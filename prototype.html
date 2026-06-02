@@ -3,21 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Case Board — Prototype v3</title>
+<title>Case Board — Prototype v4</title>
 <style>
     :root {
-        --bg: #1d1d22;
-        --card-bg: #232429;
-        --card-hover: #282930;
-        --text: #e4e1da;
-        --text-dim: #8b8983;
-        --text-faint: #5c5a55;
-        --border: #313236;
-        --star: #e6a817;
-        --star-empty: #3d3c34;
-        --check: #5d9b7e;
-        --check-empty: #2f3a34;
-        --radius: 8px;
+        --bg: #1b1b18;
+        --card-bg: #21211d;
+        --card-hover: #262621;
+        --text: #d2cec4;
+        --text-dim: #9b968a;
+        --text-faint: #5e5b52;
+        --border: #302f29;
+        --rule: #292822;
+        --star: #c49b2a;
+        --star-dim: #4a4328;
+        --check: #6a8d6d;
+        --check-dim: #303d2e;
+        --accent-burgundy: #8b4a4a;
+        --accent-navy: #4a5f7a;
+        --accent-forest: #4a7050;
+        --accent-ochre: #a0843a;
+        --radius: 6px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,283 +30,263 @@
     body {
         background: var(--bg);
         color: var(--text);
-        font-family: system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+        font-family: Georgia, Charter, 'Times New Roman', serif;
         min-height: 100vh;
         display: flex;
         justify-content: center;
-        padding: 28px 16px;
+        padding: 36px 20px;
         -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     .container {
         width: 100%;
-        max-width: 540px;
+        max-width: 560px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
     }
 
     .header {
         display: flex; align-items: baseline; justify-content: space-between;
-        padding: 0 4px; margin-bottom: 2px;
+        padding: 0 6px; margin-bottom: 2px;
     }
-    .header h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
-    .header .badge { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
+    .header h1 {
+        font-family: Georgia, Charter, serif;
+        font-size: 18px; font-weight: normal; font-style: italic;
+        color: var(--text-dim);
+    }
+    .header .badge {
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 9px; color: var(--text-faint);
+        text-transform: uppercase; letter-spacing: 0.6px;
+    }
 
     /* ——— Card ——— */
     .card {
         background: var(--card-bg);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        padding: 12px 14px 10px;
+        padding: 16px 18px 14px;
         position: relative;
-        transition: background 150ms ease, border-color 150ms ease;
+        transition: background 180ms ease, border-color 180ms ease;
     }
     .card:hover { background: var(--card-hover); }
-    .card.accent-green  { border-left: 3px solid #5d8a4a; }
-    .card.accent-yellow { border-left: 3px solid #c49b1a; }
-    .card.accent-orange { border-left: 3px solid #c4682d; }
-    .card.accent-red    { border-left: 3px solid #b84343; }
 
-    /* ——— Top row: room + name + burger ——— */
+    .card.accent-burgundy { border-left: 3px solid var(--accent-burgundy); }
+    .card.accent-navy     { border-left: 3px solid var(--accent-navy); }
+    .card.accent-forest   { border-left: 3px solid var(--accent-forest); }
+    .card.accent-ochre    { border-left: 3px solid var(--accent-ochre); }
+
+    /* ——— Top row ——— */
     .card-top-row {
         display: flex;
-        align-items: flex-start;
-        gap: 6px;
-        margin-bottom: 8px;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 10px;
     }
     .card-room {
-        font-size: 15px;
-        font-weight: 600;
+        font-family: Georgia, Charter, serif;
+        font-size: 16px; font-weight: normal; font-style: italic;
         color: var(--text-dim);
-        background: none;
-        border: none;
-        font-family: inherit;
-        outline: none;
-        padding: 1px 0;
-        width: 48px;
-        flex-shrink: 0;
+        background: none; border: none;
+        outline: none; padding: 0;
+        width: 40px; flex-shrink: 0;
+        text-align: right;
     }
     .card-title {
-        font-size: 15px;
-        font-weight: 600;
-        letter-spacing: -0.2px;
-        background: none;
-        border: none;
+        font-family: Georgia, Charter, serif;
+        font-size: 16px; font-weight: normal;
         color: var(--text);
-        font-family: inherit;
-        outline: none;
-        padding: 1px 0;
-        flex: 1;
-        min-width: 0;
+        background: none; border: none;
+        outline: none; padding: 0;
+        flex: 1; min-width: 0;
     }
+    .card-title::placeholder { color: var(--text-faint); font-style: italic; }
+    .card-room::placeholder { color: var(--text-faint); font-style: italic; }
+
     .card-burger {
-        width: 24px; height: 24px;
-        border-radius: 5px;
-        background: none;
-        border: none;
-        color: var(--text-faint);
-        cursor: pointer;
-        font-size: 16px;
+        width: 26px; height: 26px;
+        border-radius: 4px; background: none; border: none;
+        color: var(--text-faint); cursor: pointer;
+        font-size: 15px; font-family: system-ui, sans-serif;
         display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0;
-        transition: background 120ms, color 120ms;
+        flex-shrink: 0; transition: background 120ms, color 120ms;
         padding: 0;
     }
-    .card-burger:hover { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+    .card-burger:hover { background: rgba(255,255,255,0.04); color: var(--text-dim); }
 
     /* Burger dropdown */
     .burger-menu {
         display: none;
-        position: absolute;
-        top: 38px; right: 10px;
-        background: #2e2f35;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 4px;
-        z-index: 10;
-        min-width: 148px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        position: absolute; top: 42px; right: 12px;
+        background: #2a2a25; border: 1px solid var(--border);
+        border-radius: 5px; padding: 4px;
+        z-index: 10; min-width: 155px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 11px;
     }
     .burger-menu.open { display: block; }
 
-    .burger-section { padding: 3px 5px; }
+    .burger-section { padding: 3px 6px; }
     .burger-label {
-        font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+        font-size: 8px; text-transform: uppercase; letter-spacing: 0.6px;
         color: var(--text-faint); margin-bottom: 5px;
     }
-    .color-options { display: flex; gap: 5px; }
-    .color-dot {
+    .accent-options { display: flex; gap: 6px; }
+    .accent-dot {
         width: 18px; height: 18px; border-radius: 50%;
         cursor: pointer; border: 1.5px solid transparent;
         transition: border-color 120ms, transform 120ms;
     }
-    .color-dot:hover { transform: scale(1.15); }
-    .color-dot.active { border-color: var(--text-dim); }
-    .color-none  { background: transparent; border: 1.5px solid var(--border); }
-    .color-green { background: #5d8a4a; }
-    .color-yellow{ background: #c49b1a; }
-    .color-orange{ background: #c4682d; }
-    .color-red   { background: #b84343; }
+    .accent-dot:hover { transform: scale(1.15); }
+    .accent-dot.active { border-color: var(--text-dim); }
+    .accent-none      { background: transparent; border: 1.5px solid var(--border); }
+    .accent-burgundy  { background: var(--accent-burgundy); }
+    .accent-navy      { background: var(--accent-navy); }
+    .accent-forest    { background: var(--accent-forest); }
+    .accent-ochre     { background: var(--accent-ochre); }
+
+    .burger-toggle {
+        display: flex; align-items: center; justify-content: space-between;
+        width: 100%; background: none; border: none;
+        color: var(--text-dim); font-size: 11px; font-family: inherit;
+        padding: 5px 7px; border-radius: 3px; cursor: pointer;
+        transition: background 120ms, color 120ms;
+    }
+    .burger-toggle:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .burger-toggle .toggle-indicator {
+        font-size: 10px; color: var(--text-faint);
+    }
+    .burger-toggle.on .toggle-indicator { color: var(--check); }
 
     .burger-action {
         display: block; width: 100%;
         background: none; border: none;
         color: var(--text-dim); font-size: 11px; font-family: inherit;
-        padding: 4px 7px; border-radius: 3px; cursor: pointer; text-align: left;
+        padding: 5px 7px; border-radius: 3px; cursor: pointer; text-align: left;
         transition: background 120ms, color 120ms;
     }
-    .burger-action:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-    .burger-action.danger:hover { color: #c4682d; }
-    .burger-sep { height: 1px; background: var(--border); margin: 3px 5px; }
+    .burger-action:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .burger-action.danger:hover { color: #b86868; }
+    .burger-sep { height: 1px; background: var(--rule); margin: 3px 6px; }
 
     /* ——— Stars bar ——— */
     .stars-bar {
         display: flex;
         align-items: center;
         gap: 2px;
-        margin-bottom: 4px;
-        min-height: 18px;
+        margin-bottom: 6px;
+        min-height: 16px;
         flex-wrap: wrap;
     }
     .star-icon {
-        font-size: 14px;
+        font-size: 13px;
         cursor: pointer;
         user-select: none;
-        transition: color 120ms, transform 100ms;
-        line-height: 1;
-        color: var(--star-empty);
+        transition: color 150ms;
+        color: var(--star-dim);
     }
     .star-icon.filled { color: var(--star); }
-    .star-icon:hover { transform: scale(1.25); }
-    .star-icon.filled:hover { color: #c4900f; }
-    .star-add {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 16px; height: 16px; border-radius: 50%;
-        background: none; border: 1px dashed var(--star-empty);
-        color: var(--star-empty); cursor: pointer; font-size: 12px;
-        transition: border-color 120ms, color 120ms;
-    }
-    .star-add:hover { border-color: var(--star); color: var(--star); }
-    .star-add.hidden { display: none; }
+    .star-icon:hover { color: var(--star); }
 
     /* ——— Checks bar ——— */
     .checks-bar {
         display: flex;
         align-items: center;
         gap: 2px;
-        margin-bottom: 6px;
-        min-height: 17px;
+        margin-bottom: 8px;
+        min-height: 15px;
         flex-wrap: wrap;
     }
     .check-icon {
-        font-size: 13px;
+        font-size: 12px;
         cursor: pointer;
         user-select: none;
-        transition: color 120ms, transform 100ms;
-        line-height: 1;
-        color: var(--check-empty);
+        transition: color 150ms;
+        color: var(--check-dim);
     }
     .check-icon.filled { color: var(--check); }
-    .check-icon:hover { transform: scale(1.25); }
-    .check-add {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 15px; height: 15px; border-radius: 50%;
-        background: none; border: 1px dashed var(--check-empty);
-        color: var(--check-empty); cursor: pointer; font-size: 11px;
-        transition: border-color 120ms, color 120ms;
+    .check-icon:hover { color: var(--check); }
+
+    /* ——— Rule between bar and notes ——— */
+    .card-rule {
+        height: 1px; background: var(--rule);
+        margin-bottom: 8px;
     }
-    .check-add:hover { border-color: var(--check); color: var(--check); }
-    .check-add.hidden { display: none; }
 
     /* ——— Note blocks ——— */
     .note-blocks {
         display: flex;
         flex-direction: column;
-        gap: 1px;
+        gap: 4px;
     }
     .note-block {
         display: flex;
         align-items: flex-start;
-        gap: 6px;
-        padding: 2px 4px;
-        border-radius: 4px;
+        gap: 8px;
+        padding: 2px 0;
         transition: background 120ms;
     }
-    .note-block:hover { background: rgba(255,255,255,0.015); }
     .note-block.checked .note-text { text-decoration: line-through; opacity: 0.4; }
     .card.no-checkboxes .note-block.checked .note-text { text-decoration: none; opacity: 1; }
 
     .note-checkbox {
         appearance: none; -webkit-appearance: none;
-        width: 14px; height: 14px; flex-shrink: 0;
+        width: 13px; height: 13px; flex-shrink: 0;
         border: 1.5px solid var(--border);
         border-radius: 3px; cursor: pointer;
         background: transparent;
-        position: relative; margin-top: 3px;
+        position: relative; margin-top: 4px;
         transition: border-color 120ms, background 120ms;
     }
-    .note-checkbox:checked {
-        background: var(--check); border-color: var(--check);
-    }
+    .note-checkbox:checked { background: var(--check); border-color: var(--check); }
     .note-checkbox:checked::after {
-        content: '✓'; position: absolute; top: -1px; left: 2px;
-        font-size: 10px; color: #fff;
+        content: '✓'; position: absolute; top: -2px; left: 2px;
+        font-size: 10px; color: #fff; font-family: system-ui, sans-serif;
     }
     .card.no-checkboxes .note-checkbox { display: none; }
 
     .note-text {
         flex: 1;
-        font-size: 13px;
-        line-height: 1.5;
+        font-family: Georgia, Charter, 'Times New Roman', serif;
+        font-size: 14px;
+        line-height: 1.65;
         color: var(--text);
         outline: none;
-        min-height: 20px;
+        min-height: 22px;
         word-break: break-word;
         white-space: pre-wrap;
     }
     .note-text:empty::before {
-        content: 'note…';
-        color: var(--text-faint);
-        opacity: 0.5;
+        content: 'Add a note…';
+        color: var(--text-faint); font-style: italic;
     }
 
     .note-delete {
         background: none; border: none;
         color: var(--text-faint); cursor: pointer;
-        font-size: 12px; padding: 0 2px; margin-top: 2px;
+        font-size: 11px; padding: 0 2px; margin-top: 3px;
         opacity: 0; transition: opacity 120ms;
+        font-family: system-ui, sans-serif;
     }
     .note-block:hover .note-delete { opacity: 0.5; }
-    .note-delete:hover { opacity: 1 !important; color: #b84343; }
+    .note-delete:hover { opacity: 1 !important; color: #b86868; }
 
     .add-note {
-        display: inline-flex; align-items: center; gap: 4px;
+        display: inline-flex; align-items: center; gap: 5px;
         background: none; border: none;
-        color: var(--text-faint); font-size: 11px; font-family: inherit;
-        cursor: pointer; padding: 3px 6px; margin-top: 3px;
-        border-radius: 3px;
-        transition: color 120ms, background 120ms;
+        color: var(--text-faint); font-size: 12px;
+        font-family: Georgia, Charter, serif; font-style: italic;
+        cursor: pointer; padding: 4px 0; margin-top: 4px;
+        transition: color 150ms;
     }
-    .add-note:hover { color: var(--text-dim); background: rgba(255,255,255,0.02); }
-    .add-note .plus-icon {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 14px; height: 14px; border-radius: 50%;
-        border: 1px solid var(--text-faint);
-        font-size: 10px; line-height: 1;
-    }
-
-    /* ——— Animations ——— */
-    @keyframes pop-in {
-        0%   { transform: scale(0); opacity: 0; }
-        60%  { transform: scale(1.35); }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    .star-icon.pop, .check-icon.pop { animation: pop-in 220ms ease-out; }
+    .add-note:hover { color: var(--text-dim); }
 
     .demo-note {
         text-align: center; color: var(--text-faint); font-size: 11px;
-        margin-top: 6px; letter-spacing: 0.3px;
+        margin-top: 8px; font-family: Georgia, Charter, serif; font-style: italic;
     }
 </style>
 </head>
@@ -310,31 +295,33 @@
 
     <div class="header">
         <h1>Active Cases</h1>
-        <span class="badge">v3</span>
+        <span class="badge">v4</span>
     </div>
 
     <!-- === Card 1: Margaret Chen — 304 === -->
-    <div class="card accent-yellow" id="card-1">
+    <div class="card accent-ochre" id="card-1">
         <div class="card-top-row">
-            <input class="card-room" value="304" size="3">
-            <input class="card-title" value="Margaret Chen" size="14">
+            <input class="card-room" value="304" size="3" placeholder="Rm">
+            <input class="card-title" value="Margaret Chen" size="14" placeholder="Patient name">
             <button class="card-burger" onclick="toggleMenu('menu-1')">⋮</button>
             <div class="burger-menu" id="menu-1">
                 <div class="burger-section">
                     <div class="burger-label">Accent</div>
-                    <div class="color-options" id="colors-1">
-                        <button class="color-dot color-none" data-color=""></button>
-                        <button class="color-dot color-green" data-color="green"></button>
-                        <button class="color-dot color-yellow active" data-color="yellow"></button>
-                        <button class="color-dot color-orange" data-color="orange"></button>
-                        <button class="color-dot color-red" data-color="red"></button>
+                    <div class="accent-options" id="accent-1">
+                        <button class="accent-dot accent-none" data-color=""></button>
+                        <button class="accent-dot accent-burgundy" data-color="burgundy"></button>
+                        <button class="accent-dot accent-navy" data-color="navy"></button>
+                        <button class="accent-dot accent-forest" data-color="forest"></button>
+                        <button class="accent-dot accent-ochre active" data-color="ochre"></button>
                     </div>
                 </div>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="clearStars('1')">Clear stars</button>
-                <button class="burger-action" onclick="clearChecks('1')">Clear checks</button>
-                <div class="burger-sep"></div>
-                <button class="burger-action" onclick="toggleCheckboxes('1', this)">Hide checkboxes</button>
+                <button class="burger-toggle on" id="stars-toggle-1" onclick="toggleStars('1', this)">
+                    Stars <span class="toggle-indicator">on</span>
+                </button>
+                <button class="burger-toggle on" id="checks-toggle-1" onclick="toggleChecks('1', this)">
+                    Checklist <span class="toggle-indicator">on</span>
+                </button>
                 <div class="burger-sep"></div>
                 <button class="burger-action danger" onclick="deleteCard('1')">Delete</button>
             </div>
@@ -342,6 +329,7 @@
 
         <div class="stars-bar" id="stars-1"></div>
         <div class="checks-bar" id="checks-1"></div>
+        <div class="card-rule"></div>
 
         <div class="note-blocks" id="notes-1">
             <div class="note-block checked">
@@ -355,33 +343,33 @@
                 <button class="note-delete">×</button>
             </div>
         </div>
-        <button class="add-note" data-card="1">
-            <span class="plus-icon">+</span> note
-        </button>
+        <button class="add-note" data-card="1">+ Add a note</button>
     </div>
 
     <!-- === Card 2: James Okonkwo — 112 === -->
-    <div class="card accent-orange" id="card-2">
+    <div class="card accent-navy" id="card-2">
         <div class="card-top-row">
-            <input class="card-room" value="112" size="3">
-            <input class="card-title" value="James Okonkwo" size="14">
+            <input class="card-room" value="112" size="3" placeholder="Rm">
+            <input class="card-title" value="James Okonkwo" size="14" placeholder="Patient name">
             <button class="card-burger" onclick="toggleMenu('menu-2')">⋮</button>
             <div class="burger-menu" id="menu-2">
                 <div class="burger-section">
                     <div class="burger-label">Accent</div>
-                    <div class="color-options" id="colors-2">
-                        <button class="color-dot color-none" data-color=""></button>
-                        <button class="color-dot color-green" data-color="green"></button>
-                        <button class="color-dot color-yellow" data-color="yellow"></button>
-                        <button class="color-dot color-orange active" data-color="orange"></button>
-                        <button class="color-dot color-red" data-color="red"></button>
+                    <div class="accent-options" id="accent-2">
+                        <button class="accent-dot accent-none" data-color=""></button>
+                        <button class="accent-dot accent-burgundy" data-color="burgundy"></button>
+                        <button class="accent-dot accent-navy active" data-color="navy"></button>
+                        <button class="accent-dot accent-forest" data-color="forest"></button>
+                        <button class="accent-dot accent-ochre" data-color="ochre"></button>
                     </div>
                 </div>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="clearStars('2')">Clear stars</button>
-                <button class="burger-action" onclick="clearChecks('2')">Clear checks</button>
-                <div class="burger-sep"></div>
-                <button class="burger-action" onclick="toggleCheckboxes('2', this)">Hide checkboxes</button>
+                <button class="burger-toggle on" id="stars-toggle-2" onclick="toggleStars('2', this)">
+                    Stars <span class="toggle-indicator">on</span>
+                </button>
+                <button class="burger-toggle on" id="checks-toggle-2" onclick="toggleChecks('2', this)">
+                    Checklist <span class="toggle-indicator">on</span>
+                </button>
                 <div class="burger-sep"></div>
                 <button class="burger-action danger" onclick="deleteCard('2')">Delete</button>
             </div>
@@ -389,6 +377,7 @@
 
         <div class="stars-bar" id="stars-2"></div>
         <div class="checks-bar" id="checks-2"></div>
+        <div class="card-rule"></div>
 
         <div class="note-blocks" id="notes-2">
             <div class="note-block checked">
@@ -402,33 +391,33 @@
                 <button class="note-delete">×</button>
             </div>
         </div>
-        <button class="add-note" data-card="2">
-            <span class="plus-icon">+</span> note
-        </button>
+        <button class="add-note" data-card="2">+ Add a note</button>
     </div>
 
     <!-- === Card 3: Sofia Reyes — 208 === -->
     <div class="card" id="card-3">
         <div class="card-top-row">
-            <input class="card-room" value="208" size="3">
-            <input class="card-title" value="Sofia Reyes" size="12">
+            <input class="card-room" value="208" size="3" placeholder="Rm">
+            <input class="card-title" value="Sofia Reyes" size="12" placeholder="Patient name">
             <button class="card-burger" onclick="toggleMenu('menu-3')">⋮</button>
             <div class="burger-menu" id="menu-3">
                 <div class="burger-section">
                     <div class="burger-label">Accent</div>
-                    <div class="color-options" id="colors-3">
-                        <button class="color-dot color-none active" data-color=""></button>
-                        <button class="color-dot color-green" data-color="green"></button>
-                        <button class="color-dot color-yellow" data-color="yellow"></button>
-                        <button class="color-dot color-orange" data-color="orange"></button>
-                        <button class="color-dot color-red" data-color="red"></button>
+                    <div class="accent-options" id="accent-3">
+                        <button class="accent-dot accent-none active" data-color=""></button>
+                        <button class="accent-dot accent-burgundy" data-color="burgundy"></button>
+                        <button class="accent-dot accent-navy" data-color="navy"></button>
+                        <button class="accent-dot accent-forest" data-color="forest"></button>
+                        <button class="accent-dot accent-ochre" data-color="ochre"></button>
                     </div>
                 </div>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="clearStars('3')">Clear stars</button>
-                <button class="burger-action" onclick="clearChecks('3')">Clear checks</button>
-                <div class="burger-sep"></div>
-                <button class="burger-action" onclick="toggleCheckboxes('3', this)">Hide checkboxes</button>
+                <button class="burger-toggle on" id="stars-toggle-3" onclick="toggleStars('3', this)">
+                    Stars <span class="toggle-indicator">on</span>
+                </button>
+                <button class="burger-toggle on" id="checks-toggle-3" onclick="toggleChecks('3', this)">
+                    Checklist <span class="toggle-indicator">on</span>
+                </button>
                 <div class="burger-sep"></div>
                 <button class="burger-action danger" onclick="deleteCard('3')">Delete</button>
             </div>
@@ -436,6 +425,7 @@
 
         <div class="stars-bar" id="stars-3"></div>
         <div class="checks-bar" id="checks-3"></div>
+        <div class="card-rule"></div>
 
         <div class="note-blocks" id="notes-3">
             <div class="note-block">
@@ -444,112 +434,96 @@
                 <button class="note-delete">×</button>
             </div>
         </div>
-        <button class="add-note" data-card="3">
-            <span class="plus-icon">+</span> note
-        </button>
+        <button class="add-note" data-card="3">+ Add a note</button>
     </div>
 
-    <p class="demo-note">Click ★ or ✓ to add · Check a note adds to tally · Burger menu to clear or toggle</p>
+    <p class="demo-note">Click anywhere on the star bar to add a star. Click a filled star to remove. Same for checks. Use ⋮ to toggle stars &amp; checklist per card.</p>
 </div>
 
 <script>
 // ——— State ———
 const cardState = {
-    '1': { stars: 3, manualChecks: 0, accent: 'yellow', cbHidden: false },
-    '2': { stars: 5, manualChecks: 0, accent: 'orange', cbHidden: false },
-    '3': { stars: 0, manualChecks: 0, accent: '', cbHidden: false },
+    '1': { stars: 3, manualChecks: 0, accent: 'ochre', starsOn: true, checksOn: true },
+    '2': { stars: 5, manualChecks: 0, accent: 'navy',  starsOn: true, checksOn: true },
+    '3': { stars: 0, manualChecks: 0, accent: '',      starsOn: true, checksOn: true },
 };
 
-// ——— Init ———
 document.addEventListener('DOMContentLoaded', () => {
     Object.keys(cardState).forEach(id => {
         renderStars(id);
         renderChecks(id);
     });
-    wireAll();
+    wireAccents();
+    wireBars();
+    wireNotes();
+    wireAddNotes();
+    autoSizeInputs();
 });
 
-function wireAll() {
-    wireMenus();
-    wireBars();
-    wireNoteBlocks();
-    wireAddNotes();
-    wireAutoSize();
-}
-
-// ——— Render ———
+// ——— Render helpers ———
 function renderStars(id) {
     const bar = document.getElementById('stars-' + id);
-    const count = cardState[id].stars;
+    const st = cardState[id];
     bar.innerHTML = '';
-    for (let i = 0; i < count; i++) {
+    if (!st.starsOn) return;
+    for (let i = 0; i < st.stars; i++) {
         const s = document.createElement('span');
         s.className = 'star-icon filled';
         s.textContent = '★';
         bar.appendChild(s);
     }
-    const add = document.createElement('span');
-    add.className = 'star-add' + (count >= 20 ? ' hidden' : '');
-    add.textContent = '+';
-    bar.appendChild(add);
 }
 
 function renderChecks(id) {
     const bar = document.getElementById('checks-' + id);
-    const card = document.getElementById('card-' + id);
-    const manual = cardState[id].manualChecks;
-    const auto = card.querySelectorAll('.note-checkbox:checked').length;
-    const total = manual + auto;
+    const st = cardState[id];
     bar.innerHTML = '';
+    if (!st.checksOn) return;
+    const card = document.getElementById('card-' + id);
+    const auto = card ? card.querySelectorAll('.note-checkbox:checked').length : 0;
+    const total = st.manualChecks + auto;
     for (let i = 0; i < total; i++) {
         const c = document.createElement('span');
         c.className = 'check-icon filled';
         c.textContent = '✓';
         bar.appendChild(c);
     }
-    const add = document.createElement('span');
-    add.className = 'check-add' + (total >= 20 ? ' hidden' : '');
-    add.textContent = '+';
-    bar.appendChild(add);
 }
 
-// ——— Bar interactions ———
+// ——— Bar click handlers ———
 function wireBars() {
     document.querySelectorAll('.stars-bar').forEach(bar => {
-        bar.onclick = e => {
-            const star = e.target.closest('.star-icon.filled');
-            const add = e.target.closest('.star-add');
+        bar.addEventListener('click', e => {
             const id = bar.id.split('-')[1];
+            if (!cardState[id].starsOn) return;
+            const star = e.target.closest('.star-icon.filled');
             if (star) {
                 cardState[id].stars = Math.max(cardState[id].stars - 1, 0);
-                renderStars(id);
-            } else if (add) {
+            } else {
                 cardState[id].stars = Math.min(cardState[id].stars + 1, 20);
-                renderStars(id);
             }
-        };
+            renderStars(id);
+        });
     });
 
     document.querySelectorAll('.checks-bar').forEach(bar => {
-        bar.onclick = e => {
-            const check = e.target.closest('.check-icon.filled');
-            const add = e.target.closest('.check-add');
+        bar.addEventListener('click', e => {
             const id = bar.id.split('-')[1];
+            if (!cardState[id].checksOn) return;
+            const check = e.target.closest('.check-icon.filled');
             if (check) {
                 if (cardState[id].manualChecks > 0) {
                     cardState[id].manualChecks--;
-                    renderChecks(id);
                 }
-            } else if (add) {
+            } else {
                 const card = document.getElementById('card-' + id);
                 const auto = card.querySelectorAll('.note-checkbox:checked').length;
-                const current = cardState[id].manualChecks + auto;
-                if (current < 20) {
+                if (cardState[id].manualChecks + auto < 20) {
                     cardState[id].manualChecks++;
-                    renderChecks(id);
                 }
             }
-        };
+            renderChecks(id);
+        });
     });
 }
 
@@ -567,53 +541,54 @@ document.addEventListener('click', e => {
     if (!e.target.closest('.card-burger') && !e.target.closest('.burger-menu')) closeAllMenus();
 });
 
-function wireMenus() {
-    document.querySelectorAll('.color-dot').forEach(dot => {
-        dot.addEventListener('click', e => {
-            const cardId = dot.closest('.color-options').id.split('-')[1];
+function wireAccents() {
+    document.querySelectorAll('.accent-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            const cardId = dot.closest('.accent-options').id.split('-')[1];
             const color = dot.dataset.color;
             cardState[cardId].accent = color;
             const card = document.getElementById('card-' + cardId);
-            card.classList.remove('accent-green', 'accent-yellow', 'accent-orange', 'accent-red');
+            card.classList.remove('accent-burgundy', 'accent-navy', 'accent-forest', 'accent-ochre');
             if (color) card.classList.add('accent-' + color);
-            // Active dot
-            dot.parentElement.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+            dot.parentElement.querySelectorAll('.accent-dot').forEach(d => d.classList.remove('active'));
             dot.classList.add('active');
         });
     });
 }
 
-function clearStars(id) {
-    cardState[id].stars = 0;
+function toggleStars(id, btn) {
+    cardState[id].starsOn = !cardState[id].starsOn;
+    btn.classList.toggle('on', cardState[id].starsOn);
+    btn.querySelector('.toggle-indicator').textContent = cardState[id].starsOn ? 'on' : 'off';
+    if (!cardState[id].starsOn) cardState[id].stars = 0;
     renderStars(id);
 }
-function clearChecks(id) {
-    cardState[id].manualChecks = 0;
-    const card = document.getElementById('card-' + id);
-    card.querySelectorAll('.note-checkbox').forEach(cb => {
-        cb.checked = false;
-        cb.closest('.note-block').classList.remove('checked');
-    });
-    renderChecks(id);
-}
 
-function toggleCheckboxes(id, btn) {
+function toggleChecks(id, btn) {
+    cardState[id].checksOn = !cardState[id].checksOn;
+    btn.classList.toggle('on', cardState[id].checksOn);
+    btn.querySelector('.toggle-indicator').textContent = cardState[id].checksOn ? 'on' : 'off';
+
     const card = document.getElementById('card-' + id);
-    card.classList.toggle('no-checkboxes');
-    cardState[id].cbHidden = card.classList.contains('no-checkboxes');
-    btn.textContent = cardState[id].cbHidden ? 'Show checkboxes' : 'Hide checkboxes';
+    if (!cardState[id].checksOn) {
+        cardState[id].manualChecks = 0;
+        card.classList.add('no-checkboxes');
+    } else {
+        card.classList.remove('no-checkboxes');
+    }
+    renderChecks(id);
 }
 
 function deleteCard(id) {
     const card = document.getElementById('card-' + id);
-    card.style.transition = 'opacity 180ms, transform 180ms';
+    card.style.transition = 'opacity 200ms, transform 200ms';
     card.style.opacity = '0';
     card.style.transform = 'scale(0.95)';
-    setTimeout(() => card.remove(), 180);
+    setTimeout(() => card.remove(), 200);
 }
 
 // ——— Note blocks ———
-function wireNoteBlocks() {
+function wireNotes() {
     document.querySelectorAll('.note-checkbox').forEach(cb => {
         cb.addEventListener('change', () => {
             const block = cb.closest('.note-block');
@@ -651,6 +626,9 @@ function wireAddNotes() {
                 <div class="note-text" contenteditable="true"></div>
                 <button class="note-delete">×</button>
             `;
+            if (card.classList.contains('no-checkboxes')) {
+                block.querySelector('.note-checkbox').style.display = 'none';
+            }
 
             block.querySelector('.note-checkbox').addEventListener('change', () => {
                 block.classList.toggle('checked', block.querySelector('.note-checkbox').checked);
@@ -663,26 +641,21 @@ function wireAddNotes() {
                 setTimeout(() => { block.remove(); if (was) renderChecks(cardId); }, 120);
             });
 
-            if (card.classList.contains('no-checkboxes')) {
-                block.querySelector('.note-checkbox').style.display = 'none';
-            }
-
             container.appendChild(block);
-            const text = block.querySelector('.note-text');
-            text.focus();
+            block.querySelector('.note-text').focus();
         });
     });
 }
 
 // ——— Auto-size inputs ———
-function wireAutoSize() {
+function autoSizeInputs() {
     document.querySelectorAll('.card-title, .card-room').forEach(input => {
         function resize() {
             const s = document.createElement('span');
             s.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font:' + getComputedStyle(input).font;
             s.textContent = input.value || input.placeholder || ' ';
             document.body.appendChild(s);
-            const min = input.classList.contains('card-room') ? 30 : 50;
+            const min = input.classList.contains('card-room') ? 34 : 60;
             input.style.width = Math.max(s.offsetWidth + 4, min) + 'px';
             s.remove();
         }
