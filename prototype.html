@@ -1,535 +1,660 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case Board — Prototype</title>
-    <style>
-        :root {
-            --bg: #1a1a1e;
-            --card-bg: #222327;
-            --card-hover: #27282d;
-            --text: #e0ddd5;
-            --text-muted: #8b8a86;
-            --border: #2e2f34;
-            --star: #e6a817;
-            --star-bg: rgba(230, 168, 23, 0.08);
-            --star-bg-hover: rgba(230, 168, 23, 0.15);
-            --check: #5d9b7e;
-            --check-bg: rgba(93, 155, 126, 0.08);
-            --check-bg-hover: rgba(93, 155, 126, 0.15);
-            --accent: #5d7d9b;
-            --radius: 10px;
-            --transition: 120ms ease;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Board — Prototype v2</title>
+<style>
+    :root {
+        --bg: #1d1d22;
+        --card-bg: #232429;
+        --card-hover: #282930;
+        --text: #e4e1da;
+        --text-dim: #8b8983;
+        --text-faint: #5c5a55;
+        --border: #313236;
+        --star: #e6a817;
+        --star-dim: rgba(230, 168, 23, 0.15);
+        --check: #5d9b7e;
+        --check-dim: rgba(93, 155, 126, 0.12);
+        --radius: 10px;
+        --radius-sm: 6px;
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 40px 20px;
-            -webkit-font-smoothing: antialiased;
-        }
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 40px 20px;
+        -webkit-font-smoothing: antialiased;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
+    .container {
+        width: 100%;
+        max-width: 620px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
 
-        .header {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-        }
-        .header h1 {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--text);
-            letter-spacing: -0.3px;
-        }
-        .header .badge {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .header {
+        display: flex; align-items: baseline; justify-content: space-between;
+    }
+    .header h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
+    .header .badge { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; }
 
-        /* ——— Card ——— */
+    /* ——— Card ——— */
+    .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 20px 16px;
+        position: relative;
+        transition: background 150ms ease, border-color 150ms ease;
+        overflow: hidden;
+    }
+    .card:hover { background: var(--card-hover); }
+    .card.accent-green  { border-left: 3px solid #5d8a4a; }
+    .card.accent-yellow { border-left: 3px solid #c49b1a; }
+    .card.accent-orange { border-left: 3px solid #c4682d; }
+    .card.accent-red    { border-left: 3px solid #b84343; }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 18px 20px 16px;
-            transition: background var(--transition), border-color var(--transition);
-        }
-        .card:hover {
-            background: var(--card-hover);
-        }
+    /* ——— Top row: title + burger ——— */
+    .card-top-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .card-title-wrap {
+        flex: 1;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .card-title {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.2px;
+        background: none;
+        border: none;
+        color: var(--text);
+        font-family: inherit;
+        outline: none;
+        padding: 2px 0;
+        min-width: 0;
+        width: auto;
+    }
+    .card-room {
+        font-size: 17px;
+        font-weight: 400;
+        color: var(--text-dim);
+        background: none;
+        border: none;
+        font-family: inherit;
+        outline: none;
+        padding: 2px 0;
+        width: 80px;
+    }
+    .card-room::before { content: '· '; color: var(--text-faint); }
 
-        /* Title row */
-        .card-title-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-        .card-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text);
-            letter-spacing: -0.2px;
-            line-height: 1.3;
-        }
-        .card-room {
-            font-size: 12px;
-            font-weight: 400;
-            color: var(--text-muted);
-            margin-left: 6px;
-        }
+    /* ——— Burger ——— */
+    .burger-btn {
+        width: 28px; height: 28px;
+        border-radius: 6px;
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-size: 18px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        transition: background 120ms, color 120ms;
+    }
+    .burger-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
 
-        /* Counters */
-        .card-counters {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
+    .burger-menu {
+        display: none;
+        position: absolute;
+        top: 44px; right: 16px;
+        background: #2a2b31;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 6px;
+        z-index: 10;
+        min-width: 150px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .burger-menu.open { display: block; }
 
-        .counter-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px 10px 5px 8px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            font-family: inherit;
-            transition: background var(--transition), transform 80ms ease;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .counter-btn:active {
-            transform: scale(0.94);
-        }
+    .burger-section { padding: 4px 6px; }
+    .burger-label {
+        font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+        color: var(--text-faint); margin-bottom: 6px;
+    }
+    .color-options { display: flex; gap: 6px; }
+    .color-dot {
+        width: 20px; height: 20px; border-radius: 50%;
+        cursor: pointer; border: 1.5px solid transparent;
+        transition: border-color 120ms, transform 120ms;
+    }
+    .color-dot:hover { transform: scale(1.15); }
+    .color-dot.active { border-color: var(--text); }
+    .color-none  { background: transparent; border: 1.5px solid var(--border); }
+    .color-green { background: #5d8a4a; }
+    .color-yellow{ background: #c49b1a; }
+    .color-orange{ background: #c4682d; }
+    .color-red   { background: #b84343; }
 
-        .counter-star {
-            color: var(--star);
-            background: var(--star-bg);
-        }
-        .counter-star:hover {
-            background: var(--star-bg-hover);
-        }
+    .burger-action {
+        display: block; width: 100%;
+        background: none; border: none;
+        color: var(--text-dim); font-size: 12px; font-family: inherit;
+        padding: 5px 8px; border-radius: 4px; cursor: pointer; text-align: left;
+        transition: background 120ms, color 120ms;
+    }
+    .burger-action:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+    .burger-sep { height: 1px; background: var(--border); margin: 4px 6px; }
 
-        .counter-check {
-            color: var(--check);
-            background: var(--check-bg);
-        }
-        .counter-check:hover {
-            background: var(--check-bg-hover);
-        }
+    /* ——— Stars bar ——— */
+    .stars-bar {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+    }
+    .star-icon {
+        font-size: 16px;
+        color: var(--star-dim);
+        cursor: pointer;
+        user-select: none;
+        transition: color 100ms, transform 100ms;
+        line-height: 1;
+    }
+    .star-icon.filled { color: var(--star); }
+    .star-icon:active { transform: scale(1.3); }
+    .star-add {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 18px; height: 18px; border-radius: 50%;
+        background: none; border: 1px dashed var(--text-faint);
+        color: var(--text-faint); cursor: pointer; font-size: 14px;
+        margin-left: 4px;
+        transition: border-color 120ms, color 120ms;
+    }
+    .star-add:hover { border-color: var(--star); color: var(--star); }
+    .no-stars {
+        font-size: 11px; color: var(--text-faint);
+        user-select: none;
+    }
 
-        .counter-icon {
-            font-size: 15px;
-            line-height: 1;
-        }
-        .counter-num {
-            min-width: 12px;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-        }
+    /* ——— Checks bar ——— */
+    .checks-bar {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+    }
+    .check-icon {
+        font-size: 14px;
+        color: var(--check-dim);
+        user-select: none;
+        line-height: 1;
+    }
+    .check-icon.filled { color: var(--check); }
+    .check-count {
+        font-size: 11px; color: var(--text-dim);
+        margin-left: 4px; font-variant-numeric: tabular-nums;
+    }
+    .no-checks {
+        font-size: 11px; color: var(--text-faint);
+        user-select: none;
+    }
 
-        /* Notes */
-        .card-notes {
-            width: 100%;
-            min-height: 28px;
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-size: 14px;
-            font-family: inherit;
-            line-height: 1.5;
-            resize: none;
-            outline: none;
-            padding: 0;
-            margin-bottom: 10px;
-            -webkit-font-smoothing: antialiased;
-        }
-        .card-notes::placeholder {
-            color: var(--text-muted);
-            opacity: 0.5;
-        }
+    /* ——— Note blocks ——— */
+    .note-blocks {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .note-block {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 4px 6px;
+        border-radius: var(--radius-sm);
+        transition: background 120ms;
+    }
+    .note-block:hover { background: rgba(255,255,255,0.02); }
+    .note-block.checked .note-text { text-decoration: line-through; opacity: 0.45; }
 
-        /* Subtask toggle + list */
-        .subtasks-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-family: inherit;
-            cursor: pointer;
-            padding: 3px 0;
-            letter-spacing: 0.2px;
-            transition: color var(--transition);
-        }
-        .subtasks-toggle:hover {
-            color: var(--text);
-        }
-        .subtasks-toggle .arrow {
-            display: inline-block;
-            transition: transform var(--transition);
-            font-size: 10px;
-        }
-        .subtasks-toggle.open .arrow {
-            transform: rotate(90deg);
-        }
+    .note-checkbox {
+        appearance: none; -webkit-appearance: none;
+        width: 16px; height: 16px; flex-shrink: 0;
+        border: 1.5px solid var(--border);
+        border-radius: 4px; cursor: pointer;
+        background: transparent;
+        position: relative; margin-top: 2px;
+        transition: border-color 120ms, background 120ms;
+    }
+    .note-checkbox:checked {
+        background: var(--check); border-color: var(--check);
+    }
+    .note-checkbox:checked::after {
+        content: '✓'; position: absolute; top: -1px; left: 2px;
+        font-size: 11px; color: #fff;
+    }
+    .card.no-checkboxes .note-checkbox { display: none; }
 
-        .subtask-list {
-            list-style: none;
-            margin-top: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .subtask-list.hidden {
-            display: none;
-        }
+    .note-text {
+        flex: 1;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--text);
+        outline: none;
+        min-height: 22px;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+    .note-text:empty::before {
+        content: 'scratch note…';
+        color: var(--text-faint);
+    }
 
-        .subtask-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text);
-            padding: 4px 0;
-        }
-        .subtask-item input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 4px;
-            cursor: pointer;
-            flex-shrink: 0;
-            background: transparent;
-            position: relative;
-            transition: border-color var(--transition), background var(--transition);
-        }
-        .subtask-item input[type="checkbox"]:checked {
-            background: var(--check);
-            border-color: var(--check);
-        }
-        .subtask-item input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            top: -1px;
-            left: 2px;
-            font-size: 11px;
-            color: #fff;
-        }
-        .subtask-item input[type="checkbox"]:checked + .subtask-label {
-            text-decoration: line-through;
-            opacity: 0.45;
-        }
-        .subtask-label {
-            flex: 1;
-            transition: opacity var(--transition);
-        }
-        .subtask-delete {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity var(--transition);
-            padding: 0 2px;
-        }
-        .subtask-item:hover .subtask-delete {
-            opacity: 1;
-        }
-        .add-subtask {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            font-family: inherit;
-            cursor: pointer;
-            padding: 2px 0;
-            margin-top: 2px;
-            text-align: left;
-            opacity: 0;
-            transition: opacity var(--transition), color var(--transition);
-        }
-        .card:hover .add-subtask,
-        .card:focus-within .add-subtask {
-            opacity: 1;
-        }
-        .add-subtask:hover {
-            color: var(--text);
-        }
+    .note-delete {
+        background: none; border: none;
+        color: var(--text-faint); cursor: pointer;
+        font-size: 13px; padding: 0 2px; margin-top: 2px;
+        opacity: 0; transition: opacity 120ms;
+    }
+    .note-block:hover .note-delete { opacity: 0.6; }
+    .note-delete:hover { opacity: 1 !important; color: #b84343; }
 
-        /* Kicker pulse on counter increment */
-        @keyframes pulse-star {
-            0%   { box-shadow: 0 0 0 0 rgba(230, 168, 23, 0.5); }
-            70%  { box-shadow: 0 0 0 8px rgba(230, 168, 23, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(230, 168, 23, 0); }
-        }
-        @keyframes pulse-check {
-            0%   { box-shadow: 0 0 0 0 rgba(93, 155, 126, 0.5); }
-            70%  { box-shadow: 0 0 0 8px rgba(93, 155, 126, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(93, 155, 126, 0); }
-        }
-        .counter-star.pulse { animation: pulse-star 0.45s ease-out; }
-        .counter-check.pulse { animation: pulse-check 0.45s ease-out; }
+    .add-note {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: none; border: none;
+        color: var(--text-faint); font-size: 12px; font-family: inherit;
+        cursor: pointer; padding: 4px 8px; margin-top: 4px;
+        border-radius: 4px;
+        transition: color 120ms, background 120ms;
+    }
+    .add-note:hover { color: var(--text-dim); background: rgba(255,255,255,0.03); }
+    .add-note .plus-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 16px; height: 16px; border-radius: 50%;
+        border: 1px solid var(--text-faint);
+        font-size: 12px; line-height: 1;
+    }
 
-        /* ——— Demo footer ——— */
-        .demo-note {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 12px;
-            margin-top: 8px;
-            letter-spacing: 0.3px;
-        }
-    </style>
+    /* ——— Animations ——— */
+    @keyframes pop-in {
+        0%   { transform: scale(0); opacity: 0; }
+        60%  { transform: scale(1.3); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .star-icon.pop, .check-icon.pop { animation: pop-in 250ms ease-out; }
+
+    .demo-note {
+        text-align: center; color: var(--text-faint); font-size: 12px;
+        margin-top: 12px; letter-spacing: 0.3px;
+    }
+</style>
 </head>
 <body>
 <div class="container">
 
     <div class="header">
         <h1>Active Cases</h1>
-        <span class="badge">prototype</span>
+        <span class="badge">prototype v2</span>
     </div>
 
-    <!-- CARD 1 -->
-    <div class="card" id="card-1">
-        <div class="card-title-row">
-            <div>
-                <span class="card-title">Margaret Chen<span class="card-room"> · 304</span></span>
+    <!-- Card 1 -->
+    <div class="card accent-yellow" id="card-1">
+        <div class="card-top-row">
+            <div class="card-title-wrap">
+                <input class="card-title" value="Margaret Chen" size="14">
+                <input class="card-room" value="304" size="4">
             </div>
-            <div class="card-counters">
-                <button class="counter-btn counter-star" data-card="1" data-type="star" aria-label="Add star">
-                    <span class="counter-icon">★</span>
-                    <span class="counter-num">0</span>
-                </button>
-                <button class="counter-btn counter-check" data-card="1" data-type="check" aria-label="Add check">
-                    <span class="counter-icon">✓</span>
-                    <span class="counter-num">0</span>
-                </button>
+            <button class="burger-btn" onclick="toggleMenu('menu-1')" aria-label="Card options">⋮</button>
+            <div class="burger-menu" id="menu-1">
+                <div class="burger-section">
+                    <div class="burger-label">Priority</div>
+                    <div class="color-options">
+                        <button class="color-dot color-none" onclick="setAccent('card-1', '')"></button>
+                        <button class="color-dot color-green" onclick="setAccent('card-1', 'green')"></button>
+                        <button class="color-dot color-yellow active" onclick="setAccent('card-1', 'yellow')"></button>
+                        <button class="color-dot color-orange" onclick="setAccent('card-1', 'orange')"></button>
+                        <button class="color-dot color-red" onclick="setAccent('card-1', 'red')"></button>
+                    </div>
+                </div>
+                <div class="burger-sep"></div>
+                <button class="burger-action" onclick="toggleCheckboxes('card-1', this)">Hide checkboxes</button>
+                <div class="burger-sep"></div>
+                <button class="burger-action" onclick="deleteCard('card-1')">Delete card</button>
             </div>
         </div>
-        <textarea class="card-notes" placeholder="Scratch notes…" rows="1">Family meeting scheduled Thursday. Needs interpreter.</textarea>
-        <button class="subtasks-toggle open" data-card="1">
-            <span class="arrow">▸</span> checklist <span style="opacity:0.5">2</span>
-        </button>
-        <ul class="subtask-list" id="subtasks-1">
-            <li class="subtask-item">
-                <input type="checkbox" checked>
-                <span class="subtask-label">Confirm interpreter booked</span>
-                <button class="subtask-delete">×</button>
-            </li>
-            <li class="subtask-item">
-                <input type="checkbox">
-                <span class="subtask-label">Send discharge summary to GP</span>
-                <button class="subtask-delete">×</button>
-            </li>
-        </ul>
-        <button class="add-subtask" data-card="1">+ add item</button>
-    </div>
 
-    <!-- CARD 2 -->
-    <div class="card" id="card-2">
-        <div class="card-title-row">
-            <div>
-                <span class="card-title">James Okonkwo<span class="card-room"> · 112</span></span>
+        <!-- Stars -->
+        <div class="stars-bar" id="stars-1">
+            <span class="star-icon filled" data-card="1">★</span>
+            <span class="star-icon filled" data-card="1">★</span>
+            <span class="star-icon filled" data-card="1">★</span>
+            <button class="star-add" data-card="1" title="Add star">+</button>
+        </div>
+
+        <!-- Checks -->
+        <div class="checks-bar" id="checks-1">
+            <span class="check-icon filled">✓</span>
+            <span class="check-icon filled">✓</span>
+            <span class="check-count">2</span>
+        </div>
+
+        <!-- Note blocks -->
+        <div class="note-blocks" id="notes-1">
+            <div class="note-block">
+                <input type="checkbox" class="note-checkbox">
+                <div class="note-text" contenteditable="true">Family meeting Thursday. Needs interpreter confirmed — follow up with social work office.</div>
+                <button class="note-delete">×</button>
             </div>
-            <div class="card-counters">
-                <button class="counter-btn counter-star" data-card="2" data-type="star" aria-label="Add star">
-                    <span class="counter-icon">★</span>
-                    <span class="counter-num">3</span>
-                </button>
-                <button class="counter-btn counter-check" data-card="2" data-type="check" aria-label="Add check">
-                    <span class="counter-icon">✓</span>
-                    <span class="counter-num">1</span>
-                </button>
+            <div class="note-block checked">
+                <input type="checkbox" class="note-checkbox" checked>
+                <div class="note-text" contenteditable="true">Confirm interpreter booked</div>
+                <button class="note-delete">×</button>
+            </div>
+            <div class="note-block">
+                <input type="checkbox" class="note-checkbox">
+                <div class="note-text" contenteditable="true">Send discharge summary to GP</div>
+                <button class="note-delete">×</button>
             </div>
         </div>
-        <textarea class="card-notes" placeholder="Scratch notes…" rows="1">Awaiting CT results. Pain improving.</textarea>
-        <button class="subtasks-toggle" data-card="2">
-            <span class="arrow">▸</span> checklist <span style="opacity:0.5">0</span>
+        <button class="add-note" data-card="1">
+            <span class="plus-icon">+</span> add note
         </button>
-        <ul class="subtask-list hidden" id="subtasks-2"></ul>
-        <button class="add-subtask" data-card="2">+ add item</button>
     </div>
 
-    <!-- CARD 3 -->
+    <!-- Card 2 -->
+    <div class="card accent-orange" id="card-2">
+        <div class="card-top-row">
+            <div class="card-title-wrap">
+                <input class="card-title" value="James Okonkwo" size="14">
+                <input class="card-room" value="112" size="4">
+            </div>
+            <button class="burger-btn" onclick="toggleMenu('menu-2')" aria-label="Card options">⋮</button>
+            <div class="burger-menu" id="menu-2">
+                <div class="burger-section">
+                    <div class="burger-label">Priority</div>
+                    <div class="color-options">
+                        <button class="color-dot color-none" onclick="setAccent('card-2', '')"></button>
+                        <button class="color-dot color-green" onclick="setAccent('card-2', 'green')"></button>
+                        <button class="color-dot color-yellow" onclick="setAccent('card-2', 'yellow')"></button>
+                        <button class="color-dot color-orange active" onclick="setAccent('card-2', 'orange')"></button>
+                        <button class="color-dot color-red" onclick="setAccent('card-2', 'red')"></button>
+                    </div>
+                </div>
+                <div class="burger-sep"></div>
+                <button class="burger-action" onclick="toggleCheckboxes('card-2', this)">Hide checkboxes</button>
+                <div class="burger-sep"></div>
+                <button class="burger-action" onclick="deleteCard('card-2')">Delete card</button>
+            </div>
+        </div>
+        <div class="stars-bar" id="stars-2">
+            <span class="star-icon filled" data-card="2">★</span>
+            <span class="star-icon filled" data-card="2">★</span>
+            <span class="star-icon filled" data-card="2">★</span>
+            <span class="star-icon filled" data-card="2">★</span>
+            <span class="star-icon filled" data-card="2">★</span>
+            <button class="star-add" data-card="2" title="Add star">+</button>
+        </div>
+        <div class="checks-bar" id="checks-2">
+            <span class="check-icon filled">✓</span>
+            <span class="check-count">1</span>
+        </div>
+        <div class="note-blocks" id="notes-2">
+            <div class="note-block checked">
+                <input type="checkbox" class="note-checkbox" checked>
+                <div class="note-text" contenteditable="true">Awaiting CT results — check portal Thursday</div>
+                <button class="note-delete">×</button>
+            </div>
+            <div class="note-block">
+                <input type="checkbox" class="note-checkbox">
+                <div class="note-text" contenteditable="true">Pain improving — may discharge this week</div>
+                <button class="note-delete">×</button>
+            </div>
+        </div>
+        <button class="add-note" data-card="2">
+            <span class="plus-icon">+</span> add note
+        </button>
+    </div>
+
+    <!-- Card 3 -->
     <div class="card" id="card-3">
-        <div class="card-title-row">
-            <div>
-                <span class="card-title">Sofia Reyes<span class="card-room"> · 208</span></span>
+        <div class="card-top-row">
+            <div class="card-title-wrap">
+                <input class="card-title" value="Sofia Reyes" size="14">
+                <input class="card-room" value="208" size="4">
             </div>
-            <div class="card-counters">
-                <button class="counter-btn counter-star" data-card="3" data-type="star" aria-label="Add star">
-                    <span class="counter-icon">★</span>
-                    <span class="counter-num">0</span>
-                </button>
-                <button class="counter-btn counter-check" data-card="3" data-type="check" aria-label="Add check">
-                    <span class="counter-icon">✓</span>
-                    <span class="counter-num">0</span>
-                </button>
+            <button class="burger-btn" onclick="toggleMenu('menu-3')" aria-label="Card options">⋮</button>
+            <div class="burger-menu" id="menu-3">
+                <div class="burger-section">
+                    <div class="burger-label">Priority</div>
+                    <div class="color-options">
+                        <button class="color-dot color-none active" onclick="setAccent('card-3', '')"></button>
+                        <button class="color-dot color-green" onclick="setAccent('card-3', 'green')"></button>
+                        <button class="color-dot color-yellow" onclick="setAccent('card-3', 'yellow')"></button>
+                        <button class="color-dot color-orange" onclick="setAccent('card-3', 'orange')"></button>
+                        <button class="color-dot color-red" onclick="setAccent('card-3', 'red')"></button>
+                    </div>
+                </div>
+                <div class="burger-sep"></div>
+                <button class="burger-action" onclick="toggleCheckboxes('card-3', this)">Hide checkboxes</button>
+                <div class="burger-sep"></div>
+                <button class="burger-action" onclick="deleteCard('card-3')">Delete card</button>
             </div>
         </div>
-        <textarea class="card-notes" placeholder="Scratch notes…" rows="1">New admit — needs full psychosocial assessment.</textarea>
-        <button class="subtasks-toggle" data-card="3">
-            <span class="arrow">▸</span> checklist <span style="opacity:0.5">0</span>
+        <div class="stars-bar" id="stars-3">
+            <span class="no-stars">no stars yet</span>
+            <button class="star-add" data-card="3" title="Add star">+</button>
+        </div>
+        <div class="checks-bar" id="checks-3">
+            <span class="no-checks">no checks yet</span>
+        </div>
+        <div class="note-blocks" id="notes-3">
+            <div class="note-block">
+                <input type="checkbox" class="note-checkbox">
+                <div class="note-text" contenteditable="true">New admit — needs full psychosocial assessment</div>
+                <button class="note-delete">×</button>
+            </div>
+        </div>
+        <button class="add-note" data-card="3">
+            <span class="plus-icon">+</span> add note
         </button>
-        <ul class="subtask-list hidden" id="subtasks-3"></ul>
-        <button class="add-subtask" data-card="3">+ add item</button>
     </div>
 
-    <p class="demo-note">Click ★ or ✓ on any card. Counters accumulate. Try the checklist toggle.</p>
-
+    <p class="demo-note">Click ★ stars to accumulate · Check a note to see tally rise · ⋮ for per-card options</p>
 </div>
 
 <script>
-    // ——— State ———
-    const state = {};
-    document.querySelectorAll('.card').forEach(card => {
-        const id = card.id.split('-')[1];
-        const starBtn = card.querySelector('.counter-star');
-        const checkBtn = card.querySelector('.counter-check');
-        state[id] = {
-            star: parseInt(starBtn.querySelector('.counter-num').textContent) || 0,
-            check: parseInt(checkBtn.querySelector('.counter-num').textContent) || 0,
-        };
-    });
-
-    // ——— Counter clicks ———
-    document.querySelectorAll('.counter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const cardId = btn.dataset.card;
-            const type = btn.dataset.type;
-            state[cardId][type]++;
-            btn.querySelector('.counter-num').textContent = state[cardId][type];
-
-            // Pulse animation
-            btn.classList.remove('pulse');
-            void btn.offsetWidth; // force reflow
-            btn.classList.add('pulse');
-        });
-    });
-
-    // ——— Subtask toggle ———
-    document.querySelectorAll('.subtasks-toggle').forEach(toggle => {
-        toggle.addEventListener('click', () => {
-            const cardId = toggle.dataset.card;
-            const list = document.getElementById('subtasks-' + cardId);
-            list.classList.toggle('hidden');
-            toggle.classList.toggle('open');
-        });
-    });
-
-    // ——— Add subtask ———
-    document.querySelectorAll('.add-subtask').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const cardId = btn.dataset.card;
-            const list = document.getElementById('subtasks-' + cardId);
-
-            const li = document.createElement('li');
-            li.className = 'subtask-item';
-            li.innerHTML = `
-                <input type="checkbox">
-                <span class="subtask-label" contenteditable="true">new item</span>
-                <button class="subtask-delete">×</button>
-            `;
-
-            // Show list if hidden
-            list.classList.remove('hidden');
-            const toggle = document.querySelector(`.subtasks-toggle[data-card="${cardId}"]`);
-            toggle.classList.add('open');
-
-            // Delete
-            li.querySelector('.subtask-delete').addEventListener('click', () => {
-                li.remove();
-                updateChecklistCount(cardId);
-            });
-
-            // Checkbox
-            li.querySelector('input[type="checkbox"]').addEventListener('change', () => {
-                updateChecklistCount(cardId);
-            });
-
-            list.appendChild(li);
-
-            // Focus the new label
-            const label = li.querySelector('.subtask-label');
-            label.focus();
-            selectAllText(label);
-
-            updateChecklistCount(cardId);
-        });
-    });
-
-    // ——— Subtask checkbox change ———
-    document.querySelectorAll('.subtask-item input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            const cardId = cb.closest('.card').id.split('-')[1];
-            updateChecklistCount(cardId);
-        });
-    });
-
-    // ——— Subtask delete ———
-    document.querySelectorAll('.subtask-delete').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const li = btn.closest('.subtask-item');
-            const cardId = li.closest('.card').id.split('-')[1];
-            li.remove();
-            updateChecklistCount(cardId);
-        });
-    });
-
-    // ——— Auto-resize textarea ———
-    document.querySelectorAll('.card-notes').forEach(ta => {
-        ta.addEventListener('input', () => {
-            ta.style.height = 'auto';
-            ta.style.height = ta.scrollHeight + 'px';
-        });
-        // Initial resize
-        ta.style.height = 'auto';
-        ta.style.height = ta.scrollHeight + 'px';
-    });
-
-    // ——— Helpers ———
-    function updateChecklistCount(cardId) {
-        const toggle = document.querySelector(`.subtasks-toggle[data-card="${cardId}"]`);
-        const list = document.getElementById('subtasks-' + cardId);
-        const total = list.querySelectorAll('.subtask-item').length;
-        const done = list.querySelectorAll('input[type="checkbox"]:checked').length;
-        const countSpan = toggle.querySelector('span:last-child');
-        if (countSpan) countSpan.textContent = done + '/' + total;
+// ——— Burger menu ———
+function toggleMenu(id) {
+    const menu = document.getElementById(id);
+    const wasOpen = menu.classList.contains('open');
+    closeAllMenus();
+    if (!wasOpen) menu.classList.add('open');
+}
+function closeAllMenus() {
+    document.querySelectorAll('.burger-menu.open').forEach(m => m.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.burger-btn') && !e.target.closest('.burger-menu')) {
+        closeAllMenus();
     }
+});
 
-    function selectAllText(el) {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
+// ——— Accent colors ———
+function setAccent(cardId, color) {
+    const card = document.getElementById(cardId);
+    card.classList.remove('accent-green', 'accent-yellow', 'accent-orange', 'accent-red');
+    if (color) card.classList.add('accent-' + color);
+    // Update active dot
+    const menu = card.querySelector('.burger-menu');
+    menu.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+    const activeDot = menu.querySelector('.color-' + (color || 'none'));
+    if (activeDot) activeDot.classList.add('active');
+}
+
+// ——— Toggle checkboxes ———
+function toggleCheckboxes(cardId, btn) {
+    const card = document.getElementById(cardId);
+    const checksBar = card.querySelector('.checks-bar');
+    card.classList.toggle('no-checkboxes');
+    if (card.classList.contains('no-checkboxes')) {
+        checksBar.style.display = 'none';
+        btn.textContent = 'Show checkboxes';
+    } else {
+        checksBar.style.display = '';
+        btn.textContent = 'Hide checkboxes';
     }
+}
+
+// ——— Delete card ———
+function deleteCard(id) {
+    const card = document.getElementById(id);
+    card.style.transition = 'opacity 200ms, transform 200ms';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    setTimeout(() => card.remove(), 200);
+}
+
+// ——— Star clicks ———
+document.querySelectorAll('.stars-bar').forEach(bar => {
+    bar.addEventListener('click', e => {
+        const starIcon = e.target.closest('.star-icon');
+        const addBtn = e.target.closest('.star-add');
+        if (!starIcon && !addBtn) return;
+
+        const cardId = bar.id.split('-')[1];
+        bar.querySelector('.no-stars')?.remove();
+
+        const newStar = document.createElement('span');
+        newStar.className = 'star-icon filled pop';
+        newStar.textContent = '★';
+        newStar.dataset.card = cardId;
+        bar.insertBefore(newStar, bar.querySelector('.star-add'));
+    });
+});
+
+// ——— Note block checkbox → checks bar ———
+document.querySelectorAll('.note-checkbox').forEach(cb => {
+    cb.addEventListener('change', () => {
+        const block = cb.closest('.note-block');
+        block.classList.toggle('checked', cb.checked);
+        rebuildCheckBar(cb.closest('.card'));
+    });
+});
+
+// ——— Add note block ———
+document.querySelectorAll('.add-note').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const cardId = btn.dataset.card;
+        const card = document.getElementById('card-' + cardId);
+        const notesContainer = card.querySelector('.note-blocks');
+
+        const block = document.createElement('div');
+        block.className = 'note-block';
+        block.innerHTML = `
+            <input type="checkbox" class="note-checkbox">
+            <div class="note-text" contenteditable="true"></div>
+            <button class="note-delete">×</button>
+        `;
+
+        // Wire checkbox
+        block.querySelector('.note-checkbox').addEventListener('change', () => {
+            block.classList.toggle('checked', block.querySelector('.note-checkbox').checked);
+            rebuildCheckBar(card);
+        });
+
+        // Wire delete
+        block.querySelector('.note-delete').addEventListener('click', () => {
+            block.style.transition = 'opacity 150ms';
+            block.style.opacity = '0';
+            setTimeout(() => { block.remove(); rebuildCheckBar(card); }, 150);
+        });
+
+        notesContainer.appendChild(block);
+
+        // Focus
+        const text = block.querySelector('.note-text');
+        text.focus();
+    });
+});
+
+// ——— Note delete (existing) ———
+document.querySelectorAll('.note-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const block = btn.closest('.note-block');
+        const card = block.closest('.card');
+        block.style.transition = 'opacity 150ms';
+        block.style.opacity = '0';
+        setTimeout(() => { block.remove(); rebuildCheckBar(card); }, 150);
+    });
+});
+
+// Helper — rebuild checks bar from note block state
+function rebuildCheckBar(card) {
+    const checksBar = card.querySelector('.checks-bar');
+    const noteBlocks = card.querySelectorAll('.note-block');
+    const checkedCount = card.querySelectorAll('.note-checkbox:checked').length;
+
+    const existingIcons = checksBar.querySelectorAll('.check-icon');
+    const existingCount = checksBar.querySelector('.check-count');
+    const noChecks = checksBar.querySelector('.no-checks');
+
+    existingIcons.forEach(ic => ic.remove());
+    if (noChecks) noChecks.remove();
+    if (existingCount) existingCount.remove();
+
+    if (checkedCount === 0) {
+        const span = document.createElement('span');
+        span.className = 'no-checks';
+        span.textContent = 'no checks yet';
+        checksBar.appendChild(span);
+    } else {
+        for (let i = 0; i < Math.min(checkedCount, 20); i++) {
+            const check = document.createElement('span');
+            check.className = 'check-icon filled';
+            check.textContent = '✓';
+            if (i === checkedCount - 1) check.classList.add('pop');
+            checksBar.appendChild(check);
+        }
+        const count = document.createElement('span');
+        count.className = 'check-count';
+        count.textContent = checkedCount > 20 ? '20+' : checkedCount;
+        checksBar.appendChild(count);
+    }
+}
+
+// ——— Auto-size title inputs ———
+document.querySelectorAll('.card-title, .card-room').forEach(input => {
+    input.addEventListener('input', () => {
+        const span = document.createElement('span');
+        span.style.font = getComputedStyle(input).font;
+        span.style.visibility = 'hidden';
+        span.style.position = 'absolute';
+        span.style.whiteSpace = 'pre';
+        span.textContent = input.value || input.placeholder;
+        document.body.appendChild(span);
+        input.style.width = Math.max(span.offsetWidth + 4, input.classList.contains('card-room') ? 50 : 80) + 'px';
+        span.remove();
+    });
+});
 </script>
 </body>
 </html>
