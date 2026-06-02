@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Case Board — Prototype v2</title>
+<title>Case Board — Prototype v3</title>
 <style>
     :root {
         --bg: #1d1d22;
@@ -14,11 +14,10 @@
         --text-faint: #5c5a55;
         --border: #313236;
         --star: #e6a817;
-        --star-dim: rgba(230, 168, 23, 0.15);
+        --star-empty: #3d3c34;
         --check: #5d9b7e;
-        --check-dim: rgba(93, 155, 126, 0.12);
-        --radius: 10px;
-        --radius-sm: 6px;
+        --check-empty: #2f3a34;
+        --radius: 8px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,37 +25,37 @@
     body {
         background: var(--bg);
         color: var(--text);
-        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-family: system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
         min-height: 100vh;
         display: flex;
         justify-content: center;
-        padding: 40px 20px;
+        padding: 28px 16px;
         -webkit-font-smoothing: antialiased;
     }
 
     .container {
         width: 100%;
-        max-width: 620px;
+        max-width: 540px;
         display: flex;
         flex-direction: column;
-        gap: 22px;
+        gap: 12px;
     }
 
     .header {
         display: flex; align-items: baseline; justify-content: space-between;
+        padding: 0 4px; margin-bottom: 2px;
     }
-    .header h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
-    .header .badge { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; }
+    .header h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
+    .header .badge { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
 
     /* ——— Card ——— */
     .card {
         background: var(--card-bg);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        padding: 18px 20px 16px;
+        padding: 12px 14px 10px;
         position: relative;
         transition: background 150ms ease, border-color 150ms ease;
-        overflow: hidden;
     }
     .card:hover { background: var(--card-hover); }
     .card.accent-green  { border-left: 3px solid #5d8a4a; }
@@ -64,23 +63,27 @@
     .card.accent-orange { border-left: 3px solid #c4682d; }
     .card.accent-red    { border-left: 3px solid #b84343; }
 
-    /* ——— Top row: title + burger ——— */
+    /* ——— Top row: room + name + burger ——— */
     .card-top-row {
         display: flex;
         align-items: flex-start;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 6px;
+        margin-bottom: 8px;
     }
-    .card-title-wrap {
-        flex: 1;
-        display: flex;
-        align-items: baseline;
-        gap: 8px;
-        flex-wrap: wrap;
+    .card-room {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-dim);
+        background: none;
+        border: none;
+        font-family: inherit;
+        outline: none;
+        padding: 1px 0;
+        width: 48px;
+        flex-shrink: 0;
     }
     .card-title {
-        font-size: 17px;
+        font-size: 15px;
         font-weight: 600;
         letter-spacing: -0.2px;
         background: none;
@@ -88,65 +91,53 @@
         color: var(--text);
         font-family: inherit;
         outline: none;
-        padding: 2px 0;
+        padding: 1px 0;
+        flex: 1;
         min-width: 0;
-        width: auto;
     }
-    .card-room {
-        font-size: 17px;
-        font-weight: 400;
-        color: var(--text-dim);
+    .card-burger {
+        width: 24px; height: 24px;
+        border-radius: 5px;
         background: none;
         border: none;
-        font-family: inherit;
-        outline: none;
-        padding: 2px 0;
-        width: 80px;
-    }
-    .card-room::before { content: '· '; color: var(--text-faint); }
-
-    /* ——— Burger ——— */
-    .burger-btn {
-        width: 28px; height: 28px;
-        border-radius: 6px;
-        background: none;
-        border: none;
-        color: var(--text-dim);
+        color: var(--text-faint);
         cursor: pointer;
-        font-size: 18px;
+        font-size: 16px;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
         transition: background 120ms, color 120ms;
+        padding: 0;
     }
-    .burger-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+    .card-burger:hover { background: rgba(255,255,255,0.05); color: var(--text-dim); }
 
+    /* Burger dropdown */
     .burger-menu {
         display: none;
         position: absolute;
-        top: 44px; right: 16px;
-        background: #2a2b31;
+        top: 38px; right: 10px;
+        background: #2e2f35;
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 6px;
+        border-radius: 6px;
+        padding: 4px;
         z-index: 10;
-        min-width: 150px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        min-width: 148px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
     }
     .burger-menu.open { display: block; }
 
-    .burger-section { padding: 4px 6px; }
+    .burger-section { padding: 3px 5px; }
     .burger-label {
-        font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
-        color: var(--text-faint); margin-bottom: 6px;
+        font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+        color: var(--text-faint); margin-bottom: 5px;
     }
-    .color-options { display: flex; gap: 6px; }
+    .color-options { display: flex; gap: 5px; }
     .color-dot {
-        width: 20px; height: 20px; border-radius: 50%;
+        width: 18px; height: 18px; border-radius: 50%;
         cursor: pointer; border: 1.5px solid transparent;
         transition: border-color 120ms, transform 120ms;
     }
     .color-dot:hover { transform: scale(1.15); }
-    .color-dot.active { border-color: var(--text); }
+    .color-dot.active { border-color: var(--text-dim); }
     .color-none  { background: transparent; border: 1.5px solid var(--border); }
     .color-green { background: #5d8a4a; }
     .color-yellow{ background: #c49b1a; }
@@ -156,93 +147,98 @@
     .burger-action {
         display: block; width: 100%;
         background: none; border: none;
-        color: var(--text-dim); font-size: 12px; font-family: inherit;
-        padding: 5px 8px; border-radius: 4px; cursor: pointer; text-align: left;
+        color: var(--text-dim); font-size: 11px; font-family: inherit;
+        padding: 4px 7px; border-radius: 3px; cursor: pointer; text-align: left;
         transition: background 120ms, color 120ms;
     }
-    .burger-action:hover { background: rgba(255,255,255,0.06); color: var(--text); }
-    .burger-sep { height: 1px; background: var(--border); margin: 4px 6px; }
+    .burger-action:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .burger-action.danger:hover { color: #c4682d; }
+    .burger-sep { height: 1px; background: var(--border); margin: 3px 5px; }
 
     /* ——— Stars bar ——— */
     .stars-bar {
         display: flex;
         align-items: center;
-        gap: 3px;
-        margin-bottom: 6px;
+        gap: 2px;
+        margin-bottom: 4px;
+        min-height: 18px;
         flex-wrap: wrap;
     }
     .star-icon {
-        font-size: 16px;
-        color: var(--star-dim);
+        font-size: 14px;
         cursor: pointer;
         user-select: none;
-        transition: color 100ms, transform 100ms;
+        transition: color 120ms, transform 100ms;
         line-height: 1;
+        color: var(--star-empty);
     }
     .star-icon.filled { color: var(--star); }
-    .star-icon:active { transform: scale(1.3); }
+    .star-icon:hover { transform: scale(1.25); }
+    .star-icon.filled:hover { color: #c4900f; }
     .star-add {
         display: inline-flex; align-items: center; justify-content: center;
-        width: 18px; height: 18px; border-radius: 50%;
-        background: none; border: 1px dashed var(--text-faint);
-        color: var(--text-faint); cursor: pointer; font-size: 14px;
-        margin-left: 4px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: none; border: 1px dashed var(--star-empty);
+        color: var(--star-empty); cursor: pointer; font-size: 12px;
         transition: border-color 120ms, color 120ms;
     }
     .star-add:hover { border-color: var(--star); color: var(--star); }
-    .no-stars {
-        font-size: 11px; color: var(--text-faint);
-        user-select: none;
-    }
+    .star-add.hidden { display: none; }
 
     /* ——— Checks bar ——— */
     .checks-bar {
         display: flex;
         align-items: center;
-        gap: 3px;
-        margin-bottom: 8px;
+        gap: 2px;
+        margin-bottom: 6px;
+        min-height: 17px;
         flex-wrap: wrap;
     }
     .check-icon {
-        font-size: 14px;
-        color: var(--check-dim);
+        font-size: 13px;
+        cursor: pointer;
         user-select: none;
+        transition: color 120ms, transform 100ms;
         line-height: 1;
+        color: var(--check-empty);
     }
     .check-icon.filled { color: var(--check); }
-    .check-count {
-        font-size: 11px; color: var(--text-dim);
-        margin-left: 4px; font-variant-numeric: tabular-nums;
+    .check-icon:hover { transform: scale(1.25); }
+    .check-add {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 15px; height: 15px; border-radius: 50%;
+        background: none; border: 1px dashed var(--check-empty);
+        color: var(--check-empty); cursor: pointer; font-size: 11px;
+        transition: border-color 120ms, color 120ms;
     }
-    .no-checks {
-        font-size: 11px; color: var(--text-faint);
-        user-select: none;
-    }
+    .check-add:hover { border-color: var(--check); color: var(--check); }
+    .check-add.hidden { display: none; }
 
     /* ——— Note blocks ——— */
     .note-blocks {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 1px;
     }
     .note-block {
         display: flex;
         align-items: flex-start;
-        gap: 8px;
-        padding: 4px 6px;
-        border-radius: var(--radius-sm);
+        gap: 6px;
+        padding: 2px 4px;
+        border-radius: 4px;
         transition: background 120ms;
     }
-    .note-block:hover { background: rgba(255,255,255,0.02); }
-    .note-block.checked .note-text { text-decoration: line-through; opacity: 0.45; }
+    .note-block:hover { background: rgba(255,255,255,0.015); }
+    .note-block.checked .note-text { text-decoration: line-through; opacity: 0.4; }
+    .card.no-checkboxes .note-block.checked .note-text { text-decoration: none; opacity: 1; }
 
     .note-checkbox {
         appearance: none; -webkit-appearance: none;
-        width: 16px; height: 16px; flex-shrink: 0;
+        width: 14px; height: 14px; flex-shrink: 0;
         border: 1.5px solid var(--border);
-        border-radius: 4px; cursor: pointer;
+        border-radius: 3px; cursor: pointer;
         background: transparent;
-        position: relative; margin-top: 2px;
+        position: relative; margin-top: 3px;
         transition: border-color 120ms, background 120ms;
     }
     .note-checkbox:checked {
@@ -250,61 +246,62 @@
     }
     .note-checkbox:checked::after {
         content: '✓'; position: absolute; top: -1px; left: 2px;
-        font-size: 11px; color: #fff;
+        font-size: 10px; color: #fff;
     }
     .card.no-checkboxes .note-checkbox { display: none; }
 
     .note-text {
         flex: 1;
-        font-size: 14px;
-        line-height: 1.55;
+        font-size: 13px;
+        line-height: 1.5;
         color: var(--text);
         outline: none;
-        min-height: 22px;
+        min-height: 20px;
         word-break: break-word;
         white-space: pre-wrap;
     }
     .note-text:empty::before {
-        content: 'scratch note…';
+        content: 'note…';
         color: var(--text-faint);
+        opacity: 0.5;
     }
 
     .note-delete {
         background: none; border: none;
         color: var(--text-faint); cursor: pointer;
-        font-size: 13px; padding: 0 2px; margin-top: 2px;
+        font-size: 12px; padding: 0 2px; margin-top: 2px;
         opacity: 0; transition: opacity 120ms;
     }
-    .note-block:hover .note-delete { opacity: 0.6; }
+    .note-block:hover .note-delete { opacity: 0.5; }
     .note-delete:hover { opacity: 1 !important; color: #b84343; }
 
     .add-note {
-        display: inline-flex; align-items: center; gap: 5px;
+        display: inline-flex; align-items: center; gap: 4px;
         background: none; border: none;
-        color: var(--text-faint); font-size: 12px; font-family: inherit;
-        cursor: pointer; padding: 4px 8px; margin-top: 4px;
-        border-radius: 4px;
+        color: var(--text-faint); font-size: 11px; font-family: inherit;
+        cursor: pointer; padding: 3px 6px; margin-top: 3px;
+        border-radius: 3px;
         transition: color 120ms, background 120ms;
     }
-    .add-note:hover { color: var(--text-dim); background: rgba(255,255,255,0.03); }
+    .add-note:hover { color: var(--text-dim); background: rgba(255,255,255,0.02); }
     .add-note .plus-icon {
         display: inline-flex; align-items: center; justify-content: center;
-        width: 16px; height: 16px; border-radius: 50%;
+        width: 14px; height: 14px; border-radius: 50%;
         border: 1px solid var(--text-faint);
-        font-size: 12px; line-height: 1;
+        font-size: 10px; line-height: 1;
     }
 
     /* ——— Animations ——— */
     @keyframes pop-in {
         0%   { transform: scale(0); opacity: 0; }
-        60%  { transform: scale(1.3); }
+        60%  { transform: scale(1.35); }
         100% { transform: scale(1); opacity: 1; }
     }
-    .star-icon.pop, .check-icon.pop { animation: pop-in 250ms ease-out; }
+    .star-icon.pop, .check-icon.pop { animation: pop-in 220ms ease-out; }
 
     .demo-note {
-        text-align: center; color: var(--text-faint); font-size: 12px;
-        margin-top: 12px; letter-spacing: 0.3px;
+        text-align: center; color: var(--text-faint); font-size: 11px;
+        margin-top: 6px; letter-spacing: 0.3px;
     }
 </style>
 </head>
@@ -313,57 +310,40 @@
 
     <div class="header">
         <h1>Active Cases</h1>
-        <span class="badge">prototype v2</span>
+        <span class="badge">v3</span>
     </div>
 
-    <!-- Card 1 -->
+    <!-- === Card 1: Margaret Chen — 304 === -->
     <div class="card accent-yellow" id="card-1">
         <div class="card-top-row">
-            <div class="card-title-wrap">
-                <input class="card-title" value="Margaret Chen" size="14">
-                <input class="card-room" value="304" size="4">
-            </div>
-            <button class="burger-btn" onclick="toggleMenu('menu-1')" aria-label="Card options">⋮</button>
+            <input class="card-room" value="304" size="3">
+            <input class="card-title" value="Margaret Chen" size="14">
+            <button class="card-burger" onclick="toggleMenu('menu-1')">⋮</button>
             <div class="burger-menu" id="menu-1">
                 <div class="burger-section">
-                    <div class="burger-label">Priority</div>
-                    <div class="color-options">
-                        <button class="color-dot color-none" onclick="setAccent('card-1', '')"></button>
-                        <button class="color-dot color-green" onclick="setAccent('card-1', 'green')"></button>
-                        <button class="color-dot color-yellow active" onclick="setAccent('card-1', 'yellow')"></button>
-                        <button class="color-dot color-orange" onclick="setAccent('card-1', 'orange')"></button>
-                        <button class="color-dot color-red" onclick="setAccent('card-1', 'red')"></button>
+                    <div class="burger-label">Accent</div>
+                    <div class="color-options" id="colors-1">
+                        <button class="color-dot color-none" data-color=""></button>
+                        <button class="color-dot color-green" data-color="green"></button>
+                        <button class="color-dot color-yellow active" data-color="yellow"></button>
+                        <button class="color-dot color-orange" data-color="orange"></button>
+                        <button class="color-dot color-red" data-color="red"></button>
                     </div>
                 </div>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="toggleCheckboxes('card-1', this)">Hide checkboxes</button>
+                <button class="burger-action" onclick="clearStars('1')">Clear stars</button>
+                <button class="burger-action" onclick="clearChecks('1')">Clear checks</button>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="deleteCard('card-1')">Delete card</button>
+                <button class="burger-action" onclick="toggleCheckboxes('1', this)">Hide checkboxes</button>
+                <div class="burger-sep"></div>
+                <button class="burger-action danger" onclick="deleteCard('1')">Delete</button>
             </div>
         </div>
 
-        <!-- Stars -->
-        <div class="stars-bar" id="stars-1">
-            <span class="star-icon filled" data-card="1">★</span>
-            <span class="star-icon filled" data-card="1">★</span>
-            <span class="star-icon filled" data-card="1">★</span>
-            <button class="star-add" data-card="1" title="Add star">+</button>
-        </div>
+        <div class="stars-bar" id="stars-1"></div>
+        <div class="checks-bar" id="checks-1"></div>
 
-        <!-- Checks -->
-        <div class="checks-bar" id="checks-1">
-            <span class="check-icon filled">✓</span>
-            <span class="check-icon filled">✓</span>
-            <span class="check-count">2</span>
-        </div>
-
-        <!-- Note blocks -->
         <div class="note-blocks" id="notes-1">
-            <div class="note-block">
-                <input type="checkbox" class="note-checkbox">
-                <div class="note-text" contenteditable="true">Family meeting Thursday. Needs interpreter confirmed — follow up with social work office.</div>
-                <button class="note-delete">×</button>
-            </div>
             <div class="note-block checked">
                 <input type="checkbox" class="note-checkbox" checked>
                 <div class="note-text" contenteditable="true">Confirm interpreter booked</div>
@@ -371,290 +351,340 @@
             </div>
             <div class="note-block">
                 <input type="checkbox" class="note-checkbox">
-                <div class="note-text" contenteditable="true">Send discharge summary to GP</div>
+                <div class="note-text" contenteditable="true">Family meeting Thursday — needs interpreter confirmed</div>
                 <button class="note-delete">×</button>
             </div>
         </div>
         <button class="add-note" data-card="1">
-            <span class="plus-icon">+</span> add note
+            <span class="plus-icon">+</span> note
         </button>
     </div>
 
-    <!-- Card 2 -->
+    <!-- === Card 2: James Okonkwo — 112 === -->
     <div class="card accent-orange" id="card-2">
         <div class="card-top-row">
-            <div class="card-title-wrap">
-                <input class="card-title" value="James Okonkwo" size="14">
-                <input class="card-room" value="112" size="4">
-            </div>
-            <button class="burger-btn" onclick="toggleMenu('menu-2')" aria-label="Card options">⋮</button>
+            <input class="card-room" value="112" size="3">
+            <input class="card-title" value="James Okonkwo" size="14">
+            <button class="card-burger" onclick="toggleMenu('menu-2')">⋮</button>
             <div class="burger-menu" id="menu-2">
                 <div class="burger-section">
-                    <div class="burger-label">Priority</div>
-                    <div class="color-options">
-                        <button class="color-dot color-none" onclick="setAccent('card-2', '')"></button>
-                        <button class="color-dot color-green" onclick="setAccent('card-2', 'green')"></button>
-                        <button class="color-dot color-yellow" onclick="setAccent('card-2', 'yellow')"></button>
-                        <button class="color-dot color-orange active" onclick="setAccent('card-2', 'orange')"></button>
-                        <button class="color-dot color-red" onclick="setAccent('card-2', 'red')"></button>
+                    <div class="burger-label">Accent</div>
+                    <div class="color-options" id="colors-2">
+                        <button class="color-dot color-none" data-color=""></button>
+                        <button class="color-dot color-green" data-color="green"></button>
+                        <button class="color-dot color-yellow" data-color="yellow"></button>
+                        <button class="color-dot color-orange active" data-color="orange"></button>
+                        <button class="color-dot color-red" data-color="red"></button>
                     </div>
                 </div>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="toggleCheckboxes('card-2', this)">Hide checkboxes</button>
+                <button class="burger-action" onclick="clearStars('2')">Clear stars</button>
+                <button class="burger-action" onclick="clearChecks('2')">Clear checks</button>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="deleteCard('card-2')">Delete card</button>
+                <button class="burger-action" onclick="toggleCheckboxes('2', this)">Hide checkboxes</button>
+                <div class="burger-sep"></div>
+                <button class="burger-action danger" onclick="deleteCard('2')">Delete</button>
             </div>
         </div>
-        <div class="stars-bar" id="stars-2">
-            <span class="star-icon filled" data-card="2">★</span>
-            <span class="star-icon filled" data-card="2">★</span>
-            <span class="star-icon filled" data-card="2">★</span>
-            <span class="star-icon filled" data-card="2">★</span>
-            <span class="star-icon filled" data-card="2">★</span>
-            <button class="star-add" data-card="2" title="Add star">+</button>
-        </div>
-        <div class="checks-bar" id="checks-2">
-            <span class="check-icon filled">✓</span>
-            <span class="check-count">1</span>
-        </div>
+
+        <div class="stars-bar" id="stars-2"></div>
+        <div class="checks-bar" id="checks-2"></div>
+
         <div class="note-blocks" id="notes-2">
             <div class="note-block checked">
                 <input type="checkbox" class="note-checkbox" checked>
-                <div class="note-text" contenteditable="true">Awaiting CT results — check portal Thursday</div>
+                <div class="note-text" contenteditable="true">CT results — check portal Thursday</div>
                 <button class="note-delete">×</button>
             </div>
             <div class="note-block">
                 <input type="checkbox" class="note-checkbox">
-                <div class="note-text" contenteditable="true">Pain improving — may discharge this week</div>
+                <div class="note-text" contenteditable="true">Pain improving — possible discharge this week</div>
                 <button class="note-delete">×</button>
             </div>
         </div>
         <button class="add-note" data-card="2">
-            <span class="plus-icon">+</span> add note
+            <span class="plus-icon">+</span> note
         </button>
     </div>
 
-    <!-- Card 3 -->
+    <!-- === Card 3: Sofia Reyes — 208 === -->
     <div class="card" id="card-3">
         <div class="card-top-row">
-            <div class="card-title-wrap">
-                <input class="card-title" value="Sofia Reyes" size="14">
-                <input class="card-room" value="208" size="4">
-            </div>
-            <button class="burger-btn" onclick="toggleMenu('menu-3')" aria-label="Card options">⋮</button>
+            <input class="card-room" value="208" size="3">
+            <input class="card-title" value="Sofia Reyes" size="12">
+            <button class="card-burger" onclick="toggleMenu('menu-3')">⋮</button>
             <div class="burger-menu" id="menu-3">
                 <div class="burger-section">
-                    <div class="burger-label">Priority</div>
-                    <div class="color-options">
-                        <button class="color-dot color-none active" onclick="setAccent('card-3', '')"></button>
-                        <button class="color-dot color-green" onclick="setAccent('card-3', 'green')"></button>
-                        <button class="color-dot color-yellow" onclick="setAccent('card-3', 'yellow')"></button>
-                        <button class="color-dot color-orange" onclick="setAccent('card-3', 'orange')"></button>
-                        <button class="color-dot color-red" onclick="setAccent('card-3', 'red')"></button>
+                    <div class="burger-label">Accent</div>
+                    <div class="color-options" id="colors-3">
+                        <button class="color-dot color-none active" data-color=""></button>
+                        <button class="color-dot color-green" data-color="green"></button>
+                        <button class="color-dot color-yellow" data-color="yellow"></button>
+                        <button class="color-dot color-orange" data-color="orange"></button>
+                        <button class="color-dot color-red" data-color="red"></button>
                     </div>
                 </div>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="toggleCheckboxes('card-3', this)">Hide checkboxes</button>
+                <button class="burger-action" onclick="clearStars('3')">Clear stars</button>
+                <button class="burger-action" onclick="clearChecks('3')">Clear checks</button>
                 <div class="burger-sep"></div>
-                <button class="burger-action" onclick="deleteCard('card-3')">Delete card</button>
+                <button class="burger-action" onclick="toggleCheckboxes('3', this)">Hide checkboxes</button>
+                <div class="burger-sep"></div>
+                <button class="burger-action danger" onclick="deleteCard('3')">Delete</button>
             </div>
         </div>
-        <div class="stars-bar" id="stars-3">
-            <span class="no-stars">no stars yet</span>
-            <button class="star-add" data-card="3" title="Add star">+</button>
-        </div>
-        <div class="checks-bar" id="checks-3">
-            <span class="no-checks">no checks yet</span>
-        </div>
+
+        <div class="stars-bar" id="stars-3"></div>
+        <div class="checks-bar" id="checks-3"></div>
+
         <div class="note-blocks" id="notes-3">
             <div class="note-block">
                 <input type="checkbox" class="note-checkbox">
-                <div class="note-text" contenteditable="true">New admit — needs full psychosocial assessment</div>
+                <div class="note-text" contenteditable="true">New admit — full psychosocial assessment</div>
                 <button class="note-delete">×</button>
             </div>
         </div>
         <button class="add-note" data-card="3">
-            <span class="plus-icon">+</span> add note
+            <span class="plus-icon">+</span> note
         </button>
     </div>
 
-    <p class="demo-note">Click ★ stars to accumulate · Check a note to see tally rise · ⋮ for per-card options</p>
+    <p class="demo-note">Click ★ or ✓ to add · Check a note adds to tally · Burger menu to clear or toggle</p>
 </div>
 
 <script>
-// ——— Burger menu ———
+// ——— State ———
+const cardState = {
+    '1': { stars: 3, manualChecks: 0, accent: 'yellow', cbHidden: false },
+    '2': { stars: 5, manualChecks: 0, accent: 'orange', cbHidden: false },
+    '3': { stars: 0, manualChecks: 0, accent: '', cbHidden: false },
+};
+
+// ——— Init ———
+document.addEventListener('DOMContentLoaded', () => {
+    Object.keys(cardState).forEach(id => {
+        renderStars(id);
+        renderChecks(id);
+    });
+    wireAll();
+});
+
+function wireAll() {
+    wireMenus();
+    wireBars();
+    wireNoteBlocks();
+    wireAddNotes();
+    wireAutoSize();
+}
+
+// ——— Render ———
+function renderStars(id) {
+    const bar = document.getElementById('stars-' + id);
+    const count = cardState[id].stars;
+    bar.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const s = document.createElement('span');
+        s.className = 'star-icon filled';
+        s.textContent = '★';
+        bar.appendChild(s);
+    }
+    const add = document.createElement('span');
+    add.className = 'star-add' + (count >= 20 ? ' hidden' : '');
+    add.textContent = '+';
+    bar.appendChild(add);
+}
+
+function renderChecks(id) {
+    const bar = document.getElementById('checks-' + id);
+    const card = document.getElementById('card-' + id);
+    const manual = cardState[id].manualChecks;
+    const auto = card.querySelectorAll('.note-checkbox:checked').length;
+    const total = manual + auto;
+    bar.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+        const c = document.createElement('span');
+        c.className = 'check-icon filled';
+        c.textContent = '✓';
+        bar.appendChild(c);
+    }
+    const add = document.createElement('span');
+    add.className = 'check-add' + (total >= 20 ? ' hidden' : '');
+    add.textContent = '+';
+    bar.appendChild(add);
+}
+
+// ——— Bar interactions ———
+function wireBars() {
+    document.querySelectorAll('.stars-bar').forEach(bar => {
+        bar.onclick = e => {
+            const star = e.target.closest('.star-icon.filled');
+            const add = e.target.closest('.star-add');
+            const id = bar.id.split('-')[1];
+            if (star) {
+                cardState[id].stars = Math.max(cardState[id].stars - 1, 0);
+                renderStars(id);
+            } else if (add) {
+                cardState[id].stars = Math.min(cardState[id].stars + 1, 20);
+                renderStars(id);
+            }
+        };
+    });
+
+    document.querySelectorAll('.checks-bar').forEach(bar => {
+        bar.onclick = e => {
+            const check = e.target.closest('.check-icon.filled');
+            const add = e.target.closest('.check-add');
+            const id = bar.id.split('-')[1];
+            if (check) {
+                if (cardState[id].manualChecks > 0) {
+                    cardState[id].manualChecks--;
+                    renderChecks(id);
+                }
+            } else if (add) {
+                const card = document.getElementById('card-' + id);
+                const auto = card.querySelectorAll('.note-checkbox:checked').length;
+                const current = cardState[id].manualChecks + auto;
+                if (current < 20) {
+                    cardState[id].manualChecks++;
+                    renderChecks(id);
+                }
+            }
+        };
+    });
+}
+
+// ——— Burger ———
 function toggleMenu(id) {
     const menu = document.getElementById(id);
-    const wasOpen = menu.classList.contains('open');
+    const was = menu.classList.contains('open');
     closeAllMenus();
-    if (!wasOpen) menu.classList.add('open');
+    if (!was) menu.classList.add('open');
 }
 function closeAllMenus() {
     document.querySelectorAll('.burger-menu.open').forEach(m => m.classList.remove('open'));
 }
 document.addEventListener('click', e => {
-    if (!e.target.closest('.burger-btn') && !e.target.closest('.burger-menu')) {
-        closeAllMenus();
-    }
+    if (!e.target.closest('.card-burger') && !e.target.closest('.burger-menu')) closeAllMenus();
 });
 
-// ——— Accent colors ———
-function setAccent(cardId, color) {
-    const card = document.getElementById(cardId);
-    card.classList.remove('accent-green', 'accent-yellow', 'accent-orange', 'accent-red');
-    if (color) card.classList.add('accent-' + color);
-    // Update active dot
-    const menu = card.querySelector('.burger-menu');
-    menu.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-    const activeDot = menu.querySelector('.color-' + (color || 'none'));
-    if (activeDot) activeDot.classList.add('active');
+function wireMenus() {
+    document.querySelectorAll('.color-dot').forEach(dot => {
+        dot.addEventListener('click', e => {
+            const cardId = dot.closest('.color-options').id.split('-')[1];
+            const color = dot.dataset.color;
+            cardState[cardId].accent = color;
+            const card = document.getElementById('card-' + cardId);
+            card.classList.remove('accent-green', 'accent-yellow', 'accent-orange', 'accent-red');
+            if (color) card.classList.add('accent-' + color);
+            // Active dot
+            dot.parentElement.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+            dot.classList.add('active');
+        });
+    });
 }
 
-// ——— Toggle checkboxes ———
-function toggleCheckboxes(cardId, btn) {
-    const card = document.getElementById(cardId);
-    const checksBar = card.querySelector('.checks-bar');
+function clearStars(id) {
+    cardState[id].stars = 0;
+    renderStars(id);
+}
+function clearChecks(id) {
+    cardState[id].manualChecks = 0;
+    renderChecks(id);
+}
+
+function toggleCheckboxes(id, btn) {
+    const card = document.getElementById('card-' + id);
     card.classList.toggle('no-checkboxes');
-    if (card.classList.contains('no-checkboxes')) {
-        checksBar.style.display = 'none';
-        btn.textContent = 'Show checkboxes';
-    } else {
-        checksBar.style.display = '';
-        btn.textContent = 'Hide checkboxes';
-    }
+    cardState[id].cbHidden = card.classList.contains('no-checkboxes');
+    btn.textContent = cardState[id].cbHidden ? 'Show checkboxes' : 'Hide checkboxes';
 }
 
-// ——— Delete card ———
 function deleteCard(id) {
-    const card = document.getElementById(id);
-    card.style.transition = 'opacity 200ms, transform 200ms';
+    const card = document.getElementById('card-' + id);
+    card.style.transition = 'opacity 180ms, transform 180ms';
     card.style.opacity = '0';
     card.style.transform = 'scale(0.95)';
-    setTimeout(() => card.remove(), 200);
+    setTimeout(() => card.remove(), 180);
 }
 
-// ——— Star clicks ———
-document.querySelectorAll('.stars-bar').forEach(bar => {
-    bar.addEventListener('click', e => {
-        const starIcon = e.target.closest('.star-icon');
-        const addBtn = e.target.closest('.star-add');
-        if (!starIcon && !addBtn) return;
-
-        const cardId = bar.id.split('-')[1];
-        bar.querySelector('.no-stars')?.remove();
-
-        const newStar = document.createElement('span');
-        newStar.className = 'star-icon filled pop';
-        newStar.textContent = '★';
-        newStar.dataset.card = cardId;
-        bar.insertBefore(newStar, bar.querySelector('.star-add'));
-    });
-});
-
-// ——— Note block checkbox → checks bar ———
-document.querySelectorAll('.note-checkbox').forEach(cb => {
-    cb.addEventListener('change', () => {
-        const block = cb.closest('.note-block');
-        block.classList.toggle('checked', cb.checked);
-        rebuildCheckBar(cb.closest('.card'));
-    });
-});
-
-// ——— Add note block ———
-document.querySelectorAll('.add-note').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const cardId = btn.dataset.card;
-        const card = document.getElementById('card-' + cardId);
-        const notesContainer = card.querySelector('.note-blocks');
-
-        const block = document.createElement('div');
-        block.className = 'note-block';
-        block.innerHTML = `
-            <input type="checkbox" class="note-checkbox">
-            <div class="note-text" contenteditable="true"></div>
-            <button class="note-delete">×</button>
-        `;
-
-        // Wire checkbox
-        block.querySelector('.note-checkbox').addEventListener('change', () => {
-            block.classList.toggle('checked', block.querySelector('.note-checkbox').checked);
-            rebuildCheckBar(card);
+// ——— Note blocks ———
+function wireNoteBlocks() {
+    document.querySelectorAll('.note-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const block = cb.closest('.note-block');
+            const card = block.closest('.card');
+            block.classList.toggle('checked', cb.checked);
+            renderChecks(card.id.split('-')[1]);
         });
-
-        // Wire delete
-        block.querySelector('.note-delete').addEventListener('click', () => {
-            block.style.transition = 'opacity 150ms';
+    });
+    document.querySelectorAll('.note-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const block = btn.closest('.note-block');
+            const card = block.closest('.card');
+            const wasChecked = block.querySelector('.note-checkbox').checked;
+            block.style.transition = 'opacity 120ms';
             block.style.opacity = '0';
-            setTimeout(() => { block.remove(); rebuildCheckBar(card); }, 150);
+            setTimeout(() => {
+                block.remove();
+                if (wasChecked) renderChecks(card.id.split('-')[1]);
+            }, 120);
         });
-
-        notesContainer.appendChild(block);
-
-        // Focus
-        const text = block.querySelector('.note-text');
-        text.focus();
     });
-});
-
-// ——— Note delete (existing) ———
-document.querySelectorAll('.note-delete').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const block = btn.closest('.note-block');
-        const card = block.closest('.card');
-        block.style.transition = 'opacity 150ms';
-        block.style.opacity = '0';
-        setTimeout(() => { block.remove(); rebuildCheckBar(card); }, 150);
-    });
-});
-
-// Helper — rebuild checks bar from note block state
-function rebuildCheckBar(card) {
-    const checksBar = card.querySelector('.checks-bar');
-    const noteBlocks = card.querySelectorAll('.note-block');
-    const checkedCount = card.querySelectorAll('.note-checkbox:checked').length;
-
-    const existingIcons = checksBar.querySelectorAll('.check-icon');
-    const existingCount = checksBar.querySelector('.check-count');
-    const noChecks = checksBar.querySelector('.no-checks');
-
-    existingIcons.forEach(ic => ic.remove());
-    if (noChecks) noChecks.remove();
-    if (existingCount) existingCount.remove();
-
-    if (checkedCount === 0) {
-        const span = document.createElement('span');
-        span.className = 'no-checks';
-        span.textContent = 'no checks yet';
-        checksBar.appendChild(span);
-    } else {
-        for (let i = 0; i < Math.min(checkedCount, 20); i++) {
-            const check = document.createElement('span');
-            check.className = 'check-icon filled';
-            check.textContent = '✓';
-            if (i === checkedCount - 1) check.classList.add('pop');
-            checksBar.appendChild(check);
-        }
-        const count = document.createElement('span');
-        count.className = 'check-count';
-        count.textContent = checkedCount > 20 ? '20+' : checkedCount;
-        checksBar.appendChild(count);
-    }
 }
 
-// ——— Auto-size title inputs ———
-document.querySelectorAll('.card-title, .card-room').forEach(input => {
-    input.addEventListener('input', () => {
-        const span = document.createElement('span');
-        span.style.font = getComputedStyle(input).font;
-        span.style.visibility = 'hidden';
-        span.style.position = 'absolute';
-        span.style.whiteSpace = 'pre';
-        span.textContent = input.value || input.placeholder;
-        document.body.appendChild(span);
-        input.style.width = Math.max(span.offsetWidth + 4, input.classList.contains('card-room') ? 50 : 80) + 'px';
-        span.remove();
+function wireAddNotes() {
+    document.querySelectorAll('.add-note').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cardId = btn.dataset.card;
+            const card = document.getElementById('card-' + cardId);
+            const container = card.querySelector('.note-blocks');
+
+            const block = document.createElement('div');
+            block.className = 'note-block';
+            block.innerHTML = `
+                <input type="checkbox" class="note-checkbox">
+                <div class="note-text" contenteditable="true"></div>
+                <button class="note-delete">×</button>
+            `;
+
+            block.querySelector('.note-checkbox').addEventListener('change', () => {
+                block.classList.toggle('checked', block.querySelector('.note-checkbox').checked);
+                renderChecks(cardId);
+            });
+            block.querySelector('.note-delete').addEventListener('click', () => {
+                const was = block.querySelector('.note-checkbox').checked;
+                block.style.transition = 'opacity 120ms';
+                block.style.opacity = '0';
+                setTimeout(() => { block.remove(); if (was) renderChecks(cardId); }, 120);
+            });
+
+            if (card.classList.contains('no-checkboxes')) {
+                block.querySelector('.note-checkbox').style.display = 'none';
+            }
+
+            container.appendChild(block);
+            const text = block.querySelector('.note-text');
+            text.focus();
+        });
     });
-});
+}
+
+// ——— Auto-size inputs ———
+function wireAutoSize() {
+    document.querySelectorAll('.card-title, .card-room').forEach(input => {
+        function resize() {
+            const s = document.createElement('span');
+            s.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font:' + getComputedStyle(input).font;
+            s.textContent = input.value || input.placeholder || ' ';
+            document.body.appendChild(s);
+            const min = input.classList.contains('card-room') ? 30 : 50;
+            input.style.width = Math.max(s.offsetWidth + 4, min) + 'px';
+            s.remove();
+        }
+        input.addEventListener('input', resize);
+        resize();
+    });
+}
 </script>
 </body>
 </html>
