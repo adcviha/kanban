@@ -13,7 +13,7 @@
         --text-dim: #9b968a;
         --text-faint: #5e5b52;
         --border: #302f29;
-        --rule: #292822;
+        --rule: #5e5b52;
         --star: #c49b2a;
         --star-dim: #4a4328;
         --check: #6a8d6d;
@@ -71,8 +71,6 @@
         position: relative;
         transition: background 180ms ease, border-color 180ms ease;
     }
-    .card:hover { background: var(--card-hover); }
-
     .card.accent-burgundy { border-left: 3px solid var(--accent-burgundy); }
     .card.accent-navy     { border-left: 3px solid var(--accent-navy); }
     .card.accent-forest   { border-left: 3px solid var(--accent-forest); }
@@ -178,9 +176,9 @@
         align-items: center;
         gap: 2px;
         margin-bottom: 6px;
-        min-height: 16px;
         flex-wrap: wrap;
     }
+    .stars-bar:empty { display: none; }
     .star-icon {
         font-size: 13px;
         cursor: pointer;
@@ -197,9 +195,9 @@
         align-items: center;
         gap: 2px;
         margin-bottom: 8px;
-        min-height: 15px;
         flex-wrap: wrap;
     }
+    .checks-bar:empty { display: none; }
     .check-icon {
         font-size: 12px;
         cursor: pointer;
@@ -437,7 +435,6 @@
         <button class="add-note" data-card="3">+ Add a note</button>
     </div>
 
-    <p class="demo-note">Click anywhere on the star bar to add a star. Click a filled star to remove. Same for checks. Use ⋮ to toggle stars &amp; checklist per card.</p>
 </div>
 
 <script>
