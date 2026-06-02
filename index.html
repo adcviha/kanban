@@ -257,12 +257,6 @@ body {
     font-size: 10px; color: #fff; font-family: system-ui, sans-serif;
 }
 
-.note-dots {
-    display: flex; gap: 1px; margin-top: 3px; flex-shrink: 0; cursor: pointer;
-}
-.note-dot { font-size: 6px; color: var(--text-faint); transition: color 120ms; user-select: none; }
-.note-dot.active { color: var(--star); }
-
 .note-text {
     flex: 1; font-family: Georgia, Charter, serif;
     font-size: 13px; line-height: 1.55; color: var(--text);
@@ -270,6 +264,19 @@ body {
     word-break: break-word; white-space: pre-wrap;
 }
 .note-text:empty::before { content: 'note…'; color: var(--text-faint); font-style: italic; }
+
+.note-priority {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0px;
+    flex-shrink: 0; cursor: pointer; margin-top: 2px;
+    width: 16px; height: 12px;
+}
+.note-priority .np-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-faint); transition: background 120ms;
+    justify-self: center; align-self: center;
+}
+.note-priority .np-dot.on { background: var(--star); }
+.note-priority:hover .np-dot:not(.on) { background: var(--star-dim); }
 
 .note-time {
     font-family: system-ui, sans-serif; font-size: 9px;
@@ -436,10 +443,17 @@ body {
     font-family: Georgia, serif; font-style: italic;
 }
 .global-task .gt-dots {
-    display: flex; gap: 1px; cursor: pointer; flex-shrink: 0; margin-top: 2px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0px;
+    cursor: pointer; flex-shrink: 0; margin-top: 2px;
+    width: 16px; height: 12px;
 }
-.global-task .gt-dot { font-size: 6px; color: var(--text-faint); transition: color 120ms; user-select: none; }
-.global-task .gt-dot.active { color: var(--star); }
+.global-task .gt-dots .np-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-faint); transition: background 120ms;
+    justify-self: center; align-self: center;
+}
+.global-task .gt-dots .np-dot.on { background: var(--star); }
+.global-task .gt-dots:hover .np-dot:not(.on) { background: var(--star-dim); }
 .empty-global {
     font-size: 11px; color: var(--text-faint); font-style: italic;
     text-align: center; padding: 16px 0; font-family: Georgia, serif;
@@ -963,14 +977,25 @@ function renderCardNotes(card) {
     card.notes.forEach(note => {
         const block = document.createElement('div');
         block.className = 'note-block' + (note.checked?' checked':'');
+        const pri = note.priority || 0;
         block.innerHTML = `
             <input type="checkbox" class="note-checkbox" ${note.checked?'checked':''}>
-            <div class="note-dots" data-note="${note.id}">${[0,1,2].map(i=>`<span class="note-dot${i<note.priority?' active':''}">●</span>`).join('')}</div>
             <div class="note-text" contenteditable="true">${esc(note.text)}</div>
+            <div class="note-priority" data-note="${note.id}">
+                <span class="np-dot${pri>=1?' on':''}"></span>
+                <span class="np-dot${pri>=2?' on':''}"></span>
+                <span class="np-dot${pri>=3?' on':''}"></span>
+                <span class="np-dot" style="visibility:hidden"></span>
+            </div>
             <span class="note-time">${formatDate(note.createdAt)}</span>
             <button class="note-delete">×</button>`;
         block.querySelector('.note-checkbox').addEventListener('change', e => { note.checked=e.target.checked; block.classList.toggle('checked',note.checked); renderCardChecks(card); renderSidebar(); autoSave(); });
-        block.querySelector('.note-dots').addEventListener('click', e => { const dot=e.target.closest('.note-dot'); if(!dot)return; const dots=block.querySelectorAll('.note-dot'); const idx=Array.from(dots).indexOf(dot); note.priority=(note.priority===idx+1)?idx:idx+1; block.querySelectorAll('.note-dot').forEach((d,i)=>{d.classList.toggle('active',i<note.priority)}); renderSidebar(); autoSave(); });
+        block.querySelector('.note-priority').addEventListener('click', () => {
+            note.priority = ((note.priority || 0) + 1) % 4;
+            const dots = block.querySelectorAll('.np-dot');
+            dots.forEach((d, i) => d.classList.toggle('on', i < note.priority));
+            renderSidebar(); autoSave();
+        });
         block.querySelector('.note-text').addEventListener('input', e => { note.text=e.target.innerText; autoSave(); });
         block.querySelector('.note-delete').addEventListener('click', () => { const wc=note.checked; card.notes=card.notes.filter(n=>n.id!==note.id); block.style.transition='opacity 120ms'; block.style.opacity='0'; setTimeout(()=>{block.remove();if(wc)renderCardChecks(card);renderSidebar();},120); autoSave(); });
         ct.appendChild(block);
@@ -1131,14 +1156,17 @@ function renderGlobalTasks() {
         <li class="global-task">
             <input type="checkbox" class="gt-cb" data-card="${item.cardId}" data-note="${item.id}">
             <div class="gt-info"><div class="gt-text">${esc(item.text||'(empty)')}</div><div class="gt-meta">${esc(item.cardName)} · ${esc(item.cardRoom)} — ${formatDate(item.createdAt)}</div></div>
-            <div class="gt-dots" data-card="${item.cardId}" data-note="${item.id}">${[0,1,2].map(i=>`<span class="gt-dot${i<item.priority?' active':''}">●</span>`).join('')}</div>
+            <div class="gt-dots np" data-card="${item.cardId}" data-note="${item.id}">
+                <span class="np-dot${item.priority>=1?' on':''}"></span><span class="np-dot${item.priority>=2?' on':''}"></span>
+                <span class="np-dot${item.priority>=3?' on':''}"></span><span class="np-dot" style="visibility:hidden"></span>
+            </div>
         </li>`).join('');
     list.querySelectorAll('.gt-cb').forEach(cb => { cb.addEventListener('click', e => { e.stopPropagation();
         const card = board.cards[cb.dataset.card]; if(!card)return; const note=card.notes.find(n=>n.id===cb.dataset.note); if(!note)return;
         note.checked=!note.checked; cb.checked=note.checked; refreshCardDOM(cb.dataset.card); renderGlobalTasks(); autoSave(); }); });
-    list.querySelectorAll('.gt-dots').forEach(dots => { dots.addEventListener('click', e => { e.stopPropagation(); const dot=e.target.closest('.gt-dot'); if(!dot)return;
+    list.querySelectorAll('.gt-dots').forEach(dots => { dots.addEventListener('click', e => { e.stopPropagation();
         const card=board.cards[dots.dataset.card]; if(!card)return; const note=card.notes.find(n=>n.id===dots.dataset.note); if(!note)return;
-        const idx=Array.from(dots.querySelectorAll('.gt-dot')).indexOf(dot); note.priority=(note.priority===idx+1)?idx:idx+1; refreshCardDOM(dots.dataset.card); renderGlobalTasks(); autoSave(); }); });
+        note.priority = ((note.priority || 0) + 1) % 4; refreshCardDOM(dots.dataset.card); renderGlobalTasks(); autoSave(); }); });
 }
 function renderThemeChips() { document.querySelectorAll('.theme-chip').forEach(c=>c.classList.toggle('active',c.dataset.theme===appState.theme)); }
 function refreshCardDOM(cardId) { const card=activeBoard().cards[cardId]; if(card){renderCardStars(card);renderCardChecks(card);renderCardNotes(card);} }
