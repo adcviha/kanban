@@ -42,7 +42,8 @@ body {
 }
 .app-title {
     font-family: Georgia, serif; font-size: 17px; font-style: italic;
-    color: var(--text-dim); flex: 1; min-width: 0;
+    color: var(--text-dim); flex: 1; min-width: 60px;
+    background: none; border: none; outline: none;
 }
 .global-burger {
     width: 30px; height: 30px; border-radius: 5px;
@@ -79,7 +80,9 @@ body {
     display: flex; gap: 10px; padding: 10px 0 12px;
     overflow-x: auto; min-height: 50vh; align-items: flex-start;
     scroll-behavior: smooth;
+    scrollbar-width: none; -ms-overflow-style: none;
 }
+.kanban-board::-webkit-scrollbar { display: none; }
 .kanban-board.cols-1 .column { flex: 1 0 100%; min-width: 0; max-width: none; }
 .kanban-board.cols-2 .column { flex: 1 0 calc(50% - 5px); min-width: 0; max-width: none; }
 
@@ -127,9 +130,9 @@ body {
 }
 .col-options:hover { color: var(--text-dim); }
 .col-menu {
-    display: none; position: absolute; top: 38px; left: 0;
+    display: none; position: absolute; top: 38px; right: 0;
     background: #2a2a25; border: 1px solid var(--border);
-    border-radius: 5px; padding: 4px; z-index: 10; min-width: 130px;
+    border-radius: 5px; padding: 4px; z-index: 10; min-width: 155px;
     box-shadow: 0 6px 24px rgba(0,0,0,0.5);
     font-family: system-ui, sans-serif; font-size: 11px;
 }
@@ -147,21 +150,22 @@ body {
 }
 .add-col-btn:hover { border-color: var(--text-dim); color: var(--text-dim); }
 
-/* —— Mobile nav —— */
-.mobile-nav { display: none; align-items: center; justify-content: center; gap: 12px; padding: 6px 0 16px; }
-.mobile-nav .nav-arrow {
+/* —— Board nav (dots + arrows) —— */
+.board-nav { display: none; align-items: center; justify-content: center; gap: 12px; padding: 6px 0 16px; }
+.board-nav.visible { display: flex; }
+.board-nav .nav-arrow {
     background: none; border: 1px solid var(--border);
     color: var(--text-dim); width: 28px; height: 28px; border-radius: 50%;
     cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
     font-family: system-ui, sans-serif; transition: border-color 120ms, color 120ms;
 }
-.mobile-nav .nav-arrow:hover { border-color: var(--text-dim); color: var(--text); }
-.mobile-dots { display: flex; gap: 5px; }
-.mobile-dot {
+.board-nav .nav-arrow:hover { border-color: var(--text-dim); color: var(--text); }
+.board-dots { display: flex; gap: 5px; }
+.board-dot {
     width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint);
     border: none; cursor: pointer; padding: 0; transition: background 120ms;
 }
-.mobile-dot.active { background: var(--text-dim); }
+.board-dot.active { background: var(--text-dim); }
 
 /* —— Cards —— */
 .card {
@@ -173,7 +177,7 @@ body {
 }
 .card:active { cursor: grabbing; }
 .card.dragging { box-shadow: 0 4px 16px rgba(0,0,0,0.4); z-index: 5; }
-.card.drag-gap-above { margin-top: 32px; }
+.drag-placeholder { height: 4px; background: var(--text-dim); border-radius: 2px; margin: 2px 0; opacity: 0.5; transition: none; pointer-events: none; }
 .card.accent-burgundy { border-left: 3px solid var(--accent-burgundy); }
 .card.accent-navy     { border-left: 3px solid var(--accent-navy); }
 .card.accent-forest   { border-left: 3px solid var(--accent-forest); }
@@ -186,7 +190,12 @@ body {
     font-family: Georgia, serif; font-size: 14px; font-style: italic;
     color: var(--text-dim); background: none; border: none;
     outline: none; width: 38px; flex-shrink: 0; text-align: right;
+    transition: color 150ms;
 }
+.card.accent-burgundy .card-room { color: color-mix(in srgb, var(--accent-burgundy) 55%, var(--text-faint) 45%); }
+.card.accent-navy     .card-room { color: color-mix(in srgb, var(--accent-navy) 55%, var(--text-faint) 45%); }
+.card.accent-forest   .card-room { color: color-mix(in srgb, var(--accent-forest) 55%, var(--text-faint) 45%); }
+.card.accent-ochre    .card-room { color: color-mix(in srgb, var(--accent-ochre) 55%, var(--text-faint) 45%); }
 .card-name {
     font-family: Georgia, serif; font-size: 14px;
     color: var(--text); background: none; border: none;
@@ -212,9 +221,13 @@ body {
 .star-icon { font-size: 13px; cursor: pointer; user-select: none; color: var(--star-dim); transition: color 150ms; }
 .star-icon.filled { color: var(--star); }
 .star-icon:hover { color: var(--star); }
+.star-icon.hint { color: var(--star-dim); font-size: 15px; }
+.star-icon.hint:hover { color: var(--star); }
 .check-icon { font-size: 12px; cursor: pointer; user-select: none; color: var(--check-dim); transition: color 150ms; }
 .check-icon.filled { color: var(--check); }
 .check-icon:hover { color: var(--check); }
+.check-icon.hint { color: var(--check-dim); font-size: 14px; }
+.check-icon.hint:hover { color: var(--check); }
 
 .card-rule { height: 1px; background: var(--rule); margin-bottom: 6px; }
 
@@ -454,7 +467,7 @@ body {
 @media (max-width: 600px) {
     .kanban-board { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; }
     .column { flex: 0 0 100%; min-width: calc(100vw - 40px); max-width: none; scroll-snap-align: start; }
-    .mobile-nav { display: flex; }
+    .board-nav { display: flex; }
     .app-header { padding: 12px 14px 6px; }
     .board-tabs { padding: 0 14px 2px; }
     .board-outer { padding: 0 14px; }
@@ -548,7 +561,7 @@ body {
 <body>
 
 <div class="app-header">
-    <h1 class="app-title">Case Board</h1>
+    <h1 class="app-title" id="board-title-input" contenteditable="true">Case Board</h1>
     <button class="global-burger" id="global-burger" title="Settings &amp; global tasks">☰</button>
 </div>
 
@@ -556,9 +569,9 @@ body {
 
 <div class="board-outer">
     <div class="kanban-board" id="kanban-board"></div>
-    <div class="mobile-nav" id="mobile-nav">
+    <div class="board-nav" id="board-nav">
         <button class="nav-arrow" id="nav-prev">←</button>
-        <div class="mobile-dots" id="mobile-dots"></div>
+        <div class="board-dots" id="board-dots"></div>
         <button class="nav-arrow" id="nav-next">→</button>
     </div>
 </div>
@@ -749,6 +762,16 @@ function renderBoard() {
                     <button class="col-options" data-col-id="${col.id}">⋮</button>
                 </div>
                 <div class="col-menu" id="col-menu-${col.id}">
+                    <div class="burger-section"><div class="burger-label">Header Color</div>
+                        <div class="accent-options" data-col="${col.id}">
+                            <button class="accent-dot accent-none${!col.headerColor?' active':''}" data-color=""></button>
+                            <button class="accent-dot accent-burgundy${col.headerColor==='burgundy'?' active':''}" data-color="burgundy"></button>
+                            <button class="accent-dot accent-navy${col.headerColor==='navy'?' active':''}" data-color="navy"></button>
+                            <button class="accent-dot accent-forest${col.headerColor==='forest'?' active':''}" data-color="forest"></button>
+                            <button class="accent-dot accent-ochre${col.headerColor==='ochre'?' active':''}" data-color="ochre"></button>
+                        </div>
+                    </div>
+                    <div class="burger-sep"></div>
                     <button class="burger-action" data-action="rename" data-col-id="${col.id}">Rename</button>
                     <button class="burger-action" data-action="add-left" data-col-id="${col.id}" data-idx="${colIdx}">Add column left</button>
                     <button class="burger-action" data-action="add-right" data-col-id="${col.id}" data-idx="${colIdx}">Add column right</button>
@@ -758,8 +781,31 @@ function renderBoard() {
             <div class="col-drop-zone" id="zone-${col.id}" data-col-id="${col.id}"></div>`;
 
         colEl.querySelector('.col-name').addEventListener('input', e => { const c = colById(e.target.dataset.colId); if (c) { c.name = e.target.value; autoSave(); } });
+        // Column header color
+        if (col.headerColor) {
+            colEl.querySelector('.col-header').style.borderColor = `var(--accent-${col.headerColor})`;
+        }
+
         colEl.querySelector('.col-add-card').addEventListener('click', () => addCard(col.id));
         colEl.querySelector('.col-options').addEventListener('click', e => { e.stopPropagation(); toggleColMenu(col.id); });
+
+        // Wire column color dot clicks
+        colEl.querySelectorAll('.accent-dot').forEach(dot => {
+            dot.addEventListener('click', e => {
+                e.stopPropagation();
+                const color = dot.dataset.color;
+                col.headerColor = color || null;
+                colEl.querySelectorAll('.accent-dot').forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+                const header = colEl.querySelector('.col-header');
+                if (col.headerColor) {
+                    header.style.borderColor = `var(--accent-${col.headerColor})`;
+                } else {
+                    header.style.borderColor = '';
+                }
+                autoSave();
+            });
+        });
 
         colEl.querySelectorAll('.burger-action').forEach(btn => {
             btn.addEventListener('click', e => {
@@ -782,7 +828,7 @@ function renderBoard() {
 
         // Drop zone events
         zone.addEventListener('dragover', e => { e.preventDefault(); handleDragOver(e, zone); });
-        zone.addEventListener('dragleave', () => { zone.querySelectorAll('.card.drag-gap-above').forEach(c => c.classList.remove('drag-gap-above')); });
+        zone.addEventListener('dragleave', e => { if (!zone.contains(e.relatedTarget)) clearPlaceholder(); });
         zone.addEventListener('drop', e => { e.preventDefault(); handleDrop(e, zone, col); });
     });
 
@@ -796,7 +842,7 @@ function renderBoard() {
     });
     container.appendChild(addColBtn);
 
-    renderMobileDots();
+    updateBoardNav();
 }
 
 function renderCard(card) {
@@ -859,7 +905,7 @@ function renderCard(card) {
 
     // Drag
     el.addEventListener('dragstart', e => { el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
-    el.addEventListener('dragend', () => { el.classList.remove('dragging'); document.querySelectorAll('.card.drag-gap-above').forEach(c => c.classList.remove('drag-gap-above')); });
+    el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
     renderCardStars(card); renderCardChecks(card); renderCardNotes(card);
 
@@ -875,8 +921,14 @@ function renderCard(card) {
 function renderCardStars(card) {
     const bar = document.getElementById('stars-'+card.id); if (!bar) return;
     bar.innerHTML = ''; if (!card.starsOn) { bar.style.minHeight = '0'; return; }
-    bar.style.minHeight = '6px';
-    for (let i = 0; i < card.stars; i++) { const s = document.createElement('span'); s.className='star-icon filled'; s.textContent='★'; bar.appendChild(s); }
+    bar.style.minHeight = '18px';
+    if (card.stars === 0) {
+        const hint = document.createElement('span');
+        hint.className = 'star-icon hint'; hint.textContent = '☆';
+        bar.appendChild(hint);
+    } else {
+        for (let i = 0; i < card.stars; i++) { const s = document.createElement('span'); s.className='star-icon filled'; s.textContent='★'; bar.appendChild(s); }
+    }
     bar.onclick = e => {
         const star = e.target.closest('.star-icon.filled');
         if (star) card.stars = Math.max(card.stars-1, 0); else card.stars = Math.min(card.stars+1, 20);
@@ -887,10 +939,16 @@ function renderCardStars(card) {
 function renderCardChecks(card) {
     const bar = document.getElementById('checks-'+card.id); if (!bar) return;
     bar.innerHTML = ''; if (!card.checklistOn) { bar.style.minHeight = '0'; return; }
-    bar.style.minHeight = '5px';
+    bar.style.minHeight = '17px';
     const auto = card.notes.filter(n=>n.checked).length;
     const total = (card.manualChecks||0) + auto;
-    for (let i = 0; i < total; i++) { const c = document.createElement('span'); c.className='check-icon filled'; c.textContent='✓'; bar.appendChild(c); }
+    if (total === 0) {
+        const hint = document.createElement('span');
+        hint.className = 'check-icon hint'; hint.textContent = '○';
+        bar.appendChild(hint);
+    } else {
+        for (let i = 0; i < total; i++) { const c = document.createElement('span'); c.className='check-icon filled'; c.textContent='✓'; bar.appendChild(c); }
+    }
     bar.onclick = e => {
         const check = e.target.closest('.check-icon.filled');
         if (check) { if ((card.manualChecks||0) > 0) card.manualChecks = Math.max((card.manualChecks||0)-1, 0); }
@@ -927,28 +985,39 @@ function updateColCounts() {
 // ============================================================================
 // DRAG & DROP
 // ============================================================================
+function clearPlaceholder() { document.querySelectorAll('.drag-placeholder').forEach(p => p.remove()); }
+
 function handleDragOver(e, zone) {
     const cardEl = document.querySelector('.card.dragging'); if (!cardEl) return;
     const cards = [...zone.querySelectorAll('.card:not(.dragging)')];
-    zone.querySelectorAll('.card.drag-gap-above').forEach(c => c.classList.remove('drag-gap-above'));
-    if (cards.length === 0) return;
+    clearPlaceholder();
     const mouseY = e.clientY;
-    let target = null;
-    for (const c of cards) {
-        const rect = c.getBoundingClientRect();
-        if (mouseY < rect.top + rect.height/2) { target = c; break; }
+    let inserted = false;
+    for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        if (mouseY < rect.top + rect.height/2) {
+            const ph = document.createElement('div');
+            ph.className = 'drag-placeholder';
+            cards[i].before(ph); inserted = true; break;
+        }
     }
-    if (target) target.classList.add('drag-gap-above');
+    if (!inserted && cards.length > 0) {
+        const ph = document.createElement('div');
+        ph.className = 'drag-placeholder';
+        cards[cards.length-1].after(ph);
+    } else if (!inserted && cards.length === 0) {
+        const ph = document.createElement('div');
+        ph.className = 'drag-placeholder';
+        zone.appendChild(ph);
+    }
 }
 
 function handleDrop(e, zone, col) {
-    zone.querySelectorAll('.card.drag-gap-above').forEach(c => c.classList.remove('drag-gap-above'));
+    clearPlaceholder();
     const cardEl = document.querySelector('.card.dragging'); if (!cardEl) return;
     const cardId = cardEl.dataset.cardId;
     const board = activeBoard();
-    // Remove from old column
     board.columns.forEach(c => { c.cardIds = c.cardIds.filter(id => id !== cardId); });
-    // Insert at correct position
     const cards = [...zone.querySelectorAll('.card:not(.dragging)')];
     const mouseY = e.clientY; let inserted = false;
     for (let i = 0; i < cards.length; i++) {
@@ -964,35 +1033,60 @@ function handleDrop(e, zone, col) {
 }
 
 // ============================================================================
-// MOBILE NAV
+// BOARD NAV
 // ============================================================================
-function renderMobileDots() {
+function updateBoardNav() {
     const board = activeBoard();
-    const dots = document.getElementById('mobile-dots');
+    const container = document.getElementById('kanban-board');
+    const nav = document.getElementById('board-nav');
+    const dots = document.getElementById('board-dots');
+    if (!nav || !container) return;
+    const overflows = container.scrollWidth > container.clientWidth + 4;
+    nav.classList.toggle('visible', overflows);
+    if (!overflows) return;
     dots.innerHTML = board.columns.map((c, i) =>
-        `<button class="mobile-dot${i===appState.mobileColIdx?' active':''}" data-idx="${i}"></button>`
+        `<button class="board-dot${i===appState.mobileColIdx?' active':''}" data-idx="${i}"></button>`
     ).join('');
-    dots.querySelectorAll('.mobile-dot').forEach(d => {
-        d.addEventListener('click', () => { appState.mobileColIdx = parseInt(d.dataset.idx); scrollToMobileCol(); });
+    dots.querySelectorAll('.board-dot').forEach(d => {
+        d.addEventListener('click', () => { appState.mobileColIdx = parseInt(d.dataset.idx); scrollToCol(); });
     });
 }
-function scrollToMobileCol() {
+function scrollToCol() {
     const board = activeBoard();
     if (appState.mobileColIdx >= board.columns.length) appState.mobileColIdx = 0;
     const cols = document.querySelectorAll('.column');
     if (cols[appState.mobileColIdx]) cols[appState.mobileColIdx].scrollIntoView({ behavior: 'smooth', inline: 'start' });
-    renderMobileDots();
+    updateBoardNav();
 }
 document.getElementById('nav-prev').addEventListener('click', () => {
     const board = activeBoard();
     appState.mobileColIdx = (appState.mobileColIdx - 1 + board.columns.length) % board.columns.length;
-    scrollToMobileCol();
+    scrollToCol();
 });
 document.getElementById('nav-next').addEventListener('click', () => {
     const board = activeBoard();
     appState.mobileColIdx = (appState.mobileColIdx + 1) % board.columns.length;
-    scrollToMobileCol();
+    scrollToCol();
 });
+// Update nav dots on scroll
+document.getElementById('kanban-board').addEventListener('scroll', () => {
+    const cols = document.querySelectorAll('.column');
+    const boardEl = document.getElementById('kanban-board');
+    const scrollLeft = boardEl.scrollLeft;
+    let bestIdx = 0; let bestDist = Infinity;
+    cols.forEach((col, i) => {
+        const dist = Math.abs(col.offsetLeft - scrollLeft);
+        if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+    });
+    if (appState.mobileColIdx !== bestIdx) { appState.mobileColIdx = bestIdx; updateBoardNav(); }
+});
+// Editable board title
+const titleInput = document.getElementById('board-title-input');
+titleInput.addEventListener('input', () => {
+    const board = activeBoard();
+    if (board) { board.name = titleInput.innerText.trim() || board.name; renderTabs(); renderSidebar(); autoSave(); }
+});
+titleInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); titleInput.blur(); } });
 
 // ============================================================================
 // MENUS
@@ -1071,6 +1165,8 @@ document.getElementById('import-file').addEventListener('change',e=>{const file=
 // ============================================================================
 function renderAll() {
     const sidebarOpen = document.getElementById('sidebar').classList.contains('open');
+    const board = activeBoard();
+    document.getElementById('board-title-input').innerText = board ? board.name : 'Case Board';
     renderTabs(); renderBoard(); renderSidebar();
     if (sidebarOpen) { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('open'); }
 }
