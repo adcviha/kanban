@@ -1,0 +1,864 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            /* More desaturated column colors */
+            --column-ready: #14184f;
+            --column-progress: #2c1050;
+            --column-waiting: #783000;
+            --column-done: #133614;
+            /* Priority colors */
+            --priority-green: #2d9135;
+            --priority-yellow: #e6a413;
+            --priority-orange: #e05400;
+            --priority-red: #cc1e1e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 20px;
+            justify-content: stretch;
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 250px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border: 3px solid;
+        }
+
+        .ready {
+            border-color: var(--column-ready);
+        }
+
+        .progress {
+            border-color: var(--column-progress);
+        }
+
+        .waiting {
+            border-color: var(--column-waiting);
+        }
+
+        .done {
+            border-color: var(--column-done);
+        }
+
+        .column-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .ready .column-header-container {
+            background-color: var(--column-ready);
+        }
+        
+        .progress .column-header-container {
+            background-color: var(--column-progress);
+        }
+        
+        .waiting .column-header-container {
+            background-color: var(--column-waiting);
+        }
+        
+        .done .column-header-container {
+            background-color: var(--column-done);
+        }
+
+        .column-header {
+            font-size: 18px;
+            font-weight: normal;
+            text-align: center;
+            width: 100%;
+        }
+
+        .add-task-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .add-task-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .task-list {
+            flex: 1;
+            padding: 10px 0;
+            min-height: 100px;
+        }
+
+        .task {
+            background-color: var(--card-bg);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: move;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+
+        .task.priority-green {
+            background-color: rgba(45, 145, 53, 0.4);
+        }
+
+        .task.priority-yellow {
+            background-color: rgba(230, 164, 19, 0.4);
+        }
+
+        .task.priority-orange {
+            background-color: rgba(224, 84, 0, 0.4);
+        }
+
+        .task.priority-red {
+            background-color: rgba(204, 30, 30, 0.4);
+        }
+
+        .task-content {
+            width: 100%;
+            min-height: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            overflow: hidden;
+        }
+
+        .priority-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .task:hover .priority-selector {
+            opacity: 1;
+        }
+
+        .priority-option {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .priority-none {
+            background-color: transparent;
+            border: 1px solid #555;
+        }
+
+        .priority-green {
+            background-color: var(--priority-green);
+        }
+
+        .priority-yellow {
+            background-color: var(--priority-yellow);
+        }
+
+        .priority-orange {
+            background-color: var(--priority-orange);
+        }
+
+        .priority-red {
+            background-color: var(--priority-red);
+        }
+
+        .dragging {
+            opacity: 0.5;
+        }
+
+        .delete-task {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+        }
+
+        .task:hover .delete-task {
+            opacity: 1;
+        }
+
+        .delete-task:hover {
+            background-color: rgba(255, 0, 0, 0.3);
+        }
+
+        .export-controls {
+            position: relative;
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .export-filename {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #333;
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 250px;
+        }
+
+        .export-btn, .save-btn {
+            background-color: #2a2a2a;
+            color: var(--text-color);
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .export-btn:hover, .save-btn:hover {
+            background-color: #3a3a3a;
+        }
+
+        .sub-items {
+            margin-top: 10px;
+            margin-left: 15px;
+            list-style-type: none;
+        }
+
+        .sub-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .sub-item input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .sub-item-text {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+            padding: 2px 5px;
+        }
+
+        .sub-item.completed .sub-item-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .add-sub-item-btn {
+            background-color: transparent;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 2px 0;
+            width: 100%;
+            text-align: left;
+            transition: color 0.2s;
+        }
+
+        .add-sub-item-btn:hover {
+            color: #ccc;
+        }
+
+        .delete-sub-item {
+            background-color: transparent;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .sub-item:hover .delete-sub-item {
+            opacity: 1;
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            background-color: rgba(45, 145, 53, 0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tasks</h1>
+    <div class="save-indicator" id="save-indicator">Changes saved!</div>
+    <div class="kanban-board">
+        <div class="column ready" id="ready">
+            <div class="column-header-container">
+                <div class="column-header">Ready to Start</div>
+                <button class="add-task-btn" onclick="addTask('ready-list')">+</button>
+            </div>
+            <div class="task-list" id="ready-list"></div>
+        </div>
+        <div class="column progress" id="progress">
+            <div class="column-header-container">
+                <div class="column-header">In-Progress</div>
+                <button class="add-task-btn" onclick="addTask('progress-list')">+</button>
+            </div>
+            <div class="task-list" id="progress-list"></div>
+        </div>
+        <div class="column waiting" id="waiting">
+            <div class="column-header-container">
+                <div class="column-header">Waiting on Item</div>
+                <button class="add-task-btn" onclick="addTask('waiting-list')">+</button>
+            </div>
+            <div class="task-list" id="waiting-list"></div>
+        </div>
+        <div class="column done" id="done">
+            <div class="column-header-container">
+                <div class="column-header">Done</div>
+                <button class="add-task-btn" onclick="addTask('done-list')">+</button>
+            </div>
+            <div class="task-list" id="done-list"></div>
+        </div>
+    </div>
+    
+    <div class="export-controls">
+        <input type="text" id="export-filename" class="export-filename" placeholder="filename.html" value="kanban-board.html">
+        <button id="export-btn" class="export-btn">Export HTML File</button>
+        <button id="save-btn" class="save-btn">Save Current State</button>
+    </div>
+
+    <script>
+        // SAVED_TASKS_DATA_MARKER_START
+        const SAVED_TASKS_DATA = {
+        "ready-list": [],
+        "progress-list": [],
+        "waiting-list": [],
+        "done-list": []
+};
+        // SAVED_TASKS_DATA_MARKER_END
+
+        // Generate a unique storage key for this board instance
+        const BOARD_ID = 'kanban_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        const STORAGE_KEY = 'kanbanTasks_' + BOARD_ID;
+
+        // Load saved tasks from localStorage or initialize with examples
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            setupDragAndDrop();
+            setupExportFunctionality();
+            setupSaveFunctionality();
+        });
+
+        function loadTasks() {
+            // Try to load from localStorage first, then fall back to embedded data
+            let savedTasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+            
+            if (!savedTasks || Object.keys(savedTasks).length === 0) {
+                savedTasks = SAVED_TASKS_DATA;
+            }
+            
+            // If still no data, start with empty board
+            if (!savedTasks || Object.keys(savedTasks).length === 0) {
+                savedTasks = {
+                    "ready-list": [],
+                    "progress-list": [],
+                    "waiting-list": [],
+                    "done-list": []
+                };
+            }
+
+            // Clear all lists
+            document.querySelectorAll('.task-list').forEach(list => {
+                list.innerHTML = '';
+            });
+
+            // Add tasks to respective lists
+            for (const listId in savedTasks) {
+                const taskList = document.getElementById(listId);
+                if (taskList && savedTasks[listId]) {
+                    savedTasks[listId].forEach(task => {
+                        createTaskElement(taskList, task.content, task.priority, task.subItems || []);
+                    });
+                }
+            }
+        }
+
+        function saveTasks() {
+            const tasks = {};
+            document.querySelectorAll('.task-list').forEach(list => {
+                tasks[list.id] = [];
+                list.querySelectorAll('.task').forEach(task => {
+                    const content = task.querySelector('.task-content').value;
+                    
+                    // Get priority class
+                    let priority = 'none';
+                    if (task.classList.contains('priority-green')) priority = 'green';
+                    else if (task.classList.contains('priority-yellow')) priority = 'yellow';
+                    else if (task.classList.contains('priority-orange')) priority = 'orange';
+                    else if (task.classList.contains('priority-red')) priority = 'red';
+                    
+                    // Get sub-items
+                    const subItems = [];
+                    task.querySelectorAll('.sub-item').forEach(subItem => {
+                        const text = subItem.querySelector('.sub-item-text').value;
+                        const completed = subItem.classList.contains('completed');
+                        subItems.push({ text, completed });
+                    });
+                    
+                    tasks[list.id].push({ content, priority, subItems });
+                });
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+            
+            // Show save indicator
+            showSaveIndicator();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('save-indicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        function addTask(listId) {
+            const taskList = document.getElementById(listId);
+            createTaskElement(taskList, '', 'none', []);
+            
+            // Focus the newly created task
+            const newTask = taskList.lastChild;
+            const textarea = newTask.querySelector('.task-content');
+            textarea.focus();
+            
+            saveTasks();
+        }
+
+        function createTaskElement(taskList, content, priority = 'none', subItems = []) {
+            const task = document.createElement('div');
+            task.className = 'task';
+            if (priority !== 'none') {
+                task.classList.add(`priority-${priority}`);
+            }
+            task.draggable = true;
+            
+            // Create textarea for content
+            const textarea = document.createElement('textarea');
+            textarea.className = 'task-content';
+            textarea.value = content;
+            textarea.addEventListener('input', () => {
+                autoResizeTextarea(textarea);
+                saveTasks();
+            });
+            
+            // Create priority selector
+            const prioritySelector = document.createElement('div');
+            prioritySelector.className = 'priority-selector';
+            
+            const priorities = ['none', 'green', 'yellow', 'orange', 'red'];
+            priorities.forEach(p => {
+                const option = document.createElement('div');
+                option.className = `priority-option priority-${p}`;
+                option.addEventListener('click', () => {
+                    // Remove all priority classes
+                    task.classList.remove('priority-green', 'priority-yellow', 'priority-orange', 'priority-red');
+                    
+                    // Add selected priority class if not 'none'
+                    if (p !== 'none') {
+                        task.classList.add(`priority-${p}`);
+                    }
+                    
+                    saveTasks();
+                });
+                prioritySelector.appendChild(option);
+            });
+            
+            // Create delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-task';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.addEventListener('click', () => {
+                task.remove();
+                saveTasks();
+            });
+            
+            // Create sub-items container
+            const subItemsContainer = document.createElement('ul');
+            subItemsContainer.className = 'sub-items';
+            
+            // Add existing sub-items if any
+            subItems.forEach(item => {
+                addSubItem(subItemsContainer, item.text, item.completed);
+            });
+            
+            // Create add sub-item button
+            const addSubItemBtn = document.createElement('button');
+            addSubItemBtn.className = 'add-sub-item-btn';
+            addSubItemBtn.textContent = '+ Add sub-item';
+            addSubItemBtn.addEventListener('click', () => {
+                addSubItem(subItemsContainer, '', false);
+                // Focus the newly created sub-item
+                const newSubItem = subItemsContainer.lastChild;
+                const subItemInput = newSubItem.querySelector('.sub-item-text');
+                subItemInput.focus();
+                
+                saveTasks();
+            });
+            
+            task.appendChild(textarea);
+            task.appendChild(prioritySelector);
+            task.appendChild(subItemsContainer);
+            task.appendChild(addSubItemBtn);
+            task.appendChild(deleteBtn);
+            taskList.appendChild(task);
+            
+            // Set up drag events for new task
+            task.addEventListener('dragstart', handleDragStart);
+            task.addEventListener('dragend', handleDragEnd);
+            
+            // Prevent drag when interacting with sub-items or text selection
+            textarea.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            
+            subItemsContainer.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            
+            addSubItemBtn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            
+            // Auto resize the textarea
+            autoResizeTextarea(textarea);
+        }
+
+        function addSubItem(container, text, completed) {
+            const subItem = document.createElement('li');
+            subItem.className = 'sub-item';
+            if (completed) {
+                subItem.classList.add('completed');
+            }
+            
+            // Create checkbox
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = completed;
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    subItem.classList.add('completed');
+                } else {
+                    subItem.classList.remove('completed');
+                }
+                saveTasks();
+            });
+            
+            // Create text input
+            const textInput = document.createElement('input');
+            textInput.type = 'text';
+            textInput.className = 'sub-item-text';
+            textInput.value = text;
+            textInput.addEventListener('input', () => {
+                saveTasks();
+            });
+            
+            // Create delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-sub-item';
+            deleteBtn.textContent = '×';
+            deleteBtn.addEventListener('click', () => {
+                subItem.remove();
+                saveTasks();
+            });
+            
+            // Prevent dragging when interacting with sub-item elements
+            checkbox.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            
+            textInput.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            
+            deleteBtn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            
+            subItem.appendChild(checkbox);
+            subItem.appendChild(textInput);
+            subItem.appendChild(deleteBtn);
+            container.appendChild(subItem);
+        }
+
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        function setupDragAndDrop() {
+            const taskLists = document.querySelectorAll('.task-list');
+            
+            taskLists.forEach(taskList => {
+                taskList.addEventListener('dragover', handleDragOver);
+                taskList.addEventListener('dragenter', handleDragEnter);
+                taskList.addEventListener('dragleave', handleDragLeave);
+                taskList.addEventListener('drop', handleDrop);
+            });
+        }
+
+        let draggedItem = null;
+
+        function handleDragStart(e) {
+            // Prevent drag if we're selecting text in the textarea
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.classList.contains('task-content') || 
+                                  activeElement.classList.contains('sub-item-text'))) {
+                e.preventDefault();
+                return false;
+            }
+            
+            draggedItem = this;
+            setTimeout(() => {
+                this.classList.add('dragging');
+            }, 0);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+        }
+
+        function handleDragLeave(e) {
+            // No styling changes needed
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            // If no item is being dragged, return
+            if (!draggedItem) return;
+            
+            // Get the task list that was dropped on
+            let targetList = e.target;
+            
+            // Navigate up to find the task-list
+            while (targetList && !targetList.classList.contains('task-list') && targetList.parentNode) {
+                targetList = targetList.parentNode;
+            }
+            
+            if (targetList && targetList.classList.contains('task-list')) {
+                // Find the closest task to drop before/after
+                const afterElement = getDragAfterElement(targetList, e.clientY);
+                if (afterElement == null) {
+                    targetList.appendChild(draggedItem);
+                } else {
+                    targetList.insertBefore(draggedItem, afterElement);
+                }
+                saveTasks();
+            }
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.task:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Export functionality
+        function setupExportFunctionality() {
+            document.getElementById('export-btn').addEventListener('click', exportToHTML);
+        }
+
+        function exportToHTML() {
+            const tasks = getCurrentTasks();
+            const htmlContent = document.documentElement.outerHTML;
+            
+            // Create a modified version that loads with current tasks
+            const taskString = JSON.stringify(tasks, null, 8);
+            
+            const modifiedHTML = htmlContent.replace(
+                /\/\/ SAVED_TASKS_DATA_MARKER_START[\s\S]*?\/\/ SAVED_TASKS_DATA_MARKER_END/,
+                `// SAVED_TASKS_DATA_MARKER_START\n        const SAVED_TASKS_DATA = ${taskString};\n        // SAVED_TASKS_DATA_MARKER_END`
+            );
+            
+            // Create a download link
+            const filename = document.getElementById('export-filename').value || 'kanban-board.html';
+            const blob = new Blob([modifiedHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = filename;
+            
+            // Simulate click to download the file
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+        }
+        
+        // Save functionality
+        function setupSaveFunctionality() {
+            document.getElementById('save-btn').addEventListener('click', saveToSelf);
+        }
+        
+        function saveToSelf() {
+            const tasks = getCurrentTasks();
+            
+            // Save to localStorage with unique key
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+            
+            // Get the current HTML content
+            const htmlContent = document.documentElement.outerHTML;
+            
+            // Create a modified version that loads with current tasks
+            const taskString = JSON.stringify(tasks, null, 8);
+            
+            const modifiedHTML = htmlContent.replace(
+                /\/\/ SAVED_TASKS_DATA_MARKER_START[\s\S]*?\/\/ SAVED_TASKS_DATA_MARKER_END/,
+                `// SAVED_TASKS_DATA_MARKER_START\n        const SAVED_TASKS_DATA = ${taskString};\n        // SAVED_TASKS_DATA_MARKER_END`
+            );
+            
+            // Create a blob with the updated HTML
+            const blob = new Blob([modifiedHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create a download link with the current file name
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = 'kanban-board.html';
+            
+            // Simulate click to download and overwrite the file
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+            
+            // Show save indicator
+            showSaveIndicator();
+        }
+
+        function getCurrentTasks() {
+            const tasks = {};
+            document.querySelectorAll('.task-list').forEach(list => {
+                tasks[list.id] = [];
+                list.querySelectorAll('.task').forEach(task => {
+                    const content = task.querySelector('.task-content').value;
+                    
+                    // Get priority class
+                    let priority = 'none';
+                    if (task.classList.contains('priority-green')) priority = 'green';
+                    else if (task.classList.contains('priority-yellow')) priority = 'yellow';
+                    else if (task.classList.contains('priority-orange')) priority = 'orange';
+                    else if (task.classList.contains('priority-red')) priority = 'red';
+                    
+                    // Get sub-items
+                    const subItems = [];
+                    task.querySelectorAll('.sub-item').forEach(subItem => {
+                        const text = subItem.querySelector('.sub-item-text').value;
+                        const completed = subItem.classList.contains('completed');
+                        subItems.push({ text, completed });
+                    });
+                    
+                    tasks[list.id].push({ content, priority, subItems });
+                });
+            });
+            return tasks;
+        }
+    </script>
+
+</body></html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Board — Prototype</title>
+    <style>
+        :root {
+            --bg: #1a1a1e;
+            --card-bg: #222327;
+            --card-hover: #27282d;
+            --text: #e0ddd5;
+            --text-muted: #8b8a86;
+            --border: #2e2f34;
+            --star: #e6a817;
+            --star-bg: rgba(230, 168, 23, 0.08);
+            --star-bg-hover: rgba(230, 168, 23, 0.15);
+            --check: #5d9b7e;
+            --check-bg: rgba(93, 155, 126, 0.08);
+            --check-bg-hover: rgba(93, 155, 126, 0.15);
+            --accent: #5d7d9b;
+            --radius: 10px;
+            --transition: 120ms ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        .header .badge {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ——— Card ——— */
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px 16px;
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .card:hover {
+            background: var(--card-hover);
+        }
+
+        /* Title row */
+        .card-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.2px;
+            line-height: 1.3;
+        }
+        .card-room {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 6px;
+        }
+
+        /* Counters */
+        .card-counters {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .counter-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px 5px 8px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            transition: background var(--transition), transform 80ms ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .counter-btn:active {
+            transform: scale(0.94);
+        }
+
+        .counter-star {
+            color: var(--star);
+            background: var(--star-bg);
+        }
+        .counter-star:hover {
+            background: var(--star-bg-hover);
+        }
+
+        .counter-check {
+            color: var(--check);
+            background: var(--check-bg);
+        }
+        .counter-check:hover {
+            background: var(--check-bg-hover);
+        }
+
+        .counter-icon {
+            font-size: 15px;
+            line-height: 1;
+        }
+        .counter-num {
+            min-width: 12px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Notes */
+        .card-notes {
+            width: 100%;
+            min-height: 28px;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            padding: 0;
+            margin-bottom: 10px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .card-notes::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* Subtask toggle + list */
+        .subtasks-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 3px 0;
+            letter-spacing: 0.2px;
+            transition: color var(--transition);
+        }
+        .subtasks-toggle:hover {
+            color: var(--text);
+        }
+        .subtasks-toggle .arrow {
+            display: inline-block;
+            transition: transform var(--transition);
+            font-size: 10px;
+        }
+        .subtasks-toggle.open .arrow {
+            transform: rotate(90deg);
+        }
+
+        .subtask-list {
+            list-style: none;
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .subtask-list.hidden {
+            display: none;
+        }
+
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text);
+            padding: 4px 0;
+        }
+        .subtask-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+            background: transparent;
+            position: relative;
+            transition: border-color var(--transition), background var(--transition);
+        }
+        .subtask-item input[type="checkbox"]:checked {
+            background: var(--check);
+            border-color: var(--check);
+        }
+        .subtask-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: -1px;
+            left: 2px;
+            font-size: 11px;
+            color: #fff;
+        }
+        .subtask-item input[type="checkbox"]:checked + .subtask-label {
+            text-decoration: line-through;
+            opacity: 0.45;
+        }
+        .subtask-label {
+            flex: 1;
+            transition: opacity var(--transition);
+        }
+        .subtask-delete {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity var(--transition);
+            padding: 0 2px;
+        }
+        .subtask-item:hover .subtask-delete {
+            opacity: 1;
+        }
+        .add-subtask {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 2px 0;
+            margin-top: 2px;
+            text-align: left;
+            opacity: 0;
+            transition: opacity var(--transition), color var(--transition);
+        }
+        .card:hover .add-subtask,
+        .card:focus-within .add-subtask {
+            opacity: 1;
+        }
+        .add-subtask:hover {
+            color: var(--text);
+        }
+
+        /* Kicker pulse on counter increment */
+        @keyframes pulse-star {
+            0%   { box-shadow: 0 0 0 0 rgba(230, 168, 23, 0.5); }
+            70%  { box-shadow: 0 0 0 8px rgba(230, 168, 23, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(230, 168, 23, 0); }
+        }
+        @keyframes pulse-check {
+            0%   { box-shadow: 0 0 0 0 rgba(93, 155, 126, 0.5); }
+            70%  { box-shadow: 0 0 0 8px rgba(93, 155, 126, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(93, 155, 126, 0); }
+        }
+        .counter-star.pulse { animation: pulse-star 0.45s ease-out; }
+        .counter-check.pulse { animation: pulse-check 0.45s ease-out; }
+
+        /* ——— Demo footer ——— */
+        .demo-note {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>Active Cases</h1>
+        <span class="badge">prototype</span>
+    </div>
+
+    <!-- CARD 1 -->
+    <div class="card" id="card-1">
+        <div class="card-title-row">
+            <div>
+                <span class="card-title">Margaret Chen<span class="card-room"> · 304</span></span>
+            </div>
+            <div class="card-counters">
+                <button class="counter-btn counter-star" data-card="1" data-type="star" aria-label="Add star">
+                    <span class="counter-icon">★</span>
+                    <span class="counter-num">0</span>
+                </button>
+                <button class="counter-btn counter-check" data-card="1" data-type="check" aria-label="Add check">
+                    <span class="counter-icon">✓</span>
+                    <span class="counter-num">0</span>
+                </button>
+            </div>
+        </div>
+        <textarea class="card-notes" placeholder="Scratch notes…" rows="1">Family meeting scheduled Thursday. Needs interpreter.</textarea>
+        <button class="subtasks-toggle open" data-card="1">
+            <span class="arrow">▸</span> checklist <span style="opacity:0.5">2</span>
+        </button>
+        <ul class="subtask-list" id="subtasks-1">
+            <li class="subtask-item">
+                <input type="checkbox" checked>
+                <span class="subtask-label">Confirm interpreter booked</span>
+                <button class="subtask-delete">×</button>
+            </li>
+            <li class="subtask-item">
+                <input type="checkbox">
+                <span class="subtask-label">Send discharge summary to GP</span>
+                <button class="subtask-delete">×</button>
+            </li>
+        </ul>
+        <button class="add-subtask" data-card="1">+ add item</button>
+    </div>
+
+    <!-- CARD 2 -->
+    <div class="card" id="card-2">
+        <div class="card-title-row">
+            <div>
+                <span class="card-title">James Okonkwo<span class="card-room"> · 112</span></span>
+            </div>
+            <div class="card-counters">
+                <button class="counter-btn counter-star" data-card="2" data-type="star" aria-label="Add star">
+                    <span class="counter-icon">★</span>
+                    <span class="counter-num">3</span>
+                </button>
+                <button class="counter-btn counter-check" data-card="2" data-type="check" aria-label="Add check">
+                    <span class="counter-icon">✓</span>
+                    <span class="counter-num">1</span>
+                </button>
+            </div>
+        </div>
+        <textarea class="card-notes" placeholder="Scratch notes…" rows="1">Awaiting CT results. Pain improving.</textarea>
+        <button class="subtasks-toggle" data-card="2">
+            <span class="arrow">▸</span> checklist <span style="opacity:0.5">0</span>
+        </button>
+        <ul class="subtask-list hidden" id="subtasks-2"></ul>
+        <button class="add-subtask" data-card="2">+ add item</button>
+    </div>
+
+    <!-- CARD 3 -->
+    <div class="card" id="card-3">
+        <div class="card-title-row">
+            <div>
+                <span class="card-title">Sofia Reyes<span class="card-room"> · 208</span></span>
+            </div>
+            <div class="card-counters">
+                <button class="counter-btn counter-star" data-card="3" data-type="star" aria-label="Add star">
+                    <span class="counter-icon">★</span>
+                    <span class="counter-num">0</span>
+                </button>
+                <button class="counter-btn counter-check" data-card="3" data-type="check" aria-label="Add check">
+                    <span class="counter-icon">✓</span>
+                    <span class="counter-num">0</span>
+                </button>
+            </div>
+        </div>
+        <textarea class="card-notes" placeholder="Scratch notes…" rows="1">New admit — needs full psychosocial assessment.</textarea>
+        <button class="subtasks-toggle" data-card="3">
+            <span class="arrow">▸</span> checklist <span style="opacity:0.5">0</span>
+        </button>
+        <ul class="subtask-list hidden" id="subtasks-3"></ul>
+        <button class="add-subtask" data-card="3">+ add item</button>
+    </div>
+
+    <p class="demo-note">Click ★ or ✓ on any card. Counters accumulate. Try the checklist toggle.</p>
+
+</div>
+
+<script>
+    // ——— State ———
+    const state = {};
+    document.querySelectorAll('.card').forEach(card => {
+        const id = card.id.split('-')[1];
+        const starBtn = card.querySelector('.counter-star');
+        const checkBtn = card.querySelector('.counter-check');
+        state[id] = {
+            star: parseInt(starBtn.querySelector('.counter-num').textContent) || 0,
+            check: parseInt(checkBtn.querySelector('.counter-num').textContent) || 0,
+        };
+    });
+
+    // ——— Counter clicks ———
+    document.querySelectorAll('.counter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cardId = btn.dataset.card;
+            const type = btn.dataset.type;
+            state[cardId][type]++;
+            btn.querySelector('.counter-num').textContent = state[cardId][type];
+
+            // Pulse animation
+            btn.classList.remove('pulse');
+            void btn.offsetWidth; // force reflow
+            btn.classList.add('pulse');
+        });
+    });
+
+    // ——— Subtask toggle ———
+    document.querySelectorAll('.subtasks-toggle').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const cardId = toggle.dataset.card;
+            const list = document.getElementById('subtasks-' + cardId);
+            list.classList.toggle('hidden');
+            toggle.classList.toggle('open');
+        });
+    });
+
+    // ——— Add subtask ———
+    document.querySelectorAll('.add-subtask').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cardId = btn.dataset.card;
+            const list = document.getElementById('subtasks-' + cardId);
+
+            const li = document.createElement('li');
+            li.className = 'subtask-item';
+            li.innerHTML = `
+                <input type="checkbox">
+                <span class="subtask-label" contenteditable="true">new item</span>
+                <button class="subtask-delete">×</button>
+            `;
+
+            // Show list if hidden
+            list.classList.remove('hidden');
+            const toggle = document.querySelector(`.subtasks-toggle[data-card="${cardId}"]`);
+            toggle.classList.add('open');
+
+            // Delete
+            li.querySelector('.subtask-delete').addEventListener('click', () => {
+                li.remove();
+                updateChecklistCount(cardId);
+            });
+
+            // Checkbox
+            li.querySelector('input[type="checkbox"]').addEventListener('change', () => {
+                updateChecklistCount(cardId);
+            });
+
+            list.appendChild(li);
+
+            // Focus the new label
+            const label = li.querySelector('.subtask-label');
+            label.focus();
+            selectAllText(label);
+
+            updateChecklistCount(cardId);
+        });
+    });
+
+    // ——— Subtask checkbox change ———
+    document.querySelectorAll('.subtask-item input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const cardId = cb.closest('.card').id.split('-')[1];
+            updateChecklistCount(cardId);
+        });
+    });
+
+    // ——— Subtask delete ———
+    document.querySelectorAll('.subtask-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const li = btn.closest('.subtask-item');
+            const cardId = li.closest('.card').id.split('-')[1];
+            li.remove();
+            updateChecklistCount(cardId);
+        });
+    });
+
+    // ——— Auto-resize textarea ———
+    document.querySelectorAll('.card-notes').forEach(ta => {
+        ta.addEventListener('input', () => {
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+        });
+        // Initial resize
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+    });
+
+    // ——— Helpers ———
+    function updateChecklistCount(cardId) {
+        const toggle = document.querySelector(`.subtasks-toggle[data-card="${cardId}"]`);
+        const list = document.getElementById('subtasks-' + cardId);
+        const total = list.querySelectorAll('.subtask-item').length;
+        const done = list.querySelectorAll('input[type="checkbox"]:checked').length;
+        const countSpan = toggle.querySelector('span:last-child');
+        if (countSpan) countSpan.textContent = done + '/' + total;
+    }
+
+    function selectAllText(el) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+</script>
+</body>
+</html>
