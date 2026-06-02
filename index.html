@@ -454,6 +454,15 @@ body {
 }
 .global-task .gt-dots .np-dot.on { background: var(--star); }
 .global-task .gt-dots:hover .np-dot:not(.on) { background: var(--star-dim); }
+.guide-text p {
+    font-size: 11px; color: var(--text-dim); line-height: 1.55;
+    margin-bottom: 8px;
+}
+.guide-text b {
+    color: var(--text); font-weight: normal; font-style: italic;
+    font-family: Georgia, serif;
+}
+
 .empty-global {
     font-size: 11px; color: var(--text-faint); font-style: italic;
     text-align: center; padding: 16px 0; font-family: Georgia, serif;
@@ -570,6 +579,96 @@ body {
 [data-theme="warm-light"] .sidebar { background: #f5f3ec; }
 [data-theme="warm-light"] .burger-menu { background: #f5f3ec; }
 [data-theme="warm-light"] .col-menu { background: #f5f3ec; }
+
+/* Dracula — purple-tinted, high contrast */
+[data-theme="dracula"] {
+    --bg: #282a36; --card-bg: #2d2f3d;
+    --text: #f8f8f2; --text-dim: #b2b2bf; --text-faint: #6272a4;
+    --border: #3b3d4f; --rule: #44475a;
+    --star: #f1fa8c; --star-dim: #5a5a30;
+    --check: #50fa7b; --check-dim: #1e4a2a;
+    --accent-burgundy: #ff5555; --accent-navy: #6272a4;
+    --accent-forest: #50fa7b; --accent-ochre: #ffb86c;
+    --col-ready: #1e2030; --col-active: #242230;
+    --col-blocked: #2a1e20; --col-done: #1e2a20;
+    --col-ready-border: #3a3d60; --col-active-border: #4a3560;
+    --col-blocked-border: #603a3a; --col-done-border: #2a4a2a;
+}
+
+/* Gruvbox Dark — warm retro */
+[data-theme="gruvbox"] {
+    --bg: #282828; --card-bg: #32302f;
+    --text: #ebdbb2; --text-dim: #bdae93; --text-faint: #665c54;
+    --border: #3c3836; --rule: #504945;
+    --star: #fabd2f; --star-dim: #5a4a20;
+    --check: #b8bb26; --check-dim: #404a10;
+    --accent-burgundy: #cc241d; --accent-navy: #458588;
+    --accent-forest: #98971a; --accent-ochre: #d79921;
+    --col-ready: #282828; --col-active: #2a2828;
+    --col-blocked: #2a2622; --col-done: #262a24;
+    --col-ready-border: #3a5060; --col-active-border: #504050;
+    --col-blocked-border: #604020; --col-done-border: #304a20;
+}
+
+/* Catppuccin Mocha — soft pastel dark */
+[data-theme="catppuccin"] {
+    --bg: #1e1e2e; --card-bg: #26263a;
+    --text: #cdd6f4; --text-dim: #a6adc8; --text-faint: #6c7086;
+    --border: #313244; --rule: #45475a;
+    --star: #f9e2af; --star-dim: #5a5030;
+    --check: #a6e3a1; --check-dim: #2a4028;
+    --accent-burgundy: #f38ba8; --accent-navy: #89b4fa;
+    --accent-forest: #a6e3a1; --accent-ochre: #fab387;
+    --col-ready: #1a1e2a; --col-active: #221e2a;
+    --col-blocked: #2a1e20; --col-done: #1a2a20;
+    --col-ready-border: #3a4470; --col-active-border: #5a3860;
+    --col-blocked-border: #6a3a4a; --col-done-border: #2a5a2a;
+}
+
+/* Tokyo Night — blue-tinted dark */
+[data-theme="tokyo-night"] {
+    --bg: #1a1b26; --card-bg: #1f2233;
+    --text: #c0caf5; --text-dim: #9aa5ce; --text-faint: #565f89;
+    --border: #292e42; --rule: #3b4261;
+    --star: #e0af68; --star-dim: #4a3a20;
+    --check: #9ece6a; --check-dim: #2a3a20;
+    --accent-burgundy: #f7768e; --accent-navy: #7aa2f7;
+    --accent-forest: #9ece6a; --accent-ochre: #e0af68;
+    --col-ready: #1a1e2a; --col-active: #221e2a;
+    --col-blocked: #261a1e; --col-done: #1a261e;
+    --col-ready-border: #2a4070; --col-active-border: #4a3060;
+    --col-blocked-border: #603040; --col-done-border: #2a502a;
+}
+
+/* Rose Pine — rose-tinted warm dark */
+[data-theme="rose-pine"] {
+    --bg: #191724; --card-bg: #1f1d2e;
+    --text: #e0def4; --text-dim: #908caa; --text-faint: #6e6a86;
+    --border: #26233a; --rule: #403d52;
+    --star: #f6c177; --star-dim: #4a3a20;
+    --check: #9ccfd8; --check-dim: #1e3a3a;
+    --accent-burgundy: #eb6f92; --accent-navy: #31748f;
+    --accent-forest: #31748f; --accent-ochre: #f6c177;
+    --col-ready: #1a1a26; --col-active: #241e2a;
+    --col-blocked: #261a20; --col-done: #1a2426;
+    --col-ready-border: #3a3a60; --col-active-border: #5a3860;
+    --col-blocked-border: #6a3a50; --col-done-border: #2a4a5a;
+}
+
+/* Solarized Dark — classic cyan-tinted */
+[data-theme="solarized-dark"] {
+    --bg: #002b36; --card-bg: #003541;
+    --text: #eee8d5; --text-dim: #93a1a1; --text-faint: #657b83;
+    --border: #073642; --rule: #586e75;
+    --star: #b58900; --star-dim: #3a3000;
+    --check: #859900; --check-dim: #2a3000;
+    --accent-burgundy: #dc322f; --accent-navy: #268bd2;
+    --accent-forest: #859900; --accent-ochre: #cb4b16;
+    --col-ready: #002630; --col-active: #002630;
+    --col-blocked: #1e2430; --col-done: #002a24;
+    --col-ready-border: #004a60; --col-active-border: #3a3060;
+    --col-blocked-border: #603020; --col-done-border: #1a4a3a;
+}
 </style>
 </head>
 <body>
@@ -602,6 +701,18 @@ body {
     <button class="sidebar-close" id="sidebar-close">✕</button>
 
     <div class="sidebar-section">
+        <h3>Guide</h3>
+        <div class="guide-text">
+            <p><b>Columns</b> — Drag cards between Untouched, Active, Blocked, and Watching. Click <b>+</b> in any column header to add a card. Use <b>⋮</b> on columns to rename, add, or remove.</p>
+            <p><b>Stars</b> — Click the star bar on a card to add ★. Click a filled star to remove it. Toggle on/off via card <b>⋮</b> menu.</p>
+            <p><b>Checks</b> — Click the check bar for manual ✓ marks. Checking a note&rsquo;s checkbox also adds a ✓. Both pool into the same tally.</p>
+            <p><b>Priority dots</b> — The 2×2 dot grid on each note. Click to cycle 0→1→2→3→0 dots. Higher = more urgent. Sort the global task list by priority or most recent.</p>
+            <p><b>Notes</b> — Each card holds notes with a checkbox, priority grid, and timestamp. Click &ldquo;+ Add a note&rdquo; or edit text inline. Hover to reveal the delete button.</p>
+            <p><b>Data</b> — All patient data stays in your browser (IndexedDB). Nothing is ever sent to a server. Use <b>Export JSON</b> to back up or transfer between workstations.</p>
+        </div>
+    </div>
+
+    <div class="sidebar-section">
         <h3>Theme</h3>
         <div class="theme-options" id="theme-options">
             <button class="theme-chip active" data-theme="classic-dark">Classic Dark</button>
@@ -609,6 +720,13 @@ body {
             <button class="theme-chip" data-theme="nord">Nord</button>
             <button class="theme-chip" data-theme="everforest">Everforest</button>
             <button class="theme-chip" data-theme="warm-light">Warm Light</button>
+            <button class="theme-chip" data-theme="dracula">Dracula</button>
+            <button class="theme-chip" data-theme="gruvbox">Gruvbox</button>
+            <button class="theme-chip" data-theme="catppuccin">Catppuccin</button>
+            <button class="theme-chip" data-theme="tokyo-night">Tokyo Night</button>
+            <button class="theme-chip" data-theme="rose-pine">Rose Pine</button>
+            <button class="theme-chip" data-theme="solarized-dark">Solarized</button>
+            <button class="theme-chip" data-theme="random" id="random-theme-chip">Random</button>
         </div>
     </div>
 
@@ -676,7 +794,7 @@ function demoData() {
     return b;
 }
 
-let appState = { boards: {}, activeBoardId: null, theme: 'classic-dark', sortBy: 'priority', mobileColIdx: 0 };
+let appState = { boards: {}, activeBoardId: null, theme: 'classic-dark', customTheme: null, sortBy: 'priority', mobileColIdx: 0 };
 
 // ============================================================================
 // INDEXEDDB
@@ -1168,7 +1286,15 @@ function renderGlobalTasks() {
         const card=board.cards[dots.dataset.card]; if(!card)return; const note=card.notes.find(n=>n.id===dots.dataset.note); if(!note)return;
         note.priority = ((note.priority || 0) + 1) % 4; refreshCardDOM(dots.dataset.card); renderGlobalTasks(); autoSave(); }); });
 }
-function renderThemeChips() { document.querySelectorAll('.theme-chip').forEach(c=>c.classList.toggle('active',c.dataset.theme===appState.theme)); }
+function renderThemeChips() {
+    document.querySelectorAll('.theme-chip').forEach(c => {
+        if (c.dataset.theme === 'random') {
+            c.classList.toggle('active', appState.theme === 'custom');
+        } else {
+            c.classList.toggle('active', c.dataset.theme === appState.theme);
+        }
+    });
+}
 function refreshCardDOM(cardId) { const card=activeBoard().cards[cardId]; if(card){renderCardStars(card);renderCardChecks(card);renderCardNotes(card);} }
 
 // ============================================================================
@@ -1182,11 +1308,94 @@ function closeSidebar() { document.getElementById('sidebar').classList.remove('o
 document.querySelectorAll('.sort-btn').forEach(btn => { btn.addEventListener('click',()=>{document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');appState.sortBy=btn.dataset.sort;renderGlobalTasks();autoSave();}); });
 document.getElementById('add-board-sidebar').addEventListener('click',()=>{const n=prompt('Board name:');if(!n||!n.trim())return;const b=freshBoard(n.trim());appState.boards[b.id]=b;appState.activeBoardId=b.id;renderAll();autoSave();});
 
-document.querySelectorAll('.theme-chip').forEach(chip => { chip.addEventListener('click',()=>{appState.theme=chip.dataset.theme;document.documentElement.setAttribute('data-theme',chip.dataset.theme);renderThemeChips();autoSave();}); });
+document.querySelectorAll('.theme-chip').forEach(chip => { chip.addEventListener('click',()=>{
+    if (chip.dataset.theme === 'random') {
+        const palette = generateRandomPalette();
+        appState.customTheme = palette;
+        appState.theme = 'custom';
+        document.documentElement.setAttribute('data-theme', 'custom');
+        // Clear any previously set custom properties
+        const root = document.documentElement;
+        root.style.cssText = '';
+        applyCustomTheme(palette.vars);
+        renderThemeChips(); autoSave();
+    } else {
+        appState.theme = chip.dataset.theme;
+        document.documentElement.setAttribute('data-theme', chip.dataset.theme);
+        // Clear any custom inline vars so named theme CSS takes over
+        document.documentElement.style.cssText = '';
+        renderThemeChips(); autoSave();
+    }
+}); });
 
 document.getElementById('export-btn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(appState,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='case-board-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);});
 document.getElementById('import-btn').addEventListener('click',()=>document.getElementById('import-file').click());
 document.getElementById('import-file').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.boards&&data.activeBoardId){appState=data;document.documentElement.setAttribute('data-theme',appState.theme||'classic-dark');renderAll();saveState();}else{alert('Invalid board file.');}}catch(err){alert('Could not parse file: '+err.message);}};reader.readAsText(file);e.target.value='';});
+
+// ============================================================================
+// RANDOM PALETTE GENERATOR
+// ============================================================================
+function hsl(h, s, l) { return `hsl(${h},${s}%,${l}%)`; }
+
+function generateRandomPalette() {
+    const baseH = Math.floor(Math.random() * 360);
+    const off = (d) => (baseH + d + 360) % 360; // offset from base hue
+
+    // Dark background: low lightness, low saturation, slightly tinted by base hue
+    const bg = hsl(baseH, 8 + Math.random() * 14, 6 + Math.random() * 5);
+    const cardBg = hsl(baseH, 7 + Math.random() * 12, 8 + Math.random() * 5);
+
+    // Text: light, slightly warm/cool based on base
+    const text = hsl(off(0), 6 + Math.random() * 10, 82 + Math.random() * 8);
+    const textDim = hsl(off(0), 5 + Math.random() * 8, 55 + Math.random() * 12);
+    const textFaint = hsl(off(0), 4 + Math.random() * 7, 32 + Math.random() * 10);
+
+    const border = hsl(off(0), 4 + Math.random() * 8, 14 + Math.random() * 6);
+    const rule = hsl(off(0), 3 + Math.random() * 7, 24 + Math.random() * 8);
+
+    // Star: warm gold, independent of base
+    const star = hsl(44 + Math.random() * 10, 65 + Math.random() * 25, 48 + Math.random() * 10);
+    const starDim = hsl(44 + Math.random() * 8, 30 + Math.random() * 20, 18 + Math.random() * 6);
+
+    // Check: muted green/sage
+    const check = hsl(115 + Math.random() * 25, 25 + Math.random() * 25, 38 + Math.random() * 12);
+    const checkDim = hsl(115 + Math.random() * 20, 15 + Math.random() * 15, 16 + Math.random() * 6);
+
+    // Accents: split-complementary around base hue
+    const accentBurgundy = hsl(off(345 + Math.random() * 25), 40 + Math.random() * 30, 40 + Math.random() * 12);
+    const accentNavy = hsl(off(200 + Math.random() * 30), 30 + Math.random() * 30, 38 + Math.random() * 12);
+    const accentForest = hsl(off(120 + Math.random() * 30), 28 + Math.random() * 28, 35 + Math.random() * 12);
+    const accentOchre = hsl(off(30 + Math.random() * 25), 40 + Math.random() * 30, 42 + Math.random() * 12);
+
+    // Columns: subtle tinted backgrounds
+    const colReady = hsl(off(210 + Math.random() * 20), 8 + Math.random() * 8, 8 + Math.random() * 4);
+    const colActive = hsl(off(280 + Math.random() * 20), 8 + Math.random() * 8, 8 + Math.random() * 4);
+    const colBlocked = hsl(off(15 + Math.random() * 20), 10 + Math.random() * 10, 8 + Math.random() * 4);
+    const colDone = hsl(off(140 + Math.random() * 20), 8 + Math.random() * 8, 8 + Math.random() * 4);
+
+    const colReadyBorder = hsl(off(215), 12 + Math.random() * 10, 18 + Math.random() * 8);
+    const colActiveBorder = hsl(off(285), 14 + Math.random() * 12, 18 + Math.random() * 8);
+    const colBlockedBorder = hsl(off(20), 18 + Math.random() * 14, 18 + Math.random() * 8);
+    const colDoneBorder = hsl(off(145), 16 + Math.random() * 14, 18 + Math.random() * 8);
+
+    return {
+        id: 'random-' + Date.now(),
+        name: 'Random',
+        vars: { bg, 'card-bg': cardBg, text, 'text-dim': textDim, 'text-faint': textFaint,
+            border, rule, star, 'star-dim': starDim, check, 'check-dim': checkDim,
+            'accent-burgundy': accentBurgundy, 'accent-navy': accentNavy,
+            'accent-forest': accentForest, 'accent-ochre': accentOchre,
+            'col-ready': colReady, 'col-active': colActive,
+            'col-blocked': colBlocked, 'col-done': colDone,
+            'col-ready-border': colReadyBorder, 'col-active-border': colActiveBorder,
+            'col-blocked-border': colBlockedBorder, 'col-done-border': colDoneBorder }
+    };
+}
+
+function applyCustomTheme(vars) {
+    const root = document.documentElement;
+    Object.entries(vars).forEach(([k, v]) => root.style.setProperty('--' + k, v));
+}
 
 // ============================================================================
 // RENDER ALL
@@ -1206,6 +1415,10 @@ async function init() {
     await loadState();
     if (!appState.theme) appState.theme = 'classic-dark';
     document.documentElement.setAttribute('data-theme', appState.theme);
+    if (appState.theme === 'custom' && appState.customTheme) {
+        document.documentElement.style.cssText = '';
+        applyCustomTheme(appState.customTheme.vars);
+    }
     renderAll();
 }
 init();
