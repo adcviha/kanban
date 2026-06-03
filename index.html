@@ -16,6 +16,7 @@
     --check: #6a8d6d; --check-dim: #303d2e;
     --accent-burgundy: #8b4a4a; --accent-navy: #4a5f7a;
     --accent-forest: #4a7050; --accent-ochre: #a0843a;
+    --accent-calm: #4a7050; --accent-alert: #8b4a4a;
     --col-ready: #1e2330; --col-active: #26201c;
     --col-blocked: #281e18; --col-done: #19241c;
     --col-ready-border: #2a3060; --col-active-border: #4a2550;
@@ -178,10 +179,8 @@ body {
 .card:active { cursor: grabbing; }
 .card.dragging { box-shadow: 0 4px 16px rgba(0,0,0,0.4); z-index: 5; }
 .drag-placeholder { height: 4px; background: var(--text-dim); border-radius: 2px; margin: 2px 0; opacity: 0.5; transition: none; pointer-events: none; }
-.card.accent-burgundy { border-left: 3px solid var(--accent-burgundy); }
-.card.accent-navy     { border-left: 3px solid var(--accent-navy); }
-.card.accent-forest   { border-left: 3px solid var(--accent-forest); }
-.card.accent-ochre    { border-left: 3px solid var(--accent-ochre); }
+.card.has-accent { border-left-width: 3px; border-left-style: solid; }
+/* border-left-color set via JS for gradient interpolation */
 
 .card-top-row {
     display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px;
@@ -192,10 +191,7 @@ body {
     outline: none; width: 38px; flex-shrink: 0; text-align: right;
     transition: color 150ms;
 }
-.card.accent-burgundy .card-room { color: color-mix(in srgb, var(--accent-burgundy) 65%, var(--text) 35%); }
-.card.accent-navy     .card-room { color: color-mix(in srgb, var(--accent-navy) 65%, var(--text) 35%); }
-.card.accent-forest   .card-room { color: color-mix(in srgb, var(--accent-forest) 65%, var(--text) 35%); }
-.card.accent-ochre    .card-room { color: color-mix(in srgb, var(--accent-ochre) 65%, var(--text) 35%); }
+/* room number color set via JS for gradient interpolation */
 .card-name {
     font-family: Georgia, serif; font-size: 14px;
     color: var(--text); background: none; border: none;
@@ -337,10 +333,23 @@ body {
 .accent-dot:hover { transform: scale(1.15); }
 .accent-dot.active { border-color: var(--text-dim); }
 .accent-none      { background: transparent; border: 1.5px solid var(--border); }
+/* Keep old dot colors for column header picker */
 .accent-burgundy  { background: var(--accent-burgundy); }
 .accent-navy      { background: var(--accent-navy); }
 .accent-forest    { background: var(--accent-forest); }
 .accent-ochre     { background: var(--accent-ochre); }
+/* Gradient slider for card priority */
+.accent-slider {
+    width: 100%; height: 14px; border-radius: 7px;
+    cursor: pointer; position: relative;
+    margin: 4px 0 2px;
+}
+.accent-slider-knob {
+    position: absolute; top: -2px; width: 18px; height: 18px;
+    border-radius: 50%; background: #fff; border: 2px solid rgba(0,0,0,0.3);
+    transform: translateX(-9px); pointer-events: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3); transition: left 80ms ease-out;
+}
 .burger-toggle {
     display: flex; align-items: center; justify-content: space-between;
     width: 100%; background: none; border: none;
@@ -532,6 +541,7 @@ body {
     --check: #2d9135; --check-dim: #1a3a1a;
     --accent-burgundy: #cc1e1e; --accent-navy: #3344aa;
     --accent-forest: #2d9135; --accent-ochre: #e6a413;
+    --accent-calm: #2d9135; --accent-alert: #cc1e1e;
     --col-ready: #14184f; --col-active: #2c1050;
     --col-blocked: #783000; --col-done: #133614;
     --col-ready-border: #1a2060; --col-active-border: #3a1860;
@@ -547,6 +557,7 @@ body {
     --check: #6a8d6d; --check-dim: #303d2e;
     --accent-burgundy: #8b4a4a; --accent-navy: #4a5f7a;
     --accent-forest: #4a7050; --accent-ochre: #a0843a;
+    --accent-calm: #4a7050; --accent-alert: #8b4a4a;
     --col-ready: #1a1f18; --col-active: #1f1c18;
     --col-blocked: #1f1a18; --col-done: #181f1d;
     --col-ready-border: #303d2a; --col-active-border: #3d3028;
@@ -562,6 +573,7 @@ body {
     --check: #a3be8c; --check-dim: #364030;
     --accent-burgundy: #bf616a; --accent-navy: #5e81ac;
     --accent-forest: #a3be8c; --accent-ochre: #d08770;
+    --accent-calm: #a3be8c; --accent-alert: #bf616a;
     --col-ready: #262e3a; --col-active: #2a2e3a;
     --col-blocked: #2c2a36; --col-done: #262e32;
     --col-ready-border: #3b5274; --col-active-border: #4a5a7a;
@@ -577,6 +589,7 @@ body {
     --check: #a7c080; --check-dim: #304030;
     --accent-burgundy: #e67e80; --accent-navy: #7fbbb3;
     --accent-forest: #83c092; --accent-ochre: #dbbc7f;
+    --accent-calm: #83c092; --accent-alert: #e67e80;
     --col-ready: #1a241e; --col-active: #22241c;
     --col-blocked: #241e1c; --col-done: #1c241e;
     --col-ready-border: #2a4a3a; --col-active-border: #3a4a2a;
@@ -592,6 +605,7 @@ body {
     --check: #5a8a6a; --check-dim: #d0e0d0;
     --accent-burgundy: #a04a4a; --accent-navy: #4a6080;
     --accent-forest: #4a7050; --accent-ochre: #a0843a;
+    --accent-calm: #5a8a6a; --accent-alert: #a04a4a;
     --col-ready: #e8eaf0; --col-active: #f0ede8;
     --col-blocked: #f0e8e0; --col-done: #e8f0e8;
     --col-ready-border: #c0c8d8; --col-active-border: #d0c8b8;
@@ -611,6 +625,7 @@ body {
     --check: #50fa7b; --check-dim: #1e4a2a;
     --accent-burgundy: #ff5555; --accent-navy: #6272a4;
     --accent-forest: #50fa7b; --accent-ochre: #ffb86c;
+    --accent-calm: #50fa7b; --accent-alert: #ff5555;
     --col-ready: #1e2030; --col-active: #242230;
     --col-blocked: #2a1e20; --col-done: #1e2a20;
     --col-ready-border: #3a3d60; --col-active-border: #4a3560;
@@ -626,6 +641,7 @@ body {
     --check: #b8bb26; --check-dim: #404a10;
     --accent-burgundy: #cc241d; --accent-navy: #458588;
     --accent-forest: #98971a; --accent-ochre: #d79921;
+    --accent-calm: #98971a; --accent-alert: #cc241d;
     --col-ready: #282828; --col-active: #2a2828;
     --col-blocked: #2a2622; --col-done: #262a24;
     --col-ready-border: #3a5060; --col-active-border: #504050;
@@ -641,6 +657,7 @@ body {
     --check: #a6e3a1; --check-dim: #2a4028;
     --accent-burgundy: #f38ba8; --accent-navy: #89b4fa;
     --accent-forest: #a6e3a1; --accent-ochre: #fab387;
+    --accent-calm: #a6e3a1; --accent-alert: #f38ba8;
     --col-ready: #1a1e2a; --col-active: #221e2a;
     --col-blocked: #2a1e20; --col-done: #1a2a20;
     --col-ready-border: #3a4470; --col-active-border: #5a3860;
@@ -656,6 +673,7 @@ body {
     --check: #9ece6a; --check-dim: #2a3a20;
     --accent-burgundy: #f7768e; --accent-navy: #7aa2f7;
     --accent-forest: #9ece6a; --accent-ochre: #e0af68;
+    --accent-calm: #9ece6a; --accent-alert: #f7768e;
     --col-ready: #1a1e2a; --col-active: #221e2a;
     --col-blocked: #261a1e; --col-done: #1a261e;
     --col-ready-border: #2a4070; --col-active-border: #4a3060;
@@ -671,6 +689,7 @@ body {
     --check: #9ccfd8; --check-dim: #1e3a3a;
     --accent-burgundy: #eb6f92; --accent-navy: #31748f;
     --accent-forest: #31748f; --accent-ochre: #f6c177;
+    --accent-calm: #9ccfd8; --accent-alert: #eb6f92;
     --col-ready: #1a1a26; --col-active: #241e2a;
     --col-blocked: #261a20; --col-done: #1a2426;
     --col-ready-border: #3a3a60; --col-active-border: #5a3860;
@@ -686,6 +705,7 @@ body {
     --check: #859900; --check-dim: #2a3000;
     --accent-burgundy: #dc322f; --accent-navy: #268bd2;
     --accent-forest: #859900; --accent-ochre: #cb4b16;
+    --accent-calm: #859900; --accent-alert: #dc322f;
     --col-ready: #002630; --col-active: #002630;
     --col-blocked: #1e2430; --col-done: #002a24;
     --col-ready-border: #004a60; --col-active-border: #3a3060;
@@ -798,7 +818,7 @@ function demoData() {
     b.id = 'board-1';
 
     const c1 = cid(); b.columns[0].cardIds.push(c1);
-    b.cards[c1] = { id: c1, room: '304', name: 'Margaret Chen', stars: 3, accent: 'ochre', starsOn: true,
+    b.cards[c1] = { id: c1, room: '304', name: 'Margaret Chen', stars: 3, accentValue: 50, starsOn: true,
         notes: ['Speaks Mandarin — interpreter preferred'],
         listItems: [
             { id: nid(), text: 'Confirm interpreter booked', checked: true, priority: 2, createdAt: '2026-06-02T09:15:00' },
@@ -806,7 +826,7 @@ function demoData() {
         ],
         createdAt: '2026-06-01T08:00:00' };
     const c2 = cid(); b.columns[1].cardIds.push(c2);
-    b.cards[c2] = { id: c2, room: '112', name: 'James Okonkwo', stars: 5, accent: 'navy', starsOn: true,
+    b.cards[c2] = { id: c2, room: '112', name: 'James Okonkwo', stars: 5, accentValue: 25, starsOn: true,
         notes: [],
         listItems: [
             { id: nid(), text: 'CT results — check portal Thursday', checked: true, priority: 5, createdAt: '2026-06-02T08:00:00' },
@@ -814,7 +834,7 @@ function demoData() {
         ],
         createdAt: '2026-06-01T10:00:00' };
     const c3 = cid(); b.columns[2].cardIds.push(c3);
-    b.cards[c3] = { id: c3, room: '208', name: 'Sofia Reyes', stars: 0, accent: '', starsOn: false,
+    b.cards[c3] = { id: c3, room: '208', name: 'Sofia Reyes', stars: 0, accentValue: 0, starsOn: false,
         notes: [],
         listItems: [
             { id: nid(), text: 'New admit — full psychosocial assessment', checked: false, priority: 2, createdAt: '2026-06-02T10:00:00' }
@@ -854,6 +874,12 @@ function migrateData(state) {
                     card.notes = newNotes;
                 }
             }
+            // Migrate old string accent → numeric accentValue
+            if (card.accent !== undefined && card.accentValue === undefined) {
+                const map = { '': 0, 'burgundy': 85, 'navy': 25, 'forest': 35, 'ochre': 50 };
+                card.accentValue = map[card.accent] !== undefined ? map[card.accent] : 0;
+            }
+            delete card.accent;
             // Remove legacy fields
             delete card.manualChecks;
             delete card.checklistOn;
@@ -922,6 +948,25 @@ function formatDate(iso) {
     if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     return d.toLocaleDateString([],{month:'short',day:'numeric'});
 }
+function interpolateColor(c1, c2, t) {
+    const parse = (c) => {
+        if (c.startsWith('#')) {
+            const h = c.slice(1);
+            if (h.length === 3) return [parseInt(h[0]+h[0],16), parseInt(h[1]+h[1],16), parseInt(h[2]+h[2],16)];
+            if (h.length === 6) return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+        }
+        const m = c.match(/rgb\((\d+)\s*,?\s*(\d+)\s*,?\s*(\d+)\)/);
+        if (m) return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+        return [128, 128, 128];
+    };
+    const [r1, g1, b1] = parse(c1);
+    const [r2, g2, b2] = parse(c2);
+    const r = Math.round(r1 + (r2 - r1) * t);
+    const g = Math.round(g1 + (g2 - g1) * t);
+    const b = Math.round(b1 + (b2 - b1) * t);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
 function autoSize(input, minW) {
     function rs() {
         const s = document.createElement('span');
@@ -1059,7 +1104,7 @@ function renderBoard() {
 
 function renderCard(card) {
     const el = document.createElement('div');
-    el.className = 'card' + (card.accent ? ' accent-' + card.accent : '');
+    el.className = 'card' + ((card.accentValue || 0) > 0 ? ' has-accent' : '');
     el.dataset.cardId = card.id; el.draggable = true;
 
     el.innerHTML = `
@@ -1068,11 +1113,9 @@ function renderCard(card) {
             <input class="card-name" value="${esc(card.name)}" size="12" placeholder="Name">
             <button class="card-burger">⋮</button>
             <div class="burger-menu" id="menu-${card.id}">
-                <div class="burger-section"><div class="burger-label">Accent</div>
-                    <div class="accent-options" data-card="${card.id}">
-                        ${['','burgundy','navy','forest','ochre'].map(c =>
-                            `<button class="accent-dot accent-${c||'none'}${card.accent===c||(!card.accent&&c==='')?' active':''}" data-color="${c}"></button>`
-                        ).join('')}
+                <div class="burger-section"><div class="burger-label">Priority</div>
+                    <div class="accent-slider" id="slider-${card.id}" style="background: linear-gradient(to right, var(--accent-calm), var(--accent-alert));">
+                        <div class="accent-slider-knob" style="left:${(card.accentValue||0)}%"></div>
                     </div>
                 </div>
                 <div class="burger-sep"></div>
@@ -1101,11 +1144,40 @@ function renderCard(card) {
     const burgerBtn = el.querySelector('.card-burger'), menu = el.querySelector('.burger-menu');
     burgerBtn.addEventListener('click', e => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('open'); });
 
-    // Menu actions
-    el.querySelectorAll('.accent-dot').forEach(d => { d.addEventListener('click', e => { e.stopPropagation();
-        card.accent = d.dataset.color; el.className = el.className.replace(/accent-\w+/g,'');
-        if (card.accent) el.classList.add('accent-'+card.accent);
-        el.querySelectorAll('.accent-dot').forEach(x => x.classList.remove('active')); d.classList.add('active'); autoSave(); }); });
+    // Apply accent color to card
+    function applyAccent(card, cardEl) {
+        const val = card.accentValue || 0;
+        if (val > 0) {
+            cardEl.classList.add('has-accent');
+            const style = getComputedStyle(document.documentElement);
+            const calm = style.getPropertyValue('--accent-calm').trim();
+            const alert = style.getPropertyValue('--accent-alert').trim();
+            const color = interpolateColor(calm, alert, val / 100);
+            cardEl.style.borderLeftColor = color;
+            const roomInp = cardEl.querySelector('.card-room');
+            if (roomInp) roomInp.style.color = color;
+        } else {
+            cardEl.classList.remove('has-accent');
+            cardEl.style.borderLeftColor = '';
+            const roomInp = cardEl.querySelector('.card-room');
+            if (roomInp) roomInp.style.color = '';
+        }
+    }
+    applyAccent(card, el);
+
+    // Menu actions — gradient slider
+    const slider = el.querySelector('.accent-slider');
+    if (slider) {
+        slider.addEventListener('click', e => {
+            e.stopPropagation();
+            const rect = slider.getBoundingClientRect();
+            const pct = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
+            card.accentValue = pct;
+            const knob = slider.querySelector('.accent-slider-knob');
+            if (knob) knob.style.left = pct + '%';
+            applyAccent(card, el); autoSave();
+        });
+    }
     el.querySelector('[data-action="toggle-stars"]').addEventListener('click', e => { e.stopPropagation();
         card.starsOn = !card.starsOn; if (!card.starsOn) card.stars = 0; renderCardStars(card);
         const b = el.querySelector('[data-action="toggle-stars"]'); b.classList.toggle('on',card.starsOn); b.querySelector('.toggle-indicator').textContent=card.starsOn?'on':'off'; autoSave(); });
@@ -1117,11 +1189,11 @@ function renderCard(card) {
     el.addEventListener('dragstart', e => { el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
     el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
-    renderCardStars(card); renderCardNotes(card); renderCardListItems(card);
+    renderCardStars(card, el); renderCardNotes(card, el); renderCardListItems(card, el);
 
     el.querySelector('.add-note-btn').addEventListener('click', () => {
         card.notes.push('');
-        renderCardNotes(card); autoSave();
+        renderCardNotes(card); autoSave(); // card already in DOM, getElementById works
         setTimeout(() => { const ln = el.querySelector('.note-block:last-child .note-text'); if (ln) ln.focus(); }, 50);
     });
     el.querySelector('.add-item-btn').addEventListener('click', () => {
@@ -1142,8 +1214,9 @@ function dots3x3(pri) {
     return html;
 }
 
-function renderCardStars(card) {
-    const bar = document.getElementById('stars-'+card.id); if (!bar) return;
+function renderCardStars(card, cardEl) {
+    const bar = (cardEl && cardEl.querySelector('#stars-'+card.id)) || document.getElementById('stars-'+card.id);
+    if (!bar) return;
     bar.innerHTML = ''; if (!card.starsOn) { bar.style.display = 'none'; return; }
     bar.style.display = 'flex'; bar.style.minHeight = '18px';
     if (card.stars === 0) {
@@ -1160,8 +1233,9 @@ function renderCardStars(card) {
     };
 }
 
-function renderCardNotes(card) {
-    const ct = document.getElementById('notes-'+card.id); if (!ct) return;
+function renderCardNotes(card, cardEl) {
+    const ct = (cardEl && cardEl.querySelector('#notes-'+card.id)) || document.getElementById('notes-'+card.id);
+    if (!ct) return;
     ct.innerHTML = '';
     (card.notes || []).forEach((note, idx) => {
         const text = typeof note === 'string' ? note : (note.text || '');
@@ -1181,8 +1255,9 @@ function renderCardNotes(card) {
     });
 }
 
-function renderCardListItems(card) {
-    const ct = document.getElementById('listitems-'+card.id); if (!ct) return;
+function renderCardListItems(card, cardEl) {
+    const ct = (cardEl && cardEl.querySelector('#listitems-'+card.id)) || document.getElementById('listitems-'+card.id);
+    if (!ct) return;
     ct.innerHTML = '';
     (card.listItems || []).forEach(item => {
         const block = document.createElement('div');
@@ -1340,7 +1415,7 @@ document.addEventListener('click', e => {
 
 function addCard(colId) {
     const board = activeBoard();
-    const card = { id: cid(), room: '', name: '', stars: 0, accent: '', starsOn: false, notes: [], listItems: [], createdAt: nowISO() };
+    const card = { id: cid(), room: '', name: '', stars: 0, accentValue: 0, starsOn: false, notes: [], listItems: [], createdAt: nowISO() };
     board.cards[card.id] = card;
     const col = colById(colId); if (col) col.cardIds.push(card.id);
     const zone = document.getElementById('zone-'+colId);
@@ -1542,6 +1617,10 @@ function generateRandomPalette() {
     const colBlockedBorder = hsl(off(20), 18 + Math.random() * 14, 18 + Math.random() * 8);
     const colDoneBorder = hsl(off(145), 16 + Math.random() * 14, 18 + Math.random() * 8);
 
+    // Calm → Alert gradient endpoints
+    const accentCalm = hsl(off(130), 40 + Math.random() * 25, 38 + Math.random() * 12);
+    const accentAlert = hsl(off(0), 50 + Math.random() * 25, 42 + Math.random() * 12);
+
     return {
         id: 'random-' + Date.now(),
         name: 'Random',
@@ -1552,7 +1631,8 @@ function generateRandomPalette() {
             'col-ready': colReady, 'col-active': colActive,
             'col-blocked': colBlocked, 'col-done': colDone,
             'col-ready-border': colReadyBorder, 'col-active-border': colActiveBorder,
-            'col-blocked-border': colBlockedBorder, 'col-done-border': colDoneBorder }
+            'col-blocked-border': colBlockedBorder, 'col-done-border': colDoneBorder,
+            'accent-calm': accentCalm, 'accent-alert': accentAlert }
     };
 }
 
@@ -1584,6 +1664,7 @@ async function init() {
         applyCustomTheme(appState.customTheme.vars);
     }
     renderAll();
+    window.addEventListener('beforeunload', () => saveState());
 }
 init();
 </script>
