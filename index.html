@@ -1353,7 +1353,15 @@ function handleDrop(e, zone, col) {
     }
     if (!inserted) col.cardIds.push(cardId);
     cardEl.classList.remove('dragging');
-    zone.appendChild(cardEl);
+    // Insert at correct DOM position matching cardIds order
+    const idx = col.cardIds.indexOf(cardId);
+    const nextId = col.cardIds[idx + 1];
+    if (nextId) {
+        const nextEl = zone.querySelector('.card[data-card-id="' + nextId + '"]');
+        if (nextEl) { zone.insertBefore(cardEl, nextEl); } else { zone.appendChild(cardEl); }
+    } else {
+        zone.appendChild(cardEl);
+    }
     updateColCounts(); autoSave();
 }
 
