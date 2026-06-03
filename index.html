@@ -1019,11 +1019,9 @@ function renderBoard() {
                         <div class="accent-options" data-col="${col.id}">
                             <button class="accent-dot accent-none${!col.headerColor?' active':''}" data-color=""></button>
                             <button class="accent-dot accent-calm${col.headerColor==='calm'?' active':''}" data-color="calm"></button>
-                            <button class="accent-dot accent-alert${col.headerColor==='alert'?' active':''}" data-color="alert"></button>
-                            <button class="accent-dot accent-burgundy${col.headerColor==='burgundy'?' active':''}" data-color="burgundy"></button>
                             <button class="accent-dot accent-navy${col.headerColor==='navy'?' active':''}" data-color="navy"></button>
-                            <button class="accent-dot accent-forest${col.headerColor==='forest'?' active':''}" data-color="forest"></button>
                             <button class="accent-dot accent-ochre${col.headerColor==='ochre'?' active':''}" data-color="ochre"></button>
+                            <button class="accent-dot accent-alert${col.headerColor==='alert'?' active':''}" data-color="alert"></button>
                         </div>
                     </div>
                     <div class="burger-sep"></div>
@@ -1179,7 +1177,9 @@ function renderCard(card) {
         slider.addEventListener('click', e => {
             e.stopPropagation();
             const rect = slider.getBoundingClientRect();
-            const pct = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
+            const raw = ((e.clientX - rect.left) / rect.width) * 100;
+            // left 8% of slider = neutral (0), otherwise round to nearest integer
+            const pct = raw <= 8 ? 0 : Math.round(Math.max(0, Math.min(100, raw)));
             card.accentValue = pct;
             const knob = slider.querySelector('.accent-slider-knob');
             if (knob) knob.style.left = pct + '%';
