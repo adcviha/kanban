@@ -1051,7 +1051,7 @@ function renderBoard() {
     // Global task column
     if (appState.showGlobalColumn) {
         const gCol = renderGlobalColumn();
-        if (gCol) container.appendChild(gCol);
+        if (gCol) { container.appendChild(gCol); renderGlobalTasks('global-col-list'); }
     }
 
     updateBoardNav();
@@ -1447,7 +1447,6 @@ function renderGlobalColumn() {
             autoSave();
         });
     });
-    renderGlobalTasks('global-col-list');
     return gCol;
 }
 
