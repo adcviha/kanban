@@ -1038,7 +1038,9 @@ function renderBoard() {
         colEl.querySelector('.col-name').addEventListener('input', e => { const c = colById(e.target.dataset.colId); if (c) { c.name = e.target.value; autoSave(); } });
         // Column header color
         if (col.headerColor) {
-            colEl.querySelector('.col-header').style.borderColor = `var(--accent-${col.headerColor})`;
+            const hdr = colEl.querySelector('.col-header');
+            hdr.style.borderColor = `var(--accent-${col.headerColor})`;
+            hdr.style.background = `color-mix(in srgb, var(--accent-${col.headerColor}) 12%, var(--card-bg) 88%)`;
         }
 
         colEl.querySelector('.col-add-card').addEventListener('click', () => addCard(col.id));
@@ -1055,8 +1057,10 @@ function renderBoard() {
                 const header = colEl.querySelector('.col-header');
                 if (col.headerColor) {
                     header.style.borderColor = `var(--accent-${col.headerColor})`;
+                    header.style.background = `color-mix(in srgb, var(--accent-${col.headerColor}) 12%, var(--card-bg) 88%)`;
                 } else {
                     header.style.borderColor = '';
+                    header.style.background = '';
                 }
                 autoSave();
             });
