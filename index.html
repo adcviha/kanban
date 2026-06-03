@@ -75,11 +75,11 @@ body {
 .board-tab-add:hover { color: var(--text-dim); }
 
 /* —— Board —— */
-.board-outer { position: relative; padding: 0 20px; display: flex; justify-content: center; }
+.board-outer { position: relative; padding: 0 20px; }
 .kanban-board {
     display: flex; gap: 10px; padding: 10px 0 12px;
     overflow-x: auto; min-height: 50vh; align-items: flex-start;
-    scroll-behavior: smooth; justify-content: center;
+    scroll-behavior: smooth;
     scrollbar-width: none; -ms-overflow-style: none;
 }
 .kanban-board::-webkit-scrollbar { display: none; }
@@ -442,18 +442,6 @@ body {
     transition: background 120ms, border-color 120ms;
 }
 .global-task:hover { background: rgba(255,255,255,0.02); border-color: var(--border); }
-.global-task .gt-cb {
-    appearance: none; -webkit-appearance: none;
-    width: 13px; height: 13px; flex-shrink: 0;
-    border: 1.5px solid var(--border); border-radius: 3px;
-    cursor: pointer; background: transparent;
-    position: relative; margin-top: 2px;
-}
-.global-task .gt-cb:checked { background: var(--check); border-color: var(--check); }
-.global-task .gt-cb:checked::after {
-    content: '✓'; position: absolute; top: -2px; left: 2px;
-    font-size: 10px; color: #fff; font-family: system-ui, sans-serif;
-}
 .global-task .gt-info { flex: 1; min-width: 0; }
 .global-task .gt-text { font-size: 12px; color: var(--text); line-height: 1.4; word-break: break-word; }
 .global-task .gt-meta {
@@ -1397,21 +1385,9 @@ function renderGlobalTasks(containerId) {
     const sorted = sortNotes(allItems);
     list.innerHTML = sorted.map(item => `
         <li class="global-task">
-            <input type="checkbox" class="gt-cb" data-card="${item.cardId}" data-item="${item.id}">
             <div class="gt-info"><div class="gt-text">${esc(item.text || '(empty)')}</div><div class="gt-meta">${esc(item.cardName)} · ${esc(item.cardRoom)} — ${formatDate(item.createdAt)}</div></div>
             <div class="gt-dots" data-card="${item.cardId}" data-item="${item.id}">${dots3x3(item.priority || 0)}</div>
         </li>`).join('');
-    list.querySelectorAll('.gt-cb').forEach(cb => {
-        cb.addEventListener('click', e => {
-            e.stopPropagation();
-            const card = board.cards[cb.dataset.card]; if (!card) return;
-            const item = (card.listItems || []).find(li => li.id === cb.dataset.item); if (!item) return;
-            item.checked = !item.checked; cb.checked = item.checked;
-            refreshCardDOM(cb.dataset.card); renderGlobalTasks(containerId);
-            if (isColumn) renderGlobalTasks(); // keep sidebar in sync
-            autoSave();
-        });
-    });
     list.querySelectorAll('.gt-dots').forEach(dots => {
         dots.addEventListener('click', e => {
             e.stopPropagation();
