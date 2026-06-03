@@ -337,6 +337,8 @@ body {
 .accent-navy      { background: var(--accent-navy); }
 .accent-forest    { background: var(--accent-forest); }
 .accent-ochre     { background: var(--accent-ochre); }
+.accent-calm      { background: var(--accent-calm); }
+.accent-alert     { background: var(--accent-alert); }
 /* Gradient slider for card priority */
 .accent-slider {
     width: 100%; height: 14px; border-radius: 7px;
@@ -473,13 +475,14 @@ body {
     text-align: center; padding: 16px 0; font-family: Georgia, serif;
 }
 
-.global-col-toggle {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 10px; color: var(--text-faint);
-    font-family: system-ui, sans-serif; cursor: pointer;
-    margin-top: 8px;
+.pin-toggle {
+    background: none; border: 1px solid var(--border);
+    font-size: 14px; cursor: pointer; padding: 3px 8px; border-radius: 4px;
+    margin-top: 8px; transition: border-color 120ms, background 120ms;
+    line-height: 1;
 }
-.global-col-toggle input { cursor: pointer; }
+.pin-toggle:hover { border-color: var(--text-dim); }
+.pin-toggle.pinned { background: rgba(255,255,255,0.06); border-color: var(--text-dim); }
 
 /* Global column on the board */
 .global-column {
@@ -749,7 +752,7 @@ body {
         </div>
         <ul class="global-task-list" id="global-task-list"></ul>
         <div class="empty-global" id="empty-global">No open tasks across patients</div>
-        <label class="global-col-toggle"><input type="checkbox" id="toggle-global-col"> Show as column</label>
+        <button class="pin-toggle" id="toggle-global-col" title="Pin global tasks as column">📌</button>
     </div>
 
     <div class="sidebar-section">
@@ -1015,6 +1018,8 @@ function renderBoard() {
                     <div class="burger-section"><div class="burger-label">Header Color</div>
                         <div class="accent-options" data-col="${col.id}">
                             <button class="accent-dot accent-none${!col.headerColor?' active':''}" data-color=""></button>
+                            <button class="accent-dot accent-calm${col.headerColor==='calm'?' active':''}" data-color="calm"></button>
+                            <button class="accent-dot accent-alert${col.headerColor==='alert'?' active':''}" data-color="alert"></button>
                             <button class="accent-dot accent-burgundy${col.headerColor==='burgundy'?' active':''}" data-color="burgundy"></button>
                             <button class="accent-dot accent-navy${col.headerColor==='navy'?' active':''}" data-color="navy"></button>
                             <button class="accent-dot accent-forest${col.headerColor==='forest'?' active':''}" data-color="forest"></button>
@@ -1431,7 +1436,7 @@ function addCard(colId) {
 function renderSidebar() {
     renderBoardList(); renderGlobalTasks(); renderThemeChips();
     const toggle = document.getElementById('toggle-global-col');
-    if (toggle) toggle.checked = appState.showGlobalColumn;
+    if (toggle) toggle.classList.toggle('pinned', appState.showGlobalColumn);
 }
 function renderBoardList() {
     const list = document.getElementById('board-list');
@@ -1531,8 +1536,8 @@ function renderGlobalColumn() {
 (function wireGlobalColToggle() {
     const toggle = document.getElementById('toggle-global-col');
     if (toggle) {
-        toggle.addEventListener('change', () => {
-            appState.showGlobalColumn = toggle.checked;
+        toggle.addEventListener('click', () => {
+            appState.showGlobalColumn = !appState.showGlobalColumn;
             renderAll(); autoSave();
         });
     }
