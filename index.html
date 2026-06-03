@@ -170,17 +170,16 @@ body {
 
 /* —— Cards —— */
 .card {
-    background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 12px 14px 10px;
+    background: var(--card-bg); border: 2px solid var(--border);
+    border-radius: var(--radius); padding: 12px 12px 10px;
     position: relative; margin-bottom: 8px;
-    transition: border-color 180ms, box-shadow 180ms, opacity 180ms;
+    transition: border-color 180ms, background 180ms, box-shadow 180ms, opacity 180ms;
     cursor: grab; user-select: none;
 }
 .card:active { cursor: grabbing; }
 .card.dragging { box-shadow: 0 4px 16px rgba(0,0,0,0.4); z-index: 5; }
 .drag-placeholder { height: 4px; background: var(--text-dim); border-radius: 2px; margin: 2px 0; opacity: 0.5; transition: none; pointer-events: none; }
-.card.has-accent { border-left-width: 3px; border-left-style: solid; }
-/* border-left-color set via JS for gradient interpolation */
+/* card border + bg tint set via JS for accent gradient */
 
 .card-top-row {
     display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px;
@@ -1104,7 +1103,7 @@ function renderBoard() {
 
 function renderCard(card) {
     const el = document.createElement('div');
-    el.className = 'card' + ((card.accentValue || 0) > 0 ? ' has-accent' : '');
+    el.className = 'card';
     el.dataset.cardId = card.id; el.draggable = true;
 
     el.innerHTML = `
@@ -1144,21 +1143,21 @@ function renderCard(card) {
     const burgerBtn = el.querySelector('.card-burger'), menu = el.querySelector('.burger-menu');
     burgerBtn.addEventListener('click', e => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('open'); });
 
-    // Apply accent color to card
+    // Apply accent color to card (border + subtle bg tint + room number)
     function applyAccent(card, cardEl) {
         const val = card.accentValue || 0;
         if (val > 0) {
-            cardEl.classList.add('has-accent');
             const style = getComputedStyle(document.documentElement);
             const calm = style.getPropertyValue('--accent-calm').trim();
             const alert = style.getPropertyValue('--accent-alert').trim();
             const color = interpolateColor(calm, alert, val / 100);
-            cardEl.style.borderLeftColor = color;
+            cardEl.style.borderColor = color;
+            cardEl.style.background = `color-mix(in srgb, ${color} 8%, var(--card-bg) 92%)`;
             const roomInp = cardEl.querySelector('.card-room');
             if (roomInp) roomInp.style.color = color;
         } else {
-            cardEl.classList.remove('has-accent');
-            cardEl.style.borderLeftColor = '';
+            cardEl.style.borderColor = '';
+            cardEl.style.background = '';
             const roomInp = cardEl.querySelector('.card-room');
             if (roomInp) roomInp.style.color = '';
         }
@@ -1185,8 +1184,11 @@ function renderCard(card) {
         el.style.transition='opacity 180ms,transform 180ms'; el.style.opacity='0'; el.style.transform='scale(0.95)';
         setTimeout(() => { el.remove(); const bd=activeBoard(); bd.columns.forEach(c=>{c.cardIds=c.cardIds.filter(id=>id!==card.id)}); delete bd.cards[card.id]; updateColCounts(); renderSidebar(); autoSave(); }, 180); });
 
-    // Drag
-    el.addEventListener('dragstart', e => { el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    // Drag — blocked when menu is open
+    el.addEventListener('dragstart', e => {
+        if (el.querySelector('.burger-menu.open')) { e.preventDefault(); return; }
+        el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+    });
     el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
     renderCardStars(card, el); renderCardNotes(card, el); renderCardListItems(card, el);
