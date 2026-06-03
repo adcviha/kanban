@@ -892,7 +892,7 @@ function migrateData(state) {
     return state;
 }
 
-let appState = { boards: {}, activeBoardId: null, theme: 'classic-dark', customTheme: null, sortBy: 'priority', mobileColIdx: 0, showGlobalColumn: false };
+let appState = { _version: 1, boards: {}, activeBoardId: null, theme: 'classic-dark', customTheme: null, sortBy: 'priority', mobileColIdx: 0, showGlobalColumn: false };
 
 // ============================================================================
 // INDEXEDDB
@@ -911,8 +911,8 @@ async function loadState() {
         const tx = db.transaction('state', 'readonly');
         const req = tx.objectStore('state').get('app');
         req.onsuccess = () => {
-            if (req.result) { appState = req.result; migrateData(appState); }
-            else { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; }
+            if (req.result) { appState = req.result; migrateData(appState); if (!appState._version) appState._version = 1; }
+            else { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; appState._version = 1; }
             resolve();
         };
         req.onerror = () => reject(req.error);
@@ -921,6 +921,26 @@ async function loadState() {
 }
 async function saveState() {
     const db = await openDB();
+    // Guard against stale overwrite from another tab
+    const current = await new Promise(resolve => {
+        const tx = db.transaction('state', 'readonly');
+        const req = tx.objectStore('state').get('app');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+    });
+    if (current && current._version && appState._version && current._version > appState._version) {
+        db.close();
+        // Another tab saved newer data — reload instead of overwriting
+        appState = current;
+        document.documentElement.setAttribute('data-theme', appState.theme || 'classic-dark');
+        if (appState.theme === 'custom' && appState.customTheme) {
+            document.documentElement.style.cssText = '';
+            applyCustomTheme(appState.customTheme.vars);
+        }
+        renderAll();
+        return;
+    }
+    appState._version = (appState._version || 0) + 1;
     return new Promise((resolve) => {
         const tx = db.transaction('state', 'readwrite');
         tx.objectStore('state').put(appState, 'app');
