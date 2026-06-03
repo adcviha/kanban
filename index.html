@@ -75,11 +75,11 @@ body {
 .board-tab-add:hover { color: var(--text-dim); }
 
 /* —— Board —— */
-.board-outer { position: relative; padding: 0 20px; }
+.board-outer { position: relative; padding: 0 20px; display: flex; justify-content: center; }
 .kanban-board {
     display: flex; gap: 10px; padding: 10px 0 12px;
     overflow-x: auto; min-height: 50vh; align-items: flex-start;
-    scroll-behavior: smooth;
+    scroll-behavior: smooth; justify-content: center;
     scrollbar-width: none; -ms-overflow-style: none;
 }
 .kanban-board::-webkit-scrollbar { display: none; }
@@ -192,10 +192,10 @@ body {
     outline: none; width: 38px; flex-shrink: 0; text-align: right;
     transition: color 150ms;
 }
-.card.accent-burgundy .card-room { color: color-mix(in srgb, var(--accent-burgundy) 55%, var(--text-faint) 45%); }
-.card.accent-navy     .card-room { color: color-mix(in srgb, var(--accent-navy) 55%, var(--text-faint) 45%); }
-.card.accent-forest   .card-room { color: color-mix(in srgb, var(--accent-forest) 55%, var(--text-faint) 45%); }
-.card.accent-ochre    .card-room { color: color-mix(in srgb, var(--accent-ochre) 55%, var(--text-faint) 45%); }
+.card.accent-burgundy .card-room { color: color-mix(in srgb, var(--accent-burgundy) 65%, var(--text) 35%); }
+.card.accent-navy     .card-room { color: color-mix(in srgb, var(--accent-navy) 65%, var(--text) 35%); }
+.card.accent-forest   .card-room { color: color-mix(in srgb, var(--accent-forest) 65%, var(--text) 35%); }
+.card.accent-ochre    .card-room { color: color-mix(in srgb, var(--accent-ochre) 65%, var(--text) 35%); }
 .card-name {
     font-family: Georgia, serif; font-size: 14px;
     color: var(--text); background: none; border: none;
@@ -213,50 +213,27 @@ body {
 }
 .card-burger:hover { background: rgba(255,255,255,0.04); color: var(--text-dim); }
 
-/* Star / check bars — always visible when enabled */
-.stars-bar, .checks-bar {
+/* Star bar */
+.stars-bar {
     display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
     margin-bottom: 4px; min-height: 6px; cursor: pointer; padding: 2px 0;
 }
+.stars-bar:empty { display: none; }
 .star-icon { font-size: 13px; cursor: pointer; user-select: none; color: var(--star-dim); transition: color 150ms; }
 .star-icon.filled { color: var(--star); }
 .star-icon:hover { color: var(--star); }
 .star-icon.hint { color: var(--star-dim); font-size: 15px; }
 .star-icon.hint:hover { color: var(--star); }
-.check-icon { font-size: 12px; cursor: pointer; user-select: none; color: var(--check-dim); transition: color 150ms; }
-.check-icon.filled { color: var(--check); }
-.check-icon:hover { color: var(--check); }
-.check-icon.hint { color: var(--check-dim); font-size: 14px; }
-.check-icon.hint:hover { color: var(--check); }
 
 .card-rule { height: 1px; background: var(--rule); margin-bottom: 6px; }
 
-/* Note blocks */
-.note-blocks { display: flex; flex-direction: column; gap: 3px; }
+/* Note blocks (plain text, no checkbox/priority) */
+.note-blocks { display: flex; flex-direction: column; gap: 2px; }
 .note-block {
     display: flex; align-items: flex-start; gap: 6px; padding: 1px 0;
     border-radius: 3px; transition: background 120ms;
 }
 .note-block:hover { background: rgba(255,255,255,0.015); }
-.note-block.checked .note-text { text-decoration: line-through; opacity: 0.4; }
-.card.no-checkboxes .note-block.checked .note-text { text-decoration: none; opacity: 1; }
-.card.no-checkboxes .note-checkbox { display: none; }
-.card.no-checkboxes .note-dots { display: none; }
-
-.note-checkbox {
-    appearance: none; -webkit-appearance: none;
-    width: 13px; height: 13px; flex-shrink: 0;
-    border: 1.5px solid var(--border); border-radius: 3px;
-    cursor: pointer; background: transparent;
-    position: relative; margin-top: 3px;
-    transition: border-color 120ms, background 120ms;
-}
-.note-checkbox:checked { background: var(--check); border-color: var(--check); }
-.note-checkbox:checked::after {
-    content: '✓'; position: absolute; top: -2px; left: 2px;
-    font-size: 10px; color: #fff; font-family: system-ui, sans-serif;
-}
-
 .note-text {
     flex: 1; font-family: Georgia, Charter, serif;
     font-size: 13px; line-height: 1.55; color: var(--text);
@@ -265,39 +242,80 @@ body {
 }
 .note-text:empty::before { content: 'note…'; color: var(--text-faint); font-style: italic; }
 
-.note-priority {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0px;
-    flex-shrink: 0; cursor: pointer; margin-top: 2px;
-    width: 16px; height: 12px;
+/* List items (checkbox + priority + global pool) */
+.list-items { display: flex; flex-direction: column; gap: 3px; }
+.list-item {
+    display: flex; align-items: flex-start; gap: 6px; padding: 2px 0;
+    border-radius: 3px; transition: background 120ms;
 }
-.note-priority .np-dot {
-    width: 5px; height: 5px; border-radius: 50%;
+.list-item:hover { background: rgba(255,255,255,0.015); }
+.list-item.checked .li-text { text-decoration: line-through; opacity: 0.4; }
+.list-item:first-child { margin-top: 4px; }
+
+.li-checkbox {
+    appearance: none; -webkit-appearance: none;
+    width: 13px; height: 13px; flex-shrink: 0;
+    border: 1.5px solid var(--border); border-radius: 3px;
+    cursor: pointer; background: transparent;
+    position: relative; margin-top: 3px;
+    transition: border-color 120ms, background 120ms;
+}
+.li-checkbox:checked { background: var(--check); border-color: var(--check); }
+.li-checkbox:checked::after {
+    content: '✓'; position: absolute; top: -2px; left: 2px;
+    font-size: 10px; color: #fff; font-family: system-ui, sans-serif;
+}
+
+.li-text {
+    flex: 1; font-family: Georgia, Charter, serif;
+    font-size: 13px; line-height: 1.55; color: var(--text);
+    outline: none; min-height: 20px;
+    word-break: break-word; white-space: pre-wrap;
+}
+.li-text:empty::before { content: 'list item…'; color: var(--text-faint); font-style: italic; }
+
+/* 3x3 priority dot grid */
+.dot-grid-3x3 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0px;
+    flex-shrink: 0; cursor: pointer; margin-top: 2px;
+    width: 18px; height: 18px;
+}
+.dot-grid-3x3 .dg-dot {
+    width: 4px; height: 4px; border-radius: 50%;
     background: var(--text-faint); transition: background 120ms;
     justify-self: center; align-self: center;
 }
-.note-priority .np-dot.on { background: var(--star); }
-.note-priority:hover .np-dot:not(.on) { background: var(--star-dim); }
+.dot-grid-3x3 .dg-dot.on { background: var(--star); }
+.dot-grid-3x3:hover .dg-dot:not(.on) { background: var(--star-dim); }
 
-.note-time {
-    font-family: system-ui, sans-serif; font-size: 9px;
-    color: var(--text-faint); flex-shrink: 0; margin-top: 3px; white-space: nowrap;
+.li-priority {
+    flex-shrink: 0; cursor: pointer; margin-top: 2px;
 }
+
+/* Card footer */
+.card-footer {
+    display: flex; align-items: center; gap: 10px; margin-top: 8px;
+    flex-wrap: wrap;
+}
+.add-note-btn, .add-item-btn {
+    background: none; border: none; color: var(--text-faint);
+    font-size: 11px; font-family: Georgia, serif; font-style: italic;
+    cursor: pointer; padding: 3px 0;
+    transition: color 150ms;
+}
+.add-note-btn:hover, .add-item-btn:hover { color: var(--text-dim); }
+.card-date {
+    font-family: system-ui, sans-serif; font-size: 9px;
+    color: var(--text-faint); margin-left: auto; white-space: nowrap;
+}
+
 .note-delete {
     background: none; border: none; color: var(--text-faint);
     cursor: pointer; font-size: 11px; padding: 0 2px; margin-top: 2px;
     opacity: 0; transition: opacity 120ms; font-family: system-ui, sans-serif;
 }
-.note-block:hover .note-delete { opacity: 0.5; }
+.note-block:hover .note-delete, .list-item:hover .note-delete { opacity: 0.5; }
 .note-delete:hover { opacity: 1 !important; color: #b86868; }
-
-.add-note {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: none; border: none; color: var(--text-faint);
-    font-size: 11px; font-family: Georgia, serif; font-style: italic;
-    cursor: pointer; padding: 3px 0; margin-top: 3px;
-    transition: color 150ms;
-}
-.add-note:hover { color: var(--text-dim); }
 
 /* —— Burger menu (per-card) —— */
 .burger-menu {
@@ -442,18 +460,9 @@ body {
     font-size: 10px; color: var(--text-faint); margin-top: 2px;
     font-family: Georgia, serif; font-style: italic;
 }
-.global-task .gt-dots {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0px;
-    cursor: pointer; flex-shrink: 0; margin-top: 2px;
-    width: 16px; height: 12px;
-}
-.global-task .gt-dots .np-dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: var(--text-faint); transition: background 120ms;
-    justify-self: center; align-self: center;
-}
-.global-task .gt-dots .np-dot.on { background: var(--star); }
-.global-task .gt-dots:hover .np-dot:not(.on) { background: var(--star-dim); }
+.global-task .gt-dots { cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.global-task .gt-dots .dot-grid-3x3 { width: 18px; height: 18px; }
+.global-task .gt-dots .dot-grid-3x3 .dg-dot { width: 4px; height: 4px; }
 .guide-text p {
     font-size: 11px; color: var(--text-dim); line-height: 1.55;
     margin-bottom: 8px;
@@ -467,6 +476,31 @@ body {
     font-size: 11px; color: var(--text-faint); font-style: italic;
     text-align: center; padding: 16px 0; font-family: Georgia, serif;
 }
+
+.global-col-toggle {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text-faint);
+    font-family: system-ui, sans-serif; cursor: pointer;
+    margin-top: 8px;
+}
+.global-col-toggle input { cursor: pointer; }
+
+/* Global column on the board */
+.global-column {
+    flex: 1 0 280px; min-width: 280px; max-width: 360px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px; background: rgba(255,255,255,0.01);
+    max-height: calc(100vh - 160px); overflow-y: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.global-column::-webkit-scrollbar { display: none; }
+.global-column h4 {
+    font-family: Georgia, serif; font-size: 12px; font-style: italic;
+    color: var(--text-dim); margin-bottom: 10px; font-weight: normal;
+}
+.global-column .task-sort { margin-bottom: 8px; }
+.global-column .global-task-list { max-height: none; }
+.global-column .empty-global { padding: 24px 0; }
 
 /* —— Export bar —— */
 .export-bar {
@@ -701,15 +735,20 @@ body {
     <button class="sidebar-close" id="sidebar-close">✕</button>
 
     <div class="sidebar-section">
-        <h3>Guide</h3>
-        <div class="guide-text">
-            <p><b>Columns</b> — Drag cards between Untouched, Active, Blocked, and Watching. Click <b>+</b> in any column header to add a card. Use <b>⋮</b> on columns to rename, add, or remove.</p>
-            <p><b>Stars</b> — Click the star bar on a card to add ★. Click a filled star to remove it. Toggle on/off via card <b>⋮</b> menu.</p>
-            <p><b>Checks</b> — Click the check bar for manual ✓ marks. Checking a note&rsquo;s checkbox also adds a ✓. Both pool into the same tally.</p>
-            <p><b>Priority dots</b> — The 2×2 dot grid on each note. Click to cycle 0→1→2→3→0 dots. Higher = more urgent. Sort the global task list by priority or most recent.</p>
-            <p><b>Notes</b> — Each card holds notes with a checkbox, priority grid, and timestamp. Click &ldquo;+ Add a note&rdquo; or edit text inline. Hover to reveal the delete button.</p>
-            <p><b>Data</b> — All patient data stays in your browser (IndexedDB). Nothing is ever sent to a server. Use <b>Export JSON</b> to back up or transfer between workstations.</p>
+        <h3>Global Tasks</h3>
+        <div class="task-sort">
+            <button class="sort-btn active" data-sort="priority">★ Priority</button>
+            <button class="sort-btn" data-sort="recent">Recent</button>
         </div>
+        <ul class="global-task-list" id="global-task-list"></ul>
+        <div class="empty-global" id="empty-global">No open tasks across patients</div>
+        <label class="global-col-toggle"><input type="checkbox" id="toggle-global-col"> Show as column</label>
+    </div>
+
+    <div class="sidebar-section">
+        <h3>Boards</h3>
+        <ul class="board-list" id="board-list"></ul>
+        <button class="add-board-btn" id="add-board-sidebar">+ New Board</button>
     </div>
 
     <div class="sidebar-section">
@@ -731,19 +770,14 @@ body {
     </div>
 
     <div class="sidebar-section">
-        <h3>Boards</h3>
-        <ul class="board-list" id="board-list"></ul>
-        <button class="add-board-btn" id="add-board-sidebar">+ New Board</button>
-    </div>
-
-    <div class="sidebar-section">
-        <h3>Global Tasks</h3>
-        <div class="task-sort">
-            <button class="sort-btn active" data-sort="priority">★ Priority</button>
-            <button class="sort-btn" data-sort="recent">Recent</button>
+        <h3>Guide</h3>
+        <div class="guide-text">
+            <p><b>Columns</b> — Drag cards between Untouched, Active, Blocked, and Watching. Click <b>+</b> in any column header to add a card. Use <b>⋮</b> on columns to rename, add, or remove.</p>
+            <p><b>Stars</b> — Toggle on via card <b>⋮</b> menu, then click the star bar to add ★. Click a filled star to remove it.</p>
+            <p><b>Notes vs List Items</b> — <b>Notes</b> are free text, private to the card. <b>List items</b> have a checkbox and priority grid; they appear in the global task list for cross-patient triage.</p>
+            <p><b>Priority dots</b> — 3×3 dot grid on each list item. Click to cycle 0→1→2→…→9→0 dots. Higher = more urgent. Sort the global task list by priority or date.</p>
+            <p><b>Data</b> — All patient data stays in your browser (IndexedDB). Nothing is ever sent to a server. Use <b>Export JSON</b> to back up or transfer between workstations.</p>
         </div>
-        <ul class="global-task-list" id="global-task-list"></ul>
-        <div class="empty-global" id="empty-global">No open tasks across patients</div>
     </div>
 </div>
 
@@ -769,32 +803,80 @@ function freshBoard(name) {
 
 function nid() { return 'n-' + Math.random().toString(36).slice(2, 10); }
 function cid() { return 'c-' + Math.random().toString(36).slice(2, 10); }
+function nowISO() { return new Date().toISOString(); }
 
 function demoData() {
     const b = freshBoard('Main Board');
     b.id = 'board-1';
 
     const c1 = cid(); b.columns[0].cardIds.push(c1);
-    b.cards[c1] = { id: c1, room: '304', name: 'Margaret Chen', stars: 3, manualChecks: 0, accent: 'ochre', starsOn: true, checklistOn: true,
-        notes: [
+    b.cards[c1] = { id: c1, room: '304', name: 'Margaret Chen', stars: 3, accent: 'ochre', starsOn: true,
+        notes: ['Speaks Mandarin — interpreter preferred'],
+        listItems: [
             { id: nid(), text: 'Confirm interpreter booked', checked: true, priority: 2, createdAt: '2026-06-02T09:15:00' },
-            { id: nid(), text: 'Family meeting Thursday — needs interpreter confirmed', checked: false, priority: 1, createdAt: '2026-06-01T14:30:00' }
-        ]};
+            { id: nid(), text: 'Family meeting Thursday', checked: false, priority: 1, createdAt: '2026-06-01T14:30:00' }
+        ],
+        createdAt: '2026-06-01T08:00:00' };
     const c2 = cid(); b.columns[1].cardIds.push(c2);
-    b.cards[c2] = { id: c2, room: '112', name: 'James Okonkwo', stars: 5, manualChecks: 1, accent: 'navy', starsOn: true, checklistOn: true,
-        notes: [
-            { id: nid(), text: 'CT results — check portal Thursday', checked: true, priority: 3, createdAt: '2026-06-02T08:00:00' },
+    b.cards[c2] = { id: c2, room: '112', name: 'James Okonkwo', stars: 5, accent: 'navy', starsOn: true,
+        notes: [],
+        listItems: [
+            { id: nid(), text: 'CT results — check portal Thursday', checked: true, priority: 5, createdAt: '2026-06-02T08:00:00' },
             { id: nid(), text: 'Pain improving — possible discharge this week', checked: false, priority: 0, createdAt: '2026-06-01T16:00:00' }
-        ]};
+        ],
+        createdAt: '2026-06-01T10:00:00' };
     const c3 = cid(); b.columns[2].cardIds.push(c3);
-    b.cards[c3] = { id: c3, room: '208', name: 'Sofia Reyes', stars: 0, manualChecks: 0, accent: '', starsOn: true, checklistOn: true,
-        notes: [
+    b.cards[c3] = { id: c3, room: '208', name: 'Sofia Reyes', stars: 0, accent: '', starsOn: false,
+        notes: [],
+        listItems: [
             { id: nid(), text: 'New admit — full psychosocial assessment', checked: false, priority: 2, createdAt: '2026-06-02T10:00:00' }
-        ]};
+        ],
+        createdAt: '2026-06-02T10:00:00' };
     return b;
 }
 
-let appState = { boards: {}, activeBoardId: null, theme: 'classic-dark', customTheme: null, sortBy: 'priority', mobileColIdx: 0 };
+function migrateData(state) {
+    // v0.x → v1.0: split old notes[] into notes (strings) + listItems (structured)
+    Object.values(state.boards).forEach(board => {
+        if (!board.cards) return;
+        Object.values(board.cards).forEach(card => {
+            if (card._migrated) return;
+            card._migrated = true;
+            // Ensure listItems and notes arrays exist
+            if (!card.listItems) card.listItems = [];
+            if (!card.notes) card.notes = [];
+            // Migrate old structured notes → listItems
+            if (Array.isArray(card.notes) && card.notes.length > 0) {
+                // Check if notes are old structured format (have 'checked' or 'priority' properties)
+                const first = card.notes[0];
+                if (typeof first === 'object' && first !== null && ('checked' in first || 'priority' in first)) {
+                    const oldNotes = card.notes;
+                    const newNotes = [];
+                    oldNotes.forEach(n => {
+                        if (typeof n === 'object' && n !== null) {
+                            if (n.checked !== undefined || n.priority !== undefined) {
+                                card.listItems.push({ id: n.id || nid(), text: n.text || '', checked: !!n.checked, priority: n.priority || 0, createdAt: n.createdAt || nowISO() });
+                            } else {
+                                newNotes.push(typeof n.text === 'string' ? n.text : String(n));
+                            }
+                        } else if (typeof n === 'string') {
+                            newNotes.push(n);
+                        }
+                    });
+                    card.notes = newNotes;
+                }
+            }
+            // Remove legacy fields
+            delete card.manualChecks;
+            delete card.checklistOn;
+            if (!card.createdAt) card.createdAt = nowISO();
+            if (card.starsOn === undefined) card.starsOn = false;
+        });
+    });
+    return state;
+}
+
+let appState = { boards: {}, activeBoardId: null, theme: 'classic-dark', customTheme: null, sortBy: 'priority', mobileColIdx: 0, showGlobalColumn: false };
 
 // ============================================================================
 // INDEXEDDB
@@ -813,7 +895,7 @@ async function loadState() {
         const tx = db.transaction('state', 'readonly');
         const req = tx.objectStore('state').get('app');
         req.onsuccess = () => {
-            if (req.result) { appState = req.result; }
+            if (req.result) { appState = req.result; migrateData(appState); }
             else { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; }
             resolve();
         };
@@ -842,11 +924,15 @@ function sortNotes(notes) {
     if (appState.sortBy === 'recent') return [...notes].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
     return [...notes].sort((a,b) => b.priority - a.priority);
 }
+function formatShortDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
 function formatDate(iso) {
     if (!iso) return ''; const d = new Date(iso); const now = new Date();
-    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    return days[d.getDay()] + ' ' + d.toLocaleDateString([],{month:'short',day:'numeric'});
+    return d.toLocaleDateString([],{month:'short',day:'numeric'});
 }
 function autoSize(input, minW) {
     function rs() {
@@ -974,13 +1060,18 @@ function renderBoard() {
     });
     container.appendChild(addColBtn);
 
+    // Global task column
+    if (appState.showGlobalColumn) {
+        const gCol = renderGlobalColumn();
+        if (gCol) container.appendChild(gCol);
+    }
+
     updateBoardNav();
 }
 
 function renderCard(card) {
     const el = document.createElement('div');
     el.className = 'card' + (card.accent ? ' accent-' + card.accent : '');
-    if (!card.checklistOn) el.classList.add('no-checkboxes');
     el.dataset.cardId = card.id; el.draggable = true;
 
     el.innerHTML = `
@@ -998,16 +1089,19 @@ function renderCard(card) {
                 </div>
                 <div class="burger-sep"></div>
                 <button class="burger-toggle${card.starsOn?' on':''}" data-action="toggle-stars">Stars <span class="toggle-indicator">${card.starsOn?'on':'off'}</span></button>
-                <button class="burger-toggle${card.checklistOn?' on':''}" data-action="toggle-checks">Checklist <span class="toggle-indicator">${card.checklistOn?'on':'off'}</span></button>
                 <div class="burger-sep"></div>
                 <button class="burger-action danger" data-action="delete-card">Delete</button>
             </div>
         </div>
         <div class="stars-bar" id="stars-${card.id}"></div>
-        <div class="checks-bar" id="checks-${card.id}"></div>
         <div class="card-rule"></div>
         <div class="note-blocks" id="notes-${card.id}"></div>
-        <button class="add-note" data-card="${card.id}">+ Add a note</button>`;
+        <div class="list-items" id="listitems-${card.id}"></div>
+        <div class="card-footer">
+            <button class="add-note-btn" data-card="${card.id}">+ Add note</button>
+            <button class="add-item-btn" data-card="${card.id}">+ Add list item</button>
+            <span class="card-date">${formatShortDate(card.createdAt)}</span>
+        </div>`;
 
     // Wire inputs
     const roomInp = el.querySelector('.card-room'), nameInp = el.querySelector('.card-name');
@@ -1027,10 +1121,6 @@ function renderCard(card) {
     el.querySelector('[data-action="toggle-stars"]').addEventListener('click', e => { e.stopPropagation();
         card.starsOn = !card.starsOn; if (!card.starsOn) card.stars = 0; renderCardStars(card);
         const b = el.querySelector('[data-action="toggle-stars"]'); b.classList.toggle('on',card.starsOn); b.querySelector('.toggle-indicator').textContent=card.starsOn?'on':'off'; autoSave(); });
-    el.querySelector('[data-action="toggle-checks"]').addEventListener('click', e => { e.stopPropagation();
-        card.checklistOn = !card.checklistOn; if (!card.checklistOn) { card.manualChecks = 0; el.classList.add('no-checkboxes'); }
-        else el.classList.remove('no-checkboxes');
-        renderCardChecks(card); const b = el.querySelector('[data-action="toggle-checks"]'); b.classList.toggle('on',card.checklistOn); b.querySelector('.toggle-indicator').textContent=card.checklistOn?'on':'off'; autoSave(); });
     el.querySelector('[data-action="delete-card"]').addEventListener('click', e => { e.stopPropagation();
         el.style.transition='opacity 180ms,transform 180ms'; el.style.opacity='0'; el.style.transform='scale(0.95)';
         setTimeout(() => { el.remove(); const bd=activeBoard(); bd.columns.forEach(c=>{c.cardIds=c.cardIds.filter(id=>id!==card.id)}); delete bd.cards[card.id]; updateColCounts(); renderSidebar(); autoSave(); }, 180); });
@@ -1039,21 +1129,35 @@ function renderCard(card) {
     el.addEventListener('dragstart', e => { el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
     el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
-    renderCardStars(card); renderCardChecks(card); renderCardNotes(card);
+    renderCardStars(card); renderCardNotes(card); renderCardListItems(card);
 
-    el.querySelector('.add-note').addEventListener('click', () => {
-        card.notes.push({ id: nid(), text: '', checked: false, priority: 0, createdAt: new Date().toISOString() });
-        renderCardNotes(card); renderCardChecks(card); renderSidebar(); autoSave();
+    el.querySelector('.add-note-btn').addEventListener('click', () => {
+        card.notes.push('');
+        renderCardNotes(card); autoSave();
         setTimeout(() => { const ln = el.querySelector('.note-block:last-child .note-text'); if (ln) ln.focus(); }, 50);
+    });
+    el.querySelector('.add-item-btn').addEventListener('click', () => {
+        card.listItems.push({ id: nid(), text: '', checked: false, priority: 0, createdAt: nowISO() });
+        renderCardListItems(card); renderSidebar(); autoSave();
+        setTimeout(() => { const ln = el.querySelector('.list-item:last-child .li-text'); if (ln) ln.focus(); }, 50);
     });
 
     return el;
 }
 
+function dots3x3(pri) {
+    let html = '<div class="dot-grid-3x3">';
+    for (let i = 1; i <= 9; i++) {
+        html += `<span class="dg-dot${pri >= i ? ' on' : ''}"></span>`;
+    }
+    html += '</div>';
+    return html;
+}
+
 function renderCardStars(card) {
     const bar = document.getElementById('stars-'+card.id); if (!bar) return;
-    bar.innerHTML = ''; if (!card.starsOn) { bar.style.minHeight = '0'; return; }
-    bar.style.minHeight = '18px';
+    bar.innerHTML = ''; if (!card.starsOn) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex'; bar.style.minHeight = '18px';
     if (card.stars === 0) {
         const hint = document.createElement('span');
         hint.className = 'star-icon hint'; hint.textContent = '☆';
@@ -1068,54 +1172,58 @@ function renderCardStars(card) {
     };
 }
 
-function renderCardChecks(card) {
-    const bar = document.getElementById('checks-'+card.id); if (!bar) return;
-    bar.innerHTML = ''; if (!card.checklistOn) { bar.style.minHeight = '0'; return; }
-    bar.style.minHeight = '17px';
-    const auto = card.notes.filter(n=>n.checked).length;
-    const total = (card.manualChecks||0) + auto;
-    if (total === 0) {
-        const hint = document.createElement('span');
-        hint.className = 'check-icon hint'; hint.textContent = '○';
-        bar.appendChild(hint);
-    } else {
-        for (let i = 0; i < total; i++) { const c = document.createElement('span'); c.className='check-icon filled'; c.textContent='✓'; bar.appendChild(c); }
-    }
-    bar.onclick = e => {
-        const check = e.target.closest('.check-icon.filled');
-        if (check) { if ((card.manualChecks||0) > 0) card.manualChecks = Math.max((card.manualChecks||0)-1, 0); }
-        else card.manualChecks = Math.min((card.manualChecks||0)+1, 20);
-        renderCardChecks(card); autoSave();
-    };
-}
-
 function renderCardNotes(card) {
     const ct = document.getElementById('notes-'+card.id); if (!ct) return;
     ct.innerHTML = '';
-    card.notes.forEach(note => {
+    (card.notes || []).forEach((note, idx) => {
+        const text = typeof note === 'string' ? note : (note.text || '');
         const block = document.createElement('div');
-        block.className = 'note-block' + (note.checked?' checked':'');
-        const pri = note.priority || 0;
+        block.className = 'note-block';
         block.innerHTML = `
-            <input type="checkbox" class="note-checkbox" ${note.checked?'checked':''}>
-            <div class="note-text" contenteditable="true">${esc(note.text)}</div>
-            <div class="note-priority" data-note="${note.id}">
-                <span class="np-dot${pri>=1?' on':''}"></span>
-                <span class="np-dot${pri>=2?' on':''}"></span>
-                <span class="np-dot${pri>=3?' on':''}"></span>
-                <span class="np-dot" style="visibility:hidden"></span>
-            </div>
-            <span class="note-time">${formatDate(note.createdAt)}</span>
+            <div class="note-text" contenteditable="true">${esc(text)}</div>
             <button class="note-delete">×</button>`;
-        block.querySelector('.note-checkbox').addEventListener('change', e => { note.checked=e.target.checked; block.classList.toggle('checked',note.checked); renderCardChecks(card); renderSidebar(); autoSave(); });
-        block.querySelector('.note-priority').addEventListener('click', () => {
-            note.priority = ((note.priority || 0) + 1) % 4;
-            const dots = block.querySelectorAll('.np-dot');
-            dots.forEach((d, i) => d.classList.toggle('on', i < note.priority));
+        block.querySelector('.note-text').addEventListener('input', e => { card.notes[idx] = e.target.innerText; autoSave(); });
+        block.querySelector('.note-delete').addEventListener('click', () => {
+            card.notes.splice(idx, 1);
+            block.style.transition='opacity 120ms'; block.style.opacity='0';
+            setTimeout(() => { block.remove(); }, 120);
+            autoSave();
+        });
+        ct.appendChild(block);
+    });
+}
+
+function renderCardListItems(card) {
+    const ct = document.getElementById('listitems-'+card.id); if (!ct) return;
+    ct.innerHTML = '';
+    (card.listItems || []).forEach(item => {
+        const block = document.createElement('div');
+        block.className = 'list-item' + (item.checked ? ' checked' : '');
+        const pri = item.priority || 0;
+        block.innerHTML = `
+            <input type="checkbox" class="li-checkbox" ${item.checked ? 'checked' : ''}>
+            <div class="li-text" contenteditable="true">${esc(item.text)}</div>
+            <div class="li-priority" data-item="${item.id}">${dots3x3(pri)}</div>
+            <button class="note-delete">×</button>`;
+        block.querySelector('.li-checkbox').addEventListener('change', e => {
+            item.checked = e.target.checked;
+            block.classList.toggle('checked', item.checked);
             renderSidebar(); autoSave();
         });
-        block.querySelector('.note-text').addEventListener('input', e => { note.text=e.target.innerText; autoSave(); });
-        block.querySelector('.note-delete').addEventListener('click', () => { const wc=note.checked; card.notes=card.notes.filter(n=>n.id!==note.id); block.style.transition='opacity 120ms'; block.style.opacity='0'; setTimeout(()=>{block.remove();if(wc)renderCardChecks(card);renderSidebar();},120); autoSave(); });
+        block.querySelector('.li-priority').addEventListener('click', () => {
+            item.priority = ((item.priority || 0) + 1) % 10;
+            const grids = block.querySelector('.dot-grid-3x3');
+            if (grids) grids.outerHTML = dots3x3(item.priority);
+            renderSidebar(); autoSave();
+        });
+        block.querySelector('.li-text').addEventListener('input', e => { item.text = e.target.innerText; autoSave(); });
+        block.querySelector('.note-delete').addEventListener('click', () => {
+            const wasChecked = item.checked;
+            card.listItems = card.listItems.filter(li => li.id !== item.id);
+            block.style.transition = 'opacity 120ms'; block.style.opacity = '0';
+            setTimeout(() => { block.remove(); if (wasChecked) renderSidebar(); }, 120);
+            autoSave();
+        });
         ct.appendChild(block);
     });
 }
@@ -1244,7 +1352,7 @@ document.addEventListener('click', e => {
 
 function addCard(colId) {
     const board = activeBoard();
-    const card = { id: cid(), room: '', name: '', stars: 0, manualChecks: 0, accent: '', starsOn: true, checklistOn: true, notes: [] };
+    const card = { id: cid(), room: '', name: '', stars: 0, accent: '', starsOn: false, notes: [], listItems: [], createdAt: nowISO() };
     board.cards[card.id] = card;
     const col = colById(colId); if (col) col.cardIds.push(card.id);
     const zone = document.getElementById('zone-'+colId);
@@ -1255,7 +1363,11 @@ function addCard(colId) {
 // ============================================================================
 // SIDEBAR
 // ============================================================================
-function renderSidebar() { renderBoardList(); renderGlobalTasks(); renderThemeChips(); }
+function renderSidebar() {
+    renderBoardList(); renderGlobalTasks(); renderThemeChips();
+    const toggle = document.getElementById('toggle-global-col');
+    if (toggle) toggle.checked = appState.showGlobalColumn;
+}
 function renderBoardList() {
     const list = document.getElementById('board-list');
     const boards = Object.values(appState.boards);
@@ -1263,28 +1375,56 @@ function renderBoardList() {
     list.querySelectorAll('.board-list-item').forEach(item => { item.addEventListener('click', e => { if(e.target.closest('.board-delete'))return; appState.activeBoardId=item.dataset.board; renderAll(); autoSave(); }); });
     list.querySelectorAll('.board-delete').forEach(btn => { btn.addEventListener('click', e => { e.stopPropagation(); const bid=btn.dataset.board; if(Object.keys(appState.boards).length<=1)return; delete appState.boards[bid]; if(appState.activeBoardId===bid)appState.activeBoardId=Object.keys(appState.boards)[0]; renderAll(); autoSave(); }); });
 }
-function renderGlobalTasks() {
-    const list = document.getElementById('global-task-list'), empty = document.getElementById('empty-global');
-    const board = activeBoard(); const allNotes = [];
-    Object.values(board.cards).forEach(card => { card.notes.forEach(note => { if(!note.checked) allNotes.push({...note, cardId:card.id, cardName:card.name, cardRoom:card.room}); }); });
-    if (allNotes.length === 0) { list.innerHTML=''; empty.style.display='block'; return; }
-    empty.style.display='none';
-    const sorted = sortNotes(allNotes);
+function renderGlobalTasks(containerId) {
+    const isColumn = (containerId === 'global-col-list');
+    const listId = containerId || 'global-task-list';
+    const list = document.getElementById(listId);
+    const empty = isColumn ? document.getElementById('empty-global-col') : document.getElementById('empty-global');
+    if (!list) return;
+    const board = activeBoard();
+    const allItems = [];
+    Object.values(board.cards).forEach(card => {
+        (card.listItems || []).forEach(item => {
+            if (!item.checked) allItems.push({ ...item, cardId: card.id, cardName: card.name, cardRoom: card.room });
+        });
+    });
+    if (allItems.length === 0) {
+        list.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+    }
+    if (empty) empty.style.display = 'none';
+    const sorted = sortNotes(allItems);
     list.innerHTML = sorted.map(item => `
         <li class="global-task">
-            <input type="checkbox" class="gt-cb" data-card="${item.cardId}" data-note="${item.id}">
-            <div class="gt-info"><div class="gt-text">${esc(item.text||'(empty)')}</div><div class="gt-meta">${esc(item.cardName)} · ${esc(item.cardRoom)} — ${formatDate(item.createdAt)}</div></div>
-            <div class="gt-dots np" data-card="${item.cardId}" data-note="${item.id}">
-                <span class="np-dot${item.priority>=1?' on':''}"></span><span class="np-dot${item.priority>=2?' on':''}"></span>
-                <span class="np-dot${item.priority>=3?' on':''}"></span><span class="np-dot" style="visibility:hidden"></span>
-            </div>
+            <input type="checkbox" class="gt-cb" data-card="${item.cardId}" data-item="${item.id}">
+            <div class="gt-info"><div class="gt-text">${esc(item.text || '(empty)')}</div><div class="gt-meta">${esc(item.cardName)} · ${esc(item.cardRoom)} — ${formatDate(item.createdAt)}</div></div>
+            <div class="gt-dots" data-card="${item.cardId}" data-item="${item.id}">${dots3x3(item.priority || 0)}</div>
         </li>`).join('');
-    list.querySelectorAll('.gt-cb').forEach(cb => { cb.addEventListener('click', e => { e.stopPropagation();
-        const card = board.cards[cb.dataset.card]; if(!card)return; const note=card.notes.find(n=>n.id===cb.dataset.note); if(!note)return;
-        note.checked=!note.checked; cb.checked=note.checked; refreshCardDOM(cb.dataset.card); renderGlobalTasks(); autoSave(); }); });
-    list.querySelectorAll('.gt-dots').forEach(dots => { dots.addEventListener('click', e => { e.stopPropagation();
-        const card=board.cards[dots.dataset.card]; if(!card)return; const note=card.notes.find(n=>n.id===dots.dataset.note); if(!note)return;
-        note.priority = ((note.priority || 0) + 1) % 4; refreshCardDOM(dots.dataset.card); renderGlobalTasks(); autoSave(); }); });
+    list.querySelectorAll('.gt-cb').forEach(cb => {
+        cb.addEventListener('click', e => {
+            e.stopPropagation();
+            const card = board.cards[cb.dataset.card]; if (!card) return;
+            const item = (card.listItems || []).find(li => li.id === cb.dataset.item); if (!item) return;
+            item.checked = !item.checked; cb.checked = item.checked;
+            refreshCardDOM(cb.dataset.card); renderGlobalTasks(containerId);
+            if (isColumn) renderGlobalTasks(); // keep sidebar in sync
+            autoSave();
+        });
+    });
+    list.querySelectorAll('.gt-dots').forEach(dots => {
+        dots.addEventListener('click', e => {
+            e.stopPropagation();
+            const card = board.cards[dots.dataset.card]; if (!card) return;
+            const item = (card.listItems || []).find(li => li.id === dots.dataset.item); if (!item) return;
+            item.priority = ((item.priority || 0) + 1) % 10;
+            const grid = dots.querySelector('.dot-grid-3x3');
+            if (grid) grid.outerHTML = dots3x3(item.priority);
+            refreshCardDOM(dots.dataset.card);
+            if (isColumn) renderGlobalTasks(); // keep sidebar in sync
+            autoSave();
+        });
+    });
 }
 function renderThemeChips() {
     document.querySelectorAll('.theme-chip').forEach(c => {
@@ -1295,7 +1435,7 @@ function renderThemeChips() {
         }
     });
 }
-function refreshCardDOM(cardId) { const card=activeBoard().cards[cardId]; if(card){renderCardStars(card);renderCardChecks(card);renderCardNotes(card);} }
+function refreshCardDOM(cardId) { const card=activeBoard().cards[cardId]; if(card){renderCardStars(card);renderCardNotes(card);renderCardListItems(card);} }
 
 // ============================================================================
 // SIDEBAR TOGGLE / THEME / EXPORT
@@ -1305,7 +1445,56 @@ document.getElementById('sidebar-close').addEventListener('click', closeSidebar)
 document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
 
-document.querySelectorAll('.sort-btn').forEach(btn => { btn.addEventListener('click',()=>{document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');appState.sortBy=btn.dataset.sort;renderGlobalTasks();autoSave();}); });
+function renderGlobalColumn() {
+    const board = activeBoard();
+    const gCol = document.createElement('div');
+    gCol.className = 'global-column';
+    gCol.id = 'global-column';
+    gCol.innerHTML = `
+        <h4>Global Tasks</h4>
+        <div class="task-sort">
+            <button class="sort-btn${appState.sortBy==='priority'?' active':''}" data-sort="priority">★ Priority</button>
+            <button class="sort-btn${appState.sortBy==='recent'?' active':''}" data-sort="recent">Recent</button>
+        </div>
+        <ul class="global-task-list" id="global-col-list"></ul>
+        <div class="empty-global" id="empty-global-col">No open tasks across patients</div>`;
+    // Wire sort buttons inside the column
+    gCol.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            gCol.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            appState.sortBy = btn.dataset.sort;
+            // Update sidebar sort too
+            document.querySelectorAll('#sidebar .sort-btn').forEach(b => { b.classList.toggle('active', b.dataset.sort === appState.sortBy); });
+            renderGlobalTasks('global-col-list');
+            renderGlobalTasks(); // sidebar
+            autoSave();
+        });
+    });
+    renderGlobalTasks('global-col-list');
+    return gCol;
+}
+
+// Toggle global column
+(function wireGlobalColToggle() {
+    const toggle = document.getElementById('toggle-global-col');
+    if (toggle) {
+        toggle.addEventListener('change', () => {
+            appState.showGlobalColumn = toggle.checked;
+            renderAll(); autoSave();
+        });
+    }
+})();
+
+document.querySelectorAll('.sort-btn').forEach(btn => { btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    appState.sortBy=btn.dataset.sort;
+    renderGlobalTasks();
+    // Also update global column if visible
+    if (appState.showGlobalColumn) renderGlobalTasks('global-col-list');
+    autoSave();
+}); });
 document.getElementById('add-board-sidebar').addEventListener('click',()=>{const n=prompt('Board name:');if(!n||!n.trim())return;const b=freshBoard(n.trim());appState.boards[b.id]=b;appState.activeBoardId=b.id;renderAll();autoSave();});
 
 document.querySelectorAll('.theme-chip').forEach(chip => { chip.addEventListener('click',()=>{
