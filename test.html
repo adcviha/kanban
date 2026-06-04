@@ -131,6 +131,7 @@ body {
     font-family: system-ui, sans-serif;
 }
 .col-sort-stars:hover { border-color: var(--star); color: var(--star); background: rgba(255,255,255,0.02); }
+.col-sort-stars.active { border-color: var(--star); color: var(--star); background: rgba(255,255,255,0.03); }
 .col-options {
     width: 22px; height: 22px; border-radius: 4px;
     background: none; border: none; color: var(--text-faint);
@@ -1103,14 +1104,27 @@ function renderBoard() {
             hdr.style.background = `color-mix(in srgb, var(--accent-${col.headerColor}) 12%, var(--card-bg) 88%)`;
         }
 
-        colEl.querySelector('.col-sort-stars').addEventListener('click', e => {
+        const sortBtn = colEl.querySelector('.col-sort-stars');
+        if (col._sorted) sortBtn.classList.add('active');
+        sortBtn.addEventListener('click', e => {
             e.stopPropagation();
-            const cards = col.cardIds.map(id => board.cards[id]).filter(Boolean);
-            cards.sort((a, b) => {
-                if (b.stars !== a.stars) return b.stars - a.stars;
-                return (b.createdAt || '').localeCompare(a.createdAt || '');
-            });
-            col.cardIds = cards.map(c => c.id);
+            if (col._sorted) {
+                // Restore previous order
+                col.cardIds = col._preSortOrder || col.cardIds;
+                col._sorted = false; col._preSortOrder = null;
+                sortBtn.classList.remove('active');
+            } else {
+                // Save current order, then sort
+                col._preSortOrder = [...col.cardIds];
+                col._sorted = true;
+                sortBtn.classList.add('active');
+                const cards = col.cardIds.map(id => board.cards[id]).filter(Boolean);
+                cards.sort((a, b) => {
+                    if (b.stars !== a.stars) return b.stars - a.stars;
+                    return (b.createdAt || '').localeCompare(a.createdAt || '');
+                });
+                col.cardIds = cards.map(c => c.id);
+            }
             renderAll(); autoSave();
         });
         colEl.querySelector('.col-add-card').addEventListener('click', () => addCard(col.id));
@@ -1192,9 +1206,9 @@ function renderCard(card) {
 
     el.innerHTML = `
         <div class="card-top-row">
-            <button class="card-collapse">▼</button>
             <input class="card-room" value="${esc(card.room)}" size="3" placeholder="Rm">
             <input class="card-name" value="${esc(card.name)}" size="12" placeholder="Name">
+            <button class="card-collapse">▼</button>
             <button class="card-burger">⋮</button>
             <div class="burger-menu" id="menu-${card.id}">
                 <div class="burger-section"><div class="burger-label">Priority</div>
@@ -1283,11 +1297,13 @@ function renderCard(card) {
         if (el.querySelector('.burger-menu.open') || _draggingItem) { e.preventDefault(); return; }
         el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
         const clone = el.cloneNode(true);
-        clone.style.opacity = '1'; clone.style.position = 'absolute'; clone.style.top = '-9999px'; clone.style.left = '-9999px';
-        clone.style.width = el.offsetWidth + 'px'; clone.classList.remove('dragging');
+        clone.style.position = 'fixed'; clone.style.top = '0'; clone.style.left = '0';
+        clone.style.width = el.offsetWidth + 'px'; clone.style.visibility = 'hidden';
+        clone.classList.remove('dragging');
         document.body.appendChild(clone);
-        e.dataTransfer.setDragImage(clone, e.offsetX, e.offsetY);
-        requestAnimationFrame(() => clone.remove());
+        const rect = el.getBoundingClientRect();
+        e.dataTransfer.setDragImage(clone, e.clientX - rect.left, e.clientY - rect.top);
+        setTimeout(() => clone.remove(), 0);
     });
     el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
@@ -1347,10 +1363,10 @@ function renderCardItems(card, cardEl) {
 
         if (item.type === 'listItem') {
             block.innerHTML = `
-                ${itemGrip()}
                 <input type="checkbox" class="li-checkbox" ${item.checked ? 'checked' : ''}>
                 <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
                 <div class="li-priority" data-item="${item.id}">${dots3x3(item.priority || 0)}</div>
+                ${itemGrip()}
                 <button class="item-delete">×</button>`;
             block.querySelector('.li-checkbox').addEventListener('change', e => {
                 item.checked = e.target.checked;
@@ -1365,8 +1381,8 @@ function renderCardItems(card, cardEl) {
             });
         } else {
             block.innerHTML = `
-                ${itemGrip()}
                 <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
+                ${itemGrip()}
                 <button class="item-delete">×</button>`;
         }
 
