@@ -149,6 +149,7 @@ body {
 }
 .col-menu.open { display: block; }
 .col-drop-zone { flex: 1; min-height: 60px; }
+.col-drop-zone:empty { min-height: 180px; }
 
 /* Add column button — sits at end of board */
 .add-col-btn {
@@ -1292,19 +1293,16 @@ function renderCard(card) {
         el.style.transition='opacity 180ms,transform 180ms'; el.style.opacity='0'; el.style.transform='scale(0.95)';
         setTimeout(() => { el.remove(); const bd=activeBoard(); bd.columns.forEach(c=>{c.cardIds=c.cardIds.filter(id=>id!==card.id)}); delete bd.cards[card.id]; updateColCounts(); renderSidebar(); autoSave(); }, 180); });
 
-    // Drag — blocked when menu is open; full-opacity custom drag image
+    // Drag — blocked when menu is open; invisible drag ghost (cleaner)
     el.addEventListener('dragstart', e => {
         if (el.querySelector('.burger-menu.open') || _draggingItem) { e.preventDefault(); return; }
         el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
-        const clone = el.cloneNode(true);
-        clone.style.position = 'fixed'; clone.style.top = '0'; clone.style.left = '0';
-        clone.style.width = el.offsetWidth + 'px'; clone.style.opacity = '1';
-        clone.style.zIndex = '2147483647'; clone.classList.remove('dragging');
-        document.body.appendChild(clone);
-        clone.offsetHeight; // force layout paint so setDragImage captures it
-        const rect = el.getBoundingClientRect();
-        e.dataTransfer.setDragImage(clone, e.clientX - rect.left, e.clientY - rect.top);
-        setTimeout(() => clone.remove(), 60);
+        const ghost = document.createElement('div');
+        ghost.style.width = '1px'; ghost.style.height = '1px';
+        ghost.style.position = 'fixed'; ghost.style.top = '-1px'; ghost.style.left = '-1px';
+        document.body.appendChild(ghost);
+        e.dataTransfer.setDragImage(ghost, 0, 0);
+        setTimeout(() => ghost.remove(), 0);
     });
     el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
