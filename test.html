@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="classic-dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Board</title>
+<style>
+/* ========================================================================
+   BASE & VARIABLES — individual themes defined at end of stylesheet
+   ======================================================================== */
+:root {
+    --bg: #1b1b18; --card-bg: #21211d;
+    --text: #d2cec4; --text-dim: #9b968a; --text-faint: #5e5b52;
+    --border: #302f29; --rule: #5e5b52;
+    --star: #c49b2a; --star-dim: #4a4328;
+    --check: #6a8d6d; --check-dim: #303d2e;
+    --accent-burgundy: #8b4a4a; --accent-navy: #4a5f7a;
+    --accent-forest: #4a7050; --accent-ochre: #a0843a;
+    --accent-calm: #4a7050; --accent-alert: #8b4a4a;
+    --col-ready: #1e2330; --col-active: #26201c;
+    --col-blocked: #281e18; --col-done: #19241c;
+    --col-ready-border: #2a3060; --col-active-border: #4a2550;
+    --col-blocked-border: #783000; --col-done-border: #1a4a1a;
+    --radius: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--bg); color: var(--text);
+    font-family: Georgia, Charter, 'Times New Roman', serif;
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* —— Header —— */
+.app-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px 10px;
+    position: sticky; top: 0; z-index: 20; background: var(--bg);
+    flex-wrap: wrap;
+}
+.app-title {
+    font-family: Georgia, serif; font-size: 17px; font-style: italic;
+    color: var(--text-dim); flex: 1; min-width: 60px;
+    background: none; border: none; outline: none;
+}
+.global-burger {
+    width: 30px; height: 30px; border-radius: 5px;
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 18px; font-family: system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 120ms;
+}
+.global-burger:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+
+/* —— Board Tabs —— */
+.board-tabs {
+    display: flex; gap: 2px; padding: 0 20px 2px;
+    overflow-x: auto; align-items: flex-end;
+}
+.board-tab {
+    font-family: Georgia, serif; font-size: 12px; font-style: italic;
+    color: var(--text-faint); background: none; border: none;
+    padding: 5px 12px; cursor: pointer; border-radius: 4px 4px 0 0;
+    white-space: nowrap; transition: color 120ms, background 120ms;
+}
+.board-tab:hover { color: var(--text-dim); }
+.board-tab.active { color: var(--text); background: var(--card-bg); }
+.board-tab-add {
+    font-size: 14px; padding: 5px 8px; color: var(--text-faint);
+    background: none; border: none; cursor: pointer; border-radius: 4px 4px 0 0;
+    transition: color 120ms;
+}
+.board-tab-add:hover { color: var(--text-dim); }
+
+/* —— Board —— */
+.board-outer { position: relative; padding: 0 20px; }
+.kanban-board {
+    display: flex; gap: 10px; padding: 10px 0 12px;
+    overflow-x: auto; min-height: 50vh; align-items: flex-start;
+    scroll-behavior: smooth;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.kanban-board::-webkit-scrollbar { display: none; }
+.kanban-board.cols-1 .column { flex: 1 0 100%; min-width: 0; max-width: none; }
+.kanban-board.cols-2 .column { flex: 1 0 calc(50% - 5px); min-width: 0; max-width: none; }
+
+/* —— Column —— */
+.column {
+    flex: 1 0 260px; min-width: 260px; max-width: 340px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.col-header-wrap { position: relative; }
+.col-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 12px; border-radius: var(--radius);
+    border: 2px solid var(--border);
+    background: rgba(255,255,255,0.015);
+}
+.column:nth-child(1) .col-header { border-color: var(--col-ready-border); background: var(--col-ready); }
+.column:nth-child(2) .col-header { border-color: var(--col-active-border); background: var(--col-active); }
+.column:nth-child(3) .col-header { border-color: var(--col-blocked-border); background: var(--col-blocked); }
+.column:nth-child(4) .col-header { border-color: var(--col-done-border); background: var(--col-done); }
+
+.col-name {
+    font-family: Georgia, serif; font-size: 13px; font-style: italic;
+    color: var(--text-dim); background: none; border: none;
+    outline: none; flex: 1; min-width: 0;
+}
+.col-count {
+    font-family: system-ui, sans-serif; font-size: 10px;
+    color: var(--text-faint); min-width: 14px; text-align: center;
+}
+.col-add-card {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: none; border: 1px solid var(--text-faint);
+    color: var(--text-faint); cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color 120ms, color 120ms;
+    font-family: system-ui, sans-serif;
+}
+.col-add-card:hover { border-color: var(--text-dim); color: var(--text-dim); }
+.col-sort-stars {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: none; border: 1px solid transparent;
+    color: var(--text-faint); cursor: pointer; font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color 120ms, color 120ms, background 120ms;
+    font-family: system-ui, sans-serif;
+}
+.col-sort-stars:hover { border-color: var(--star); color: var(--star); background: rgba(255,255,255,0.02); }
+.col-options {
+    width: 22px; height: 22px; border-radius: 4px;
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 14px; display: flex;
+    align-items: center; justify-content: center;
+    font-family: system-ui, sans-serif; transition: color 120ms; padding: 0;
+}
+.col-options:hover { color: var(--text-dim); }
+.col-menu {
+    display: none; position: absolute; top: 38px; right: 0;
+    background: #2a2a25; border: 1px solid var(--border);
+    border-radius: 5px; padding: 4px; z-index: 10; min-width: 155px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    font-family: system-ui, sans-serif; font-size: 11px;
+}
+.col-menu.open { display: block; }
+.col-drop-zone { flex: 1; min-height: 60px; }
+
+/* Add column button — sits at end of board */
+.add-col-btn {
+    flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+    background: none; border: 1px dashed var(--text-faint);
+    color: var(--text-faint); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 10px; transition: border-color 120ms, color 120ms;
+    font-family: system-ui, sans-serif;
+}
+.add-col-btn:hover { border-color: var(--text-dim); color: var(--text-dim); }
+
+/* —— Board nav (dots + arrows) —— */
+.board-nav { display: none; align-items: center; justify-content: center; gap: 12px; padding: 6px 0 16px; }
+.board-nav.visible { display: flex; }
+.board-nav .nav-arrow {
+    background: none; border: 1px solid var(--border);
+    color: var(--text-dim); width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, sans-serif; transition: border-color 120ms, color 120ms;
+}
+.board-nav .nav-arrow:hover { border-color: var(--text-dim); color: var(--text); }
+.board-dots { display: flex; gap: 5px; }
+.board-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint);
+    border: none; cursor: pointer; padding: 0; transition: background 120ms;
+}
+.board-dot.active { background: var(--text-dim); }
+
+/* —— Cards —— */
+.card {
+    background: var(--card-bg); border: 2px solid var(--border);
+    border-radius: var(--radius); padding: 12px 12px 10px;
+    position: relative; margin-bottom: 8px;
+    transition: border-color 180ms, background 180ms, box-shadow 180ms, opacity 180ms;
+    cursor: grab; user-select: none;
+}
+.card:active { cursor: grabbing; }
+.card.dragging { box-shadow: 0 4px 16px rgba(0,0,0,0.4); z-index: 5; }
+.drag-placeholder { height: 4px; background: var(--text-dim); border-radius: 2px; margin: 2px 0; opacity: 0.5; transition: none; pointer-events: none; }
+/* card border + bg tint set via JS for accent gradient */
+
+/* Collapse toggle */
+.card-collapse {
+    width: 20px; height: 20px; border-radius: 4px;
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 10px; font-family: system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 120ms, color 120ms, transform 150ms; padding: 0;
+}
+.card-collapse:hover { background: rgba(255,255,255,0.04); color: var(--text-dim); }
+.card.collapsed .card-collapse { transform: rotate(-90deg); }
+.card.collapsed .stars-bar,
+.card.collapsed .card-rule,
+.card.collapsed .card-items,
+.card.collapsed .card-footer { display: none; }
+.card.collapsed .card-top-row { margin-bottom: 0; }
+
+.card-top-row {
+    display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px;
+}
+.card-room {
+    font-family: Georgia, serif; font-size: 14px; font-style: italic;
+    color: var(--text-dim); background: none; border: none;
+    outline: none; width: 38px; flex-shrink: 0; text-align: right;
+    transition: color 150ms;
+}
+/* room number color set via JS for gradient interpolation */
+.card-name {
+    font-family: Georgia, serif; font-size: 14px;
+    color: var(--text); background: none; border: none;
+    outline: none; flex: 1; min-width: 0;
+}
+.card-name::placeholder { color: var(--text-faint); font-style: italic; }
+.card-room::placeholder { color: var(--text-faint); font-style: italic; }
+
+.card-burger {
+    width: 22px; height: 22px; border-radius: 4px;
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 14px; font-family: system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 120ms, color 120ms; padding: 0;
+}
+.card-burger:hover { background: rgba(255,255,255,0.04); color: var(--text-dim); }
+
+/* Star bar */
+.stars-bar {
+    display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+    margin-bottom: 4px; min-height: 6px; cursor: pointer; padding: 2px 0;
+}
+.stars-bar:empty { display: none; }
+.star-icon { font-size: 13px; cursor: pointer; user-select: none; color: var(--star-dim); transition: color 150ms; }
+.star-icon.filled { color: var(--star); }
+.star-icon:hover { color: var(--star); }
+.star-icon.hint { color: var(--star-dim); font-size: 15px; }
+.star-icon.hint:hover { color: var(--star); }
+
+.card-rule { height: 1px; background: var(--rule); margin-bottom: 6px; }
+
+/* Unified card items (notes + list items, mixable & reorderable) */
+.card-items { display: flex; flex-direction: column; gap: 2px; }
+.card-item {
+    display: flex; align-items: flex-start; gap: 5px; padding: 2px 0;
+    border-radius: 3px; transition: background 120ms;
+}
+.card-item:hover { background: rgba(255,255,255,0.015); }
+.card-item.checked .ci-text { text-decoration: line-through; opacity: 0.4; }
+.card-item.dragging { opacity: 0.35; }
+.item-placeholder { height: 3px; background: var(--text-dim); border-radius: 2px; margin: 1px 0 1px 15px; opacity: 0.5; transition: none; pointer-events: none; }
+
+/* Drag grip (2x3 dot grid) */
+.item-grip {
+    display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);
+    gap: 2px; width: 10px; height: 14px; flex-shrink: 0;
+    cursor: grab; opacity: 0; transition: opacity 120ms; margin-top: 4px;
+    padding: 2px 0;
+}
+.card-item:hover .item-grip { opacity: 0.35; }
+.item-grip:hover { opacity: 0.8 !important; }
+.item-grip:active { cursor: grabbing; }
+.grip-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-faint); pointer-events: none; }
+
+.ci-text {
+    flex: 1; font-family: Georgia, Charter, serif;
+    font-size: 13px; line-height: 1.55; color: var(--text);
+    outline: none; min-height: 20px;
+    word-break: break-word; white-space: pre-wrap;
+}
+.ci-text:empty::before { content: '…'; color: var(--text-faint); font-style: italic; }
+.ci-note .ci-text:empty::before { content: 'note…'; }
+.ci-listitem .ci-text:empty::before { content: 'list item…'; }
+
+.li-checkbox {
+    appearance: none; -webkit-appearance: none;
+    width: 13px; height: 13px; flex-shrink: 0;
+    border: 1.5px solid var(--border); border-radius: 3px;
+    cursor: pointer; background: transparent;
+    position: relative; margin-top: 3px;
+    transition: border-color 120ms, background 120ms;
+}
+.li-checkbox:checked { background: var(--check); border-color: var(--check); }
+.li-checkbox:checked::after {
+    content: '✓'; position: absolute; top: -2px; left: 2px;
+    font-size: 10px; color: #fff; font-family: system-ui, sans-serif;
+}
+
+/* 3x3 priority dot grid */
+.dot-grid-3x3 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0px;
+    flex-shrink: 0; cursor: pointer; margin-top: 2px;
+    width: 18px; height: 18px;
+}
+.dot-grid-3x3 .dg-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--text-faint); transition: background 120ms;
+    justify-self: center; align-self: center;
+}
+.dot-grid-3x3 .dg-dot.on { background: var(--star); }
+.dot-grid-3x3:hover .dg-dot:not(.on) { background: var(--star-dim); }
+
+.li-priority {
+    flex-shrink: 0; cursor: pointer; margin-top: 2px;
+}
+
+/* Card footer */
+.card-footer {
+    display: flex; align-items: center; gap: 10px; margin-top: 8px;
+    flex-wrap: wrap;
+}
+.add-note-btn, .add-item-btn {
+    background: none; border: none; color: var(--text-faint);
+    font-size: 11px; font-family: Georgia, serif; font-style: italic;
+    cursor: pointer; padding: 3px 0;
+    transition: color 150ms;
+}
+.add-note-btn:hover, .add-item-btn:hover { color: var(--text-dim); }
+.card-date {
+    font-family: system-ui, sans-serif; font-size: 9px;
+    color: var(--text-faint); margin-left: auto; white-space: nowrap;
+}
+
+.item-delete {
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 11px; padding: 0 2px; margin-top: 2px;
+    opacity: 0; transition: opacity 120ms; font-family: system-ui, sans-serif;
+}
+.card-item:hover .item-delete { opacity: 0.5; }
+.item-delete:hover { opacity: 1 !important; color: #b86868; }
+
+/* —— Burger menu (per-card) —— */
+.burger-menu {
+    display: none; position: absolute; top: 34px; right: 8px;
+    background: #2a2a25; border: 1px solid var(--border);
+    border-radius: 5px; padding: 4px; z-index: 10; min-width: 155px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    font-family: system-ui, sans-serif; font-size: 11px;
+}
+.burger-menu.open { display: block; }
+.burger-section { padding: 3px 6px; }
+.burger-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-faint); margin-bottom: 5px; }
+.accent-options { display: flex; gap: 6px; }
+.accent-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    cursor: pointer; border: 1.5px solid transparent;
+    transition: border-color 120ms, transform 120ms;
+}
+.accent-dot:hover { transform: scale(1.15); }
+.accent-dot.active { border-color: var(--text-dim); }
+.accent-none      { background: transparent; border: 1.5px solid var(--border); }
+/* Keep old dot colors for column header picker */
+.accent-burgundy  { background: var(--accent-burgundy); }
+.accent-navy      { background: var(--accent-navy); }
+.accent-forest    { background: var(--accent-forest); }
+.accent-ochre     { background: var(--accent-ochre); }
+.accent-calm      { background: var(--accent-calm); }
+.accent-alert     { background: var(--accent-alert); }
+/* Gradient slider for card priority */
+.accent-slider {
+    width: 100%; height: 14px; border-radius: 7px;
+    cursor: pointer; position: relative;
+    margin: 4px 0 2px;
+}
+.accent-slider-knob {
+    position: absolute; top: -2px; width: 18px; height: 18px;
+    border-radius: 50%; background: #fff; border: 2px solid rgba(0,0,0,0.3);
+    transform: translateX(-9px); pointer-events: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3); transition: left 80ms ease-out;
+}
+.burger-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; background: none; border: none;
+    color: var(--text-dim); font-size: 11px; font-family: inherit;
+    padding: 5px 7px; border-radius: 3px; cursor: pointer;
+    transition: background 120ms, color 120ms;
+}
+.burger-toggle:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.burger-toggle .toggle-indicator { font-size: 10px; color: var(--text-faint); }
+.burger-toggle.on .toggle-indicator { color: var(--check); }
+.burger-action {
+    display: block; width: 100%; background: none; border: none;
+    color: var(--text-dim); font-size: 11px; font-family: inherit;
+    padding: 5px 7px; border-radius: 3px; cursor: pointer; text-align: left;
+    transition: background 120ms, color 120ms;
+}
+.burger-action:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.burger-action.danger:hover { color: #b86868; }
+.burger-sep { height: 1px; background: var(--rule); margin: 3px 6px; }
+
+/* —— Sidebar —— */
+.sidebar-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 30; display: none;
+}
+.sidebar-overlay.open { display: block; }
+.sidebar {
+    position: fixed; top: 0; right: -360px; width: 340px; height: 100%;
+    background: #1e1e1a; border-left: 1px solid var(--border);
+    z-index: 31; overflow-y: auto; padding: 20px;
+    transition: right 250ms ease;
+    font-family: system-ui, -apple-system, sans-serif;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+.sidebar.open { right: 0; }
+.sidebar-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; color: var(--text-dim);
+    font-size: 18px; cursor: pointer; font-family: system-ui, sans-serif;
+    transition: color 120ms;
+}
+.sidebar-close:hover { color: var(--text); }
+.sidebar h3 {
+    font-family: Georgia, serif; font-size: 14px; font-style: italic;
+    color: var(--text-dim); margin-bottom: 14px; font-weight: normal;
+}
+.sidebar-section { margin-bottom: 22px; }
+
+/* Theme picker */
+.theme-options { display: flex; gap: 6px; flex-wrap: wrap; }
+.theme-chip {
+    padding: 5px 10px; border-radius: 12px; border: 1px solid var(--border);
+    background: none; color: var(--text-dim); font-size: 10px;
+    font-family: system-ui, sans-serif; cursor: pointer;
+    transition: border-color 120ms, color 120ms;
+}
+.theme-chip:hover { border-color: var(--text-dim); color: var(--text); }
+.theme-chip.active { border-color: var(--text); color: var(--text); }
+
+/* Board list */
+.board-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.board-list-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; color: var(--text-dim);
+    transition: background 120ms, color 120ms;
+}
+.board-list-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+.board-list-item.active { color: var(--text); background: rgba(255,255,255,0.04); }
+.board-list-item .board-delete {
+    margin-left: auto; background: none; border: none;
+    color: var(--text-faint); cursor: pointer; font-size: 14px;
+    opacity: 0; transition: opacity 120ms; font-family: system-ui, sans-serif;
+}
+.board-list-item:hover .board-delete { opacity: 0.5; }
+.board-list-item .board-delete:hover { opacity: 1; color: #b86868; }
+.add-board-btn {
+    background: none; border: 1px dashed var(--text-faint);
+    color: var(--text-faint); font-size: 11px; font-family: system-ui, sans-serif;
+    cursor: pointer; padding: 6px 10px; border-radius: 4px;
+    margin-top: 4px; transition: border-color 120ms, color 120ms;
+}
+.add-board-btn:hover { color: var(--text-dim); border-color: var(--text-dim); }
+
+/* Global task list */
+.task-sort { display: flex; gap: 6px; margin-bottom: 10px; }
+.sort-btn {
+    font-size: 10px; background: none; border: 1px solid var(--border);
+    color: var(--text-faint); padding: 3px 8px; border-radius: 10px;
+    cursor: pointer; font-family: system-ui, sans-serif;
+    transition: border-color 120ms, color 120ms;
+}
+.sort-btn:hover { color: var(--text-dim); border-color: var(--text-dim); }
+.sort-btn.active { border-color: var(--text); color: var(--text); }
+
+.global-task-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.global-task {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 6px; border-radius: 4px; border: 1px solid transparent;
+    transition: background 120ms, border-color 120ms;
+}
+.global-task:hover { background: rgba(255,255,255,0.02); border-color: var(--border); }
+.global-task .gt-info { flex: 1; min-width: 0; }
+.global-task .gt-text { font-size: 12px; color: var(--text); line-height: 1.4; word-break: break-word; }
+.global-task .gt-meta {
+    font-size: 10px; color: var(--text-faint); margin-top: 2px;
+    font-family: Georgia, serif; font-style: italic;
+}
+.global-task .gt-dots { cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.global-task .gt-dots .dot-grid-3x3 { width: 18px; height: 18px; }
+.global-task .gt-dots .dot-grid-3x3 .dg-dot { width: 4px; height: 4px; }
+.guide-text p {
+    font-size: 11px; color: var(--text-dim); line-height: 1.55;
+    margin-bottom: 8px;
+}
+.guide-text b {
+    color: var(--text); font-weight: normal; font-style: italic;
+    font-family: Georgia, serif;
+}
+
+.empty-global {
+    font-size: 11px; color: var(--text-faint); font-style: italic;
+    text-align: center; padding: 16px 0; font-family: Georgia, serif;
+}
+
+.pin-toggle {
+    background: none; border: 1px solid var(--border);
+    font-size: 14px; cursor: pointer; padding: 3px 8px; border-radius: 4px;
+    margin-top: 8px; transition: border-color 120ms, background 120ms;
+    line-height: 1;
+}
+.pin-toggle:hover { border-color: var(--text-dim); }
+.pin-toggle.pinned { background: rgba(255,255,255,0.06); border-color: var(--text-dim); }
+
+/* Global column on the board */
+.global-column {
+    flex: 1 0 280px; min-width: 280px; max-width: 360px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px; background: rgba(255,255,255,0.01);
+    max-height: calc(100vh - 160px); overflow-y: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.global-column::-webkit-scrollbar { display: none; }
+.global-column h4 {
+    font-family: Georgia, serif; font-size: 12px; font-style: italic;
+    color: var(--text-dim); margin-bottom: 10px; font-weight: normal;
+}
+.global-column .task-sort { margin-bottom: 8px; }
+.global-column .global-task-list { max-height: none; }
+.global-column .empty-global { padding: 24px 0; }
+
+/* —— Export bar —— */
+.export-bar {
+    display: flex; gap: 8px; padding: 0 20px 20px;
+    justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.export-btn {
+    font-family: system-ui, sans-serif; font-size: 10px;
+    background: none; border: 1px solid var(--border);
+    color: var(--text-faint); padding: 5px 12px; border-radius: 4px;
+    cursor: pointer; transition: border-color 120ms, color 120ms;
+}
+.export-btn:hover { color: var(--text-dim); border-color: var(--text-dim); }
+
+/* —— Responsive ——— */
+@media (max-width: 900px) {
+    .kanban-board { flex-wrap: wrap; }
+    .column { flex: 1 0 calc(50% - 5px); min-width: 0; max-width: none; }
+    .add-col-btn { margin-left: auto; margin-right: auto; }
+}
+@media (max-width: 600px) {
+    .kanban-board { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; }
+    .column { flex: 0 0 100%; min-width: calc(100vw - 40px); max-width: none; scroll-snap-align: start; }
+    .board-nav { display: flex; }
+    .app-header { padding: 12px 14px 6px; }
+    .board-tabs { padding: 0 14px 2px; }
+    .board-outer { padding: 0 14px; }
+    .export-bar { padding: 0 14px 16px; }
+}
+
+/* ========================================================================
+   COLOR THEMES
+   ======================================================================== */
+
+/* Classic Dark — original old.htm palette */
+[data-theme="classic-dark"] {
+    --bg: #121212; --card-bg: #1e1e1e;
+    --text: #e0e0e0; --text-dim: #999; --text-faint: #666;
+    --border: #333; --rule: #444;
+    --star: #e6a413; --star-dim: #4a3a10;
+    --check: #2d9135; --check-dim: #1a3a1a;
+    --accent-burgundy: #cc1e1e; --accent-navy: #3344aa;
+    --accent-forest: #2d9135; --accent-ochre: #e6a413;
+    --accent-calm: #2d9135; --accent-alert: #cc1e1e;
+    --col-ready: #14184f; --col-active: #2c1050;
+    --col-blocked: #783000; --col-done: #133614;
+    --col-ready-border: #1a2060; --col-active-border: #3a1860;
+    --col-blocked-border: #904000; --col-done-border: #1a4a1a;
+}
+
+/* Dark Editorial — warm muted newsprint */
+[data-theme="editorial-dark"] {
+    --bg: #1b1b18; --card-bg: #21211d;
+    --text: #d2cec4; --text-dim: #9b968a; --text-faint: #5e5b52;
+    --border: #302f29; --rule: #5e5b52;
+    --star: #c49b2a; --star-dim: #4a4328;
+    --check: #6a8d6d; --check-dim: #303d2e;
+    --accent-burgundy: #8b4a4a; --accent-navy: #4a5f7a;
+    --accent-forest: #4a7050; --accent-ochre: #a0843a;
+    --accent-calm: #4a7050; --accent-alert: #8b4a4a;
+    --col-ready: #1a1f18; --col-active: #1f1c18;
+    --col-blocked: #1f1a18; --col-done: #181f1d;
+    --col-ready-border: #303d2a; --col-active-border: #3d3028;
+    --col-blocked-border: #4a3020; --col-done-border: #2a3a2a;
+}
+
+/* Nord — cool blue-grey, calming */
+[data-theme="nord"] {
+    --bg: #2e3440; --card-bg: #343b48;
+    --text: #d8dee9; --text-dim: #81a1c1; --text-faint: #5e81ac;
+    --border: #434c5e; --rule: #4c566a;
+    --star: #ebcb8b; --star-dim: #4a4238;
+    --check: #a3be8c; --check-dim: #364030;
+    --accent-burgundy: #bf616a; --accent-navy: #5e81ac;
+    --accent-forest: #a3be8c; --accent-ochre: #d08770;
+    --accent-calm: #a3be8c; --accent-alert: #bf616a;
+    --col-ready: #262e3a; --col-active: #2a2e3a;
+    --col-blocked: #2c2a36; --col-done: #262e32;
+    --col-ready-border: #3b5274; --col-active-border: #4a5a7a;
+    --col-blocked-border: #6a4a3a; --col-done-border: #3a5a3a;
+}
+
+/* Everforest — green-tinted, very calming */
+[data-theme="everforest"] {
+    --bg: #1e2326; --card-bg: #232a2e;
+    --text: #d3c6aa; --text-dim: #859289; --text-faint: #5a6b5a;
+    --border: #343f44; --rule: #3d484d;
+    --star: #dbbc7f; --star-dim: #4a4030;
+    --check: #a7c080; --check-dim: #304030;
+    --accent-burgundy: #e67e80; --accent-navy: #7fbbb3;
+    --accent-forest: #83c092; --accent-ochre: #dbbc7f;
+    --accent-calm: #83c092; --accent-alert: #e67e80;
+    --col-ready: #1a241e; --col-active: #22241c;
+    --col-blocked: #241e1c; --col-done: #1c241e;
+    --col-ready-border: #2a4a3a; --col-active-border: #3a4a2a;
+    --col-blocked-border: #4a3828; --col-done-border: #2a4a2a;
+}
+
+/* Warm Light — paper/cream */
+[data-theme="warm-light"] {
+    --bg: #f2eee5; --card-bg: #faf8f2;
+    --text: #3a3730; --text-dim: #8a8578; --text-faint: #b5b0a2;
+    --border: #ddd8ca; --rule: #ccc7b8;
+    --star: #b8922e; --star-dim: #e8dcc0;
+    --check: #5a8a6a; --check-dim: #d0e0d0;
+    --accent-burgundy: #a04a4a; --accent-navy: #4a6080;
+    --accent-forest: #4a7050; --accent-ochre: #a0843a;
+    --accent-calm: #5a8a6a; --accent-alert: #a04a4a;
+    --col-ready: #e8eaf0; --col-active: #f0ede8;
+    --col-blocked: #f0e8e0; --col-done: #e8f0e8;
+    --col-ready-border: #c0c8d8; --col-active-border: #d0c8b8;
+    --col-blocked-border: #d0b8a0; --col-done-border: #b0c8b0;
+}
+/* Sidebar in light mode */
+[data-theme="warm-light"] .sidebar { background: #f5f3ec; }
+[data-theme="warm-light"] .burger-menu { background: #f5f3ec; }
+[data-theme="warm-light"] .col-menu { background: #f5f3ec; }
+
+/* Dracula — purple-tinted, high contrast */
+[data-theme="dracula"] {
+    --bg: #282a36; --card-bg: #2d2f3d;
+    --text: #f8f8f2; --text-dim: #b2b2bf; --text-faint: #6272a4;
+    --border: #3b3d4f; --rule: #44475a;
+    --star: #f1fa8c; --star-dim: #5a5a30;
+    --check: #50fa7b; --check-dim: #1e4a2a;
+    --accent-burgundy: #ff5555; --accent-navy: #6272a4;
+    --accent-forest: #50fa7b; --accent-ochre: #ffb86c;
+    --accent-calm: #50fa7b; --accent-alert: #ff5555;
+    --col-ready: #1e2030; --col-active: #242230;
+    --col-blocked: #2a1e20; --col-done: #1e2a20;
+    --col-ready-border: #3a3d60; --col-active-border: #4a3560;
+    --col-blocked-border: #603a3a; --col-done-border: #2a4a2a;
+}
+
+/* Gruvbox Dark — warm retro */
+[data-theme="gruvbox"] {
+    --bg: #282828; --card-bg: #32302f;
+    --text: #ebdbb2; --text-dim: #bdae93; --text-faint: #665c54;
+    --border: #3c3836; --rule: #504945;
+    --star: #fabd2f; --star-dim: #5a4a20;
+    --check: #b8bb26; --check-dim: #404a10;
+    --accent-burgundy: #cc241d; --accent-navy: #458588;
+    --accent-forest: #98971a; --accent-ochre: #d79921;
+    --accent-calm: #98971a; --accent-alert: #cc241d;
+    --col-ready: #282828; --col-active: #2a2828;
+    --col-blocked: #2a2622; --col-done: #262a24;
+    --col-ready-border: #3a5060; --col-active-border: #504050;
+    --col-blocked-border: #604020; --col-done-border: #304a20;
+}
+
+/* Catppuccin Mocha — soft pastel dark */
+[data-theme="catppuccin"] {
+    --bg: #1e1e2e; --card-bg: #26263a;
+    --text: #cdd6f4; --text-dim: #a6adc8; --text-faint: #6c7086;
+    --border: #313244; --rule: #45475a;
+    --star: #f9e2af; --star-dim: #5a5030;
+    --check: #a6e3a1; --check-dim: #2a4028;
+    --accent-burgundy: #f38ba8; --accent-navy: #89b4fa;
+    --accent-forest: #a6e3a1; --accent-ochre: #fab387;
+    --accent-calm: #a6e3a1; --accent-alert: #f38ba8;
+    --col-ready: #1a1e2a; --col-active: #221e2a;
+    --col-blocked: #2a1e20; --col-done: #1a2a20;
+    --col-ready-border: #3a4470; --col-active-border: #5a3860;
+    --col-blocked-border: #6a3a4a; --col-done-border: #2a5a2a;
+}
+
+/* Tokyo Night — blue-tinted dark */
+[data-theme="tokyo-night"] {
+    --bg: #1a1b26; --card-bg: #1f2233;
+    --text: #c0caf5; --text-dim: #9aa5ce; --text-faint: #565f89;
+    --border: #292e42; --rule: #3b4261;
+    --star: #e0af68; --star-dim: #4a3a20;
+    --check: #9ece6a; --check-dim: #2a3a20;
+    --accent-burgundy: #f7768e; --accent-navy: #7aa2f7;
+    --accent-forest: #9ece6a; --accent-ochre: #e0af68;
+    --accent-calm: #9ece6a; --accent-alert: #f7768e;
+    --col-ready: #1a1e2a; --col-active: #221e2a;
+    --col-blocked: #261a1e; --col-done: #1a261e;
+    --col-ready-border: #2a4070; --col-active-border: #4a3060;
+    --col-blocked-border: #603040; --col-done-border: #2a502a;
+}
+
+/* Rose Pine — rose-tinted warm dark */
+[data-theme="rose-pine"] {
+    --bg: #191724; --card-bg: #1f1d2e;
+    --text: #e0def4; --text-dim: #908caa; --text-faint: #6e6a86;
+    --border: #26233a; --rule: #403d52;
+    --star: #f6c177; --star-dim: #4a3a20;
+    --check: #9ccfd8; --check-dim: #1e3a3a;
+    --accent-burgundy: #eb6f92; --accent-navy: #31748f;
+    --accent-forest: #31748f; --accent-ochre: #f6c177;
+    --accent-calm: #9ccfd8; --accent-alert: #eb6f92;
+    --col-ready: #1a1a26; --col-active: #241e2a;
+    --col-blocked: #261a20; --col-done: #1a2426;
+    --col-ready-border: #3a3a60; --col-active-border: #5a3860;
+    --col-blocked-border: #6a3a50; --col-done-border: #2a4a5a;
+}
+
+/* Solarized Dark — classic cyan-tinted */
+[data-theme="solarized-dark"] {
+    --bg: #002b36; --card-bg: #003541;
+    --text: #eee8d5; --text-dim: #93a1a1; --text-faint: #657b83;
+    --border: #073642; --rule: #586e75;
+    --star: #b58900; --star-dim: #3a3000;
+    --check: #859900; --check-dim: #2a3000;
+    --accent-burgundy: #dc322f; --accent-navy: #268bd2;
+    --accent-forest: #859900; --accent-ochre: #cb4b16;
+    --accent-calm: #859900; --accent-alert: #dc322f;
+    --col-ready: #002630; --col-active: #002630;
+    --col-blocked: #1e2430; --col-done: #002a24;
+    --col-ready-border: #004a60; --col-active-border: #3a3060;
+    --col-blocked-border: #603020; --col-done-border: #1a4a3a;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+    <h1 class="app-title" id="board-title-input" contenteditable="true">Case Board</h1>
+    <button class="global-burger" id="global-burger" title="Settings &amp; global tasks">☰</button>
+</div>
+
+<div class="board-tabs" id="board-tabs"></div>
+
+<div class="board-outer">
+    <div class="kanban-board" id="kanban-board"></div>
+    <div class="board-nav" id="board-nav">
+        <button class="nav-arrow" id="nav-prev">←</button>
+        <div class="board-dots" id="board-dots"></div>
+        <button class="nav-arrow" id="nav-next">→</button>
+    </div>
+</div>
+
+<div class="export-bar">
+    <button class="export-btn" id="export-btn">Export JSON</button>
+    <button class="export-btn" id="import-btn">Import JSON</button>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+</div>
+
+<!-- Global Sidebar -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebar-close">✕</button>
+
+    <div class="sidebar-section">
+        <h3>Global Tasks</h3>
+        <div class="task-sort">
+            <button class="sort-btn active" data-sort="priority">★ Priority</button>
+            <button class="sort-btn" data-sort="recent">Recent</button>
+        </div>
+        <ul class="global-task-list" id="global-task-list"></ul>
+        <div class="empty-global" id="empty-global">No open tasks across patients</div>
+        <button class="pin-toggle" id="toggle-global-col" title="Pin global tasks as column">📌</button>
+    </div>
+
+    <div class="sidebar-section">
+        <h3>Boards</h3>
+        <ul class="board-list" id="board-list"></ul>
+        <button class="add-board-btn" id="add-board-sidebar">+ New Board</button>
+    </div>
+
+    <div class="sidebar-section">
+        <h3>Theme</h3>
+        <div class="theme-options" id="theme-options">
+            <button class="theme-chip active" data-theme="classic-dark">Classic Dark</button>
+            <button class="theme-chip" data-theme="editorial-dark">Editorial Dark</button>
+            <button class="theme-chip" data-theme="nord">Nord</button>
+            <button class="theme-chip" data-theme="everforest">Everforest</button>
+            <button class="theme-chip" data-theme="warm-light">Warm Light</button>
+            <button class="theme-chip" data-theme="dracula">Dracula</button>
+            <button class="theme-chip" data-theme="gruvbox">Gruvbox</button>
+            <button class="theme-chip" data-theme="catppuccin">Catppuccin</button>
+            <button class="theme-chip" data-theme="tokyo-night">Tokyo Night</button>
+            <button class="theme-chip" data-theme="rose-pine">Rose Pine</button>
+            <button class="theme-chip" data-theme="solarized-dark">Solarized</button>
+            <button class="theme-chip" data-theme="random" id="random-theme-chip">Random</button>
+        </div>
+    </div>
+
+    <div class="sidebar-section">
+        <h3>Guide</h3>
+        <div class="guide-text">
+            <p><b>Columns</b> — Drag cards between Untouched, Active, Blocked, and Watching. Click <b>+</b> in any column header to add a card. Use <b>⋮</b> on columns to rename, add, or remove.</p>
+            <p><b>Stars</b> — Toggle on via card <b>⋮</b> menu, then click the star bar to add ★. Click a filled star to remove it.</p>
+            <p><b>Notes vs List Items</b> — <b>Notes</b> are free text, private to the card. <b>List items</b> have a checkbox and priority grid; they appear in the global task list for cross-patient triage.</p>
+            <p><b>Priority dots</b> — 3×3 dot grid on each list item. Click to cycle 0→1→2→…→9→0 dots. Higher = more urgent. Sort the global task list by priority or date.</p>
+            <p><b>Data</b> — All patient data stays in your browser (IndexedDB). Nothing is ever sent to a server. Use <b>Export JSON</b> to back up or transfer between workstations.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================================
+// STATE
+// ============================================================================
+const DEFAULT_COLUMNS = [
+    { id: 'col-ready',    name: 'Untouched', cardIds: [] },
+    { id: 'col-active',   name: 'Active',    cardIds: [] },
+    { id: 'col-blocked',  name: 'Blocked',   cardIds: [] },
+    { id: 'col-done',     name: 'Watching',  cardIds: [] }
+];
+
+function freshBoard(name) {
+    return {
+        id: 'board-' + Date.now(),
+        name: name,
+        columns: JSON.parse(JSON.stringify(DEFAULT_COLUMNS)),
+        cards: {}
+    };
+}
+
+function nid() { return 'n-' + Math.random().toString(36).slice(2, 10); }
+function cid() { return 'c-' + Math.random().toString(36).slice(2, 10); }
+function nowISO() { return new Date().toISOString(); }
+
+function demoData() {
+    const b = freshBoard('Main Board');
+    b.id = 'board-1';
+
+    const c1 = cid(); b.columns[0].cardIds.push(c1);
+    b.cards[c1] = { id: c1, room: '304', name: 'Margaret Chen', stars: 3, accentValue: 50, starsOn: true,
+        items: [
+            { type: 'note', id: nid(), text: 'Speaks Mandarin — interpreter preferred' },
+            { type: 'listItem', id: nid(), text: 'Confirm interpreter booked', checked: true, priority: 2, createdAt: '2026-06-02T09:15:00' },
+            { type: 'listItem', id: nid(), text: 'Family meeting Thursday', checked: false, priority: 1, createdAt: '2026-06-01T14:30:00' }
+        ],
+        createdAt: '2026-06-01T08:00:00' };
+    const c2 = cid(); b.columns[1].cardIds.push(c2);
+    b.cards[c2] = { id: c2, room: '112', name: 'James Okonkwo', stars: 5, accentValue: 25, starsOn: true,
+        items: [
+            { type: 'listItem', id: nid(), text: 'CT results — check portal Thursday', checked: true, priority: 5, createdAt: '2026-06-02T08:00:00' },
+            { type: 'listItem', id: nid(), text: 'Pain improving — possible discharge this week', checked: false, priority: 0, createdAt: '2026-06-01T16:00:00' }
+        ],
+        createdAt: '2026-06-01T10:00:00' };
+    const c3 = cid(); b.columns[2].cardIds.push(c3);
+    b.cards[c3] = { id: c3, room: '208', name: 'Sofia Reyes', stars: 0, accentValue: 0, starsOn: false,
+        items: [
+            { type: 'listItem', id: nid(), text: 'New admit — full psychosocial assessment', checked: false, priority: 2, createdAt: '2026-06-02T10:00:00' }
+        ],
+        createdAt: '2026-06-02T10:00:00' };
+    return b;
+}
+
+function migrateData(state) {
+    // v0.x → v1.0: split old notes[] into notes (strings) + listItems (structured)
+    // v1.x → v2.0: merge notes[] + listItems[] → items[]
+    Object.values(state.boards).forEach(board => {
+        if (!board.cards) return;
+        Object.values(board.cards).forEach(card => {
+            if (card._migrated === 2) return;
+            // v0.x → v1.0: split old structured notes
+            if (!card._migrated || card._migrated < 1) {
+                if (!card.listItems) card.listItems = [];
+                if (!card.notes) card.notes = [];
+                if (Array.isArray(card.notes) && card.notes.length > 0) {
+                    const first = card.notes[0];
+                    if (typeof first === 'object' && first !== null && ('checked' in first || 'priority' in first)) {
+                        const oldNotes = card.notes;
+                        const newNotes = [];
+                        oldNotes.forEach(n => {
+                            if (typeof n === 'object' && n !== null) {
+                                if (n.checked !== undefined || n.priority !== undefined) {
+                                    card.listItems.push({ id: n.id || nid(), text: n.text || '', checked: !!n.checked, priority: n.priority || 0, createdAt: n.createdAt || nowISO() });
+                                } else {
+                                    newNotes.push(typeof n.text === 'string' ? n.text : String(n));
+                                }
+                            } else if (typeof n === 'string') {
+                                newNotes.push(n);
+                            }
+                        });
+                        card.notes = newNotes;
+                    }
+                }
+            }
+            // v1.x → v2.0: merge notes + listItems → items
+            card.items = [];
+            (card.notes || []).forEach(n => {
+                const text = typeof n === 'string' ? n : (n.text || '');
+                card.items.push({ type: 'note', id: nid(), text });
+            });
+            (card.listItems || []).forEach(li => {
+                card.items.push({ type: 'listItem', id: li.id || nid(), text: li.text || '', checked: !!li.checked, priority: li.priority || 0, createdAt: li.createdAt || nowISO() });
+            });
+            delete card.notes;
+            delete card.listItems;
+            // Migrate old string accent → numeric accentValue
+            if (card.accent !== undefined && card.accentValue === undefined) {
+                const map = { '': 0, 'burgundy': 85, 'navy': 25, 'forest': 35, 'ochre': 50 };
+                card.accentValue = map[card.accent] !== undefined ? map[card.accent] : 0;
+            }
+            delete card.accent;
+            // Remove legacy fields
+            delete card.manualChecks;
+            delete card.checklistOn;
+            if (!card.createdAt) card.createdAt = nowISO();
+            if (card.starsOn === undefined) card.starsOn = false;
+            if (card.collapsed === undefined) card.collapsed = false;
+            card._migrated = 2;
+        });
+    });
+    return state;
+}
+
+let appState = { _version: 1, boards: {}, activeBoardId: null, theme: 'classic-dark', customTheme: null, sortBy: 'priority', mobileColIdx: 0, showGlobalColumn: false };
+
+// ============================================================================
+// INDEXEDDB
+// ============================================================================
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open('case-board', 1);
+        req.onupgradeneeded = e => { if (!e.target.result.objectStoreNames.contains('state')) e.target.result.createObjectStore('state'); };
+        req.onsuccess = e => resolve(e.target.result);
+        req.onerror = e => reject(e.target.error);
+    });
+}
+async function loadState() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('state', 'readonly');
+        const req = tx.objectStore('state').get('app');
+        req.onsuccess = () => {
+            if (req.result) { appState = req.result; migrateData(appState); if (!appState._version) appState._version = 1; }
+            else { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; appState._version = 1; }
+            resolve();
+        };
+        req.onerror = () => reject(req.error);
+        tx.oncomplete = () => db.close();
+    });
+}
+async function saveState() {
+    const db = await openDB();
+    // Guard against stale overwrite from another tab
+    const current = await new Promise(resolve => {
+        const tx = db.transaction('state', 'readonly');
+        const req = tx.objectStore('state').get('app');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+    });
+    if (current && current._version && appState._version && current._version > appState._version) {
+        db.close();
+        // Another tab saved newer data — reload instead of overwriting
+        appState = current;
+        document.documentElement.setAttribute('data-theme', appState.theme || 'classic-dark');
+        if (appState.theme === 'custom' && appState.customTheme) {
+            document.documentElement.style.cssText = '';
+            applyCustomTheme(appState.customTheme.vars);
+        }
+        renderAll();
+        return;
+    }
+    appState._version = (appState._version || 0) + 1;
+    return new Promise((resolve) => {
+        const tx = db.transaction('state', 'readwrite');
+        tx.objectStore('state').put(appState, 'app');
+        tx.oncomplete = () => { db.close(); resolve(); };
+    });
+}
+let saveTimeout;
+function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => saveState(), 300); }
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+function activeBoard() { return appState.boards[appState.activeBoardId]; }
+function colById(id) { const b = activeBoard(); return b ? b.columns.find(c => c.id === id) : null; }
+function esc(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function sortItems(items) {
+    if (appState.sortBy === 'recent') return [...items].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+    return [...items].sort((a,b) => b.priority - a.priority);
+}
+function formatShortDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+function formatDate(iso) {
+    if (!iso) return ''; const d = new Date(iso); const now = new Date();
+    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString([],{month:'short',day:'numeric'});
+}
+function interpolateColor(c1, c2, t) {
+    const parse = (c) => {
+        if (c.startsWith('#')) {
+            const h = c.slice(1);
+            if (h.length === 3) return [parseInt(h[0]+h[0],16), parseInt(h[1]+h[1],16), parseInt(h[2]+h[2],16)];
+            if (h.length === 6) return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+        }
+        const m = c.match(/rgb\((\d+)\s*,?\s*(\d+)\s*,?\s*(\d+)\)/);
+        if (m) return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+        return [128, 128, 128];
+    };
+    const [r1, g1, b1] = parse(c1);
+    const [r2, g2, b2] = parse(c2);
+    const r = Math.round(r1 + (r2 - r1) * t);
+    const g = Math.round(g1 + (g2 - g1) * t);
+    const b = Math.round(b1 + (b2 - b1) * t);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+function autoSize(input, minW) {
+    function rs() {
+        const s = document.createElement('span');
+        s.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font:' + getComputedStyle(input).font;
+        s.textContent = input.value || input.placeholder || ' '; document.body.appendChild(s);
+        input.style.width = Math.max(s.offsetWidth + 4, minW) + 'px'; s.remove();
+    }
+    input.addEventListener('input', rs); rs();
+}
+
+// ============================================================================
+// RENDER
+// ============================================================================
+function renderTabs() {
+    const container = document.getElementById('board-tabs');
+    const boards = Object.values(appState.boards);
+    container.innerHTML = boards.map(b =>
+        `<button class="board-tab${b.id===appState.activeBoardId?' active':''}" data-board="${b.id}">${esc(b.name)}</button>`
+    ).join('') + '<button class="board-tab-add" title="New board">+</button>';
+    container.querySelectorAll('.board-tab').forEach(tab => {
+        tab.addEventListener('click', () => { appState.activeBoardId = tab.dataset.board; renderAll(); autoSave(); });
+    });
+    container.querySelector('.board-tab-add').addEventListener('click', () => {
+        const name = prompt('Board name:'); if (!name||!name.trim()) return;
+        const b = freshBoard(name.trim()); appState.boards[b.id] = b; appState.activeBoardId = b.id;
+        renderAll(); autoSave();
+    });
+}
+
+function renderBoard() {
+    const board = activeBoard();
+    const container = document.getElementById('kanban-board');
+    container.innerHTML = '';
+
+    board.columns.forEach((col, colIdx) => {
+        const colEl = document.createElement('div');
+        colEl.className = 'column'; colEl.dataset.colId = col.id;
+        colEl.innerHTML = `
+            <div class="col-header-wrap">
+                <div class="col-header">
+                    <input class="col-name" value="${esc(col.name)}" data-col-id="${col.id}">
+                    <span class="col-count">${col.cardIds.length}</span>
+                    <button class="col-sort-stars" data-col-id="${col.id}" title="Sort by stars">★</button>
+                    <button class="col-add-card" data-col-id="${col.id}" title="Add card">+</button>
+                    <button class="col-options" data-col-id="${col.id}">⋮</button>
+                </div>
+                <div class="col-menu" id="col-menu-${col.id}">
+                    <div class="burger-section"><div class="burger-label">Header Color</div>
+                        <div class="accent-options" data-col="${col.id}">
+                            <button class="accent-dot accent-none${!col.headerColor?' active':''}" data-color=""></button>
+                            <button class="accent-dot accent-calm${col.headerColor==='calm'?' active':''}" data-color="calm"></button>
+                            <button class="accent-dot accent-navy${col.headerColor==='navy'?' active':''}" data-color="navy"></button>
+                            <button class="accent-dot accent-ochre${col.headerColor==='ochre'?' active':''}" data-color="ochre"></button>
+                            <button class="accent-dot accent-alert${col.headerColor==='alert'?' active':''}" data-color="alert"></button>
+                        </div>
+                    </div>
+                    <div class="burger-sep"></div>
+                    <button class="burger-action" data-action="rename" data-col-id="${col.id}">Rename</button>
+                    <button class="burger-action" data-action="add-left" data-col-id="${col.id}" data-idx="${colIdx}">Add column left</button>
+                    <button class="burger-action" data-action="add-right" data-col-id="${col.id}" data-idx="${colIdx}">Add column right</button>
+                    ${board.columns.length > 1 ? `<button class="burger-action danger" data-action="delete-col" data-col-id="${col.id}">Remove column</button>` : ''}
+                </div>
+            </div>
+            <div class="col-drop-zone" id="zone-${col.id}" data-col-id="${col.id}"></div>`;
+
+        colEl.querySelector('.col-name').addEventListener('input', e => { const c = colById(e.target.dataset.colId); if (c) { c.name = e.target.value; autoSave(); } });
+        // Column header color
+        if (col.headerColor) {
+            const hdr = colEl.querySelector('.col-header');
+            hdr.style.borderColor = `var(--accent-${col.headerColor})`;
+            hdr.style.background = `color-mix(in srgb, var(--accent-${col.headerColor}) 12%, var(--card-bg) 88%)`;
+        }
+
+        colEl.querySelector('.col-sort-stars').addEventListener('click', e => {
+            e.stopPropagation();
+            const cards = col.cardIds.map(id => board.cards[id]).filter(Boolean);
+            cards.sort((a, b) => {
+                if (b.stars !== a.stars) return b.stars - a.stars;
+                return (b.createdAt || '').localeCompare(a.createdAt || '');
+            });
+            col.cardIds = cards.map(c => c.id);
+            renderAll(); autoSave();
+        });
+        colEl.querySelector('.col-add-card').addEventListener('click', () => addCard(col.id));
+        colEl.querySelector('.col-options').addEventListener('click', e => { e.stopPropagation(); toggleColMenu(col.id); });
+
+        // Wire column color dot clicks
+        colEl.querySelectorAll('.accent-dot').forEach(dot => {
+            dot.addEventListener('click', e => {
+                e.stopPropagation();
+                const color = dot.dataset.color;
+                col.headerColor = color || null;
+                colEl.querySelectorAll('.accent-dot').forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+                const header = colEl.querySelector('.col-header');
+                if (col.headerColor) {
+                    header.style.borderColor = `var(--accent-${col.headerColor})`;
+                    header.style.background = `color-mix(in srgb, var(--accent-${col.headerColor}) 12%, var(--card-bg) 88%)`;
+                } else {
+                    header.style.borderColor = '';
+                    header.style.background = '';
+                }
+                autoSave();
+            });
+        });
+
+        colEl.querySelectorAll('.burger-action').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation(); const a = btn.dataset.action; const cId = btn.dataset.colId; const idx = parseInt(btn.dataset.idx);
+                if (a === 'rename') { colEl.querySelector('.col-name').focus(); colEl.querySelector('.col-name').select(); }
+                else if (a === 'add-left') { board.columns.splice(idx, 0, {id:'col-'+Date.now(), name:'New', cardIds:[]}); renderAll(); autoSave(); }
+                else if (a === 'add-right') { board.columns.splice(idx+1, 0, {id:'col-'+Date.now(), name:'New', cardIds:[]}); renderAll(); autoSave(); }
+                else if (a === 'delete-col' && board.columns.length > 1) { board.columns = board.columns.filter(c => c.id !== cId); renderAll(); autoSave(); }
+                closeColMenus();
+            });
+        });
+
+        container.appendChild(colEl);
+
+        const zone = colEl.querySelector('.col-drop-zone');
+        col.cardIds.forEach(cardId => {
+            const cd = board.cards[cardId];
+            if (cd) zone.appendChild(renderCard(cd));
+        });
+
+        // Drop zone events
+        zone.addEventListener('dragover', e => { e.preventDefault(); handleDragOver(e, zone); });
+        zone.addEventListener('dragleave', e => { if (!zone.contains(e.relatedTarget)) clearPlaceholder(); });
+        zone.addEventListener('drop', e => { e.preventDefault(); handleDrop(e, zone, col); });
+    });
+
+    // Add column button
+    const addColBtn = document.createElement('button');
+    addColBtn.className = 'add-col-btn'; addColBtn.textContent = '+';
+    addColBtn.title = 'Add column';
+    addColBtn.addEventListener('click', () => {
+        board.columns.push({ id: 'col-'+Date.now(), name: 'New', cardIds: [] });
+        renderAll(); autoSave();
+    });
+    container.appendChild(addColBtn);
+
+    // Global task column
+    if (appState.showGlobalColumn) {
+        const gCol = renderGlobalColumn();
+        if (gCol) { container.appendChild(gCol); renderGlobalTasks('global-col-list'); }
+    }
+
+    updateBoardNav();
+}
+
+function itemGrip() { return '<div class="item-grip" draggable="true"><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span></div>'; }
+
+let _draggingItem = null; // { card, idx, el }
+
+function renderCard(card) {
+    const el = document.createElement('div');
+    el.className = 'card' + (card.collapsed ? ' collapsed' : '');
+    el.dataset.cardId = card.id; el.draggable = true;
+    if (!card.items) card.items = [];
+
+    el.innerHTML = `
+        <div class="card-top-row">
+            <button class="card-collapse">▼</button>
+            <input class="card-room" value="${esc(card.room)}" size="3" placeholder="Rm">
+            <input class="card-name" value="${esc(card.name)}" size="12" placeholder="Name">
+            <button class="card-burger">⋮</button>
+            <div class="burger-menu" id="menu-${card.id}">
+                <div class="burger-section"><div class="burger-label">Priority</div>
+                    <div class="accent-slider" id="slider-${card.id}" style="background: linear-gradient(to right, var(--accent-calm), var(--accent-alert));">
+                        <div class="accent-slider-knob" style="left:${(card.accentValue||0)}%"></div>
+                    </div>
+                </div>
+                <div class="burger-sep"></div>
+                <button class="burger-toggle${card.starsOn?' on':''}" data-action="toggle-stars">Stars <span class="toggle-indicator">${card.starsOn?'on':'off'}</span></button>
+                <div class="burger-sep"></div>
+                <button class="burger-action danger" data-action="delete-card">Delete</button>
+            </div>
+        </div>
+        <div class="stars-bar" id="stars-${card.id}"></div>
+        <div class="card-rule"></div>
+        <div class="card-items" id="items-${card.id}"></div>
+        <div class="card-footer">
+            <button class="add-note-btn" data-card="${card.id}">+ Add note</button>
+            <button class="add-item-btn" data-card="${card.id}">+ Add list item</button>
+            <span class="card-date">${formatShortDate(card.createdAt)}</span>
+        </div>`;
+
+    // Wire inputs
+    const roomInp = el.querySelector('.card-room'), nameInp = el.querySelector('.card-name');
+    roomInp.addEventListener('input', () => { card.room = roomInp.value; autoSave(); });
+    nameInp.addEventListener('input', () => { card.name = nameInp.value; autoSave(); });
+    autoSize(roomInp, 34); autoSize(nameInp, 60);
+
+    // Collapse toggle
+    el.querySelector('.card-collapse').addEventListener('click', e => {
+        e.stopPropagation();
+        card.collapsed = !card.collapsed;
+        el.classList.toggle('collapsed', card.collapsed);
+        autoSave();
+    });
+
+    // Burger
+    const burgerBtn = el.querySelector('.card-burger'), menu = el.querySelector('.burger-menu');
+    burgerBtn.addEventListener('click', e => { e.stopPropagation(); closeAllMenus(); menu.classList.toggle('open'); });
+
+    // Apply accent color to card (border + subtle bg tint + room number)
+    function applyAccent(card, cardEl) {
+        const val = card.accentValue || 0;
+        if (val > 0) {
+            const style = getComputedStyle(document.documentElement);
+            const calm = style.getPropertyValue('--accent-calm').trim();
+            const alert = style.getPropertyValue('--accent-alert').trim();
+            const color = interpolateColor(calm, alert, val / 100);
+            cardEl.style.borderColor = color;
+            cardEl.style.background = `color-mix(in srgb, ${color} 8%, var(--card-bg) 92%)`;
+            const roomInp = cardEl.querySelector('.card-room');
+            if (roomInp) roomInp.style.color = color;
+        } else {
+            cardEl.style.borderColor = '';
+            cardEl.style.background = '';
+            const roomInp = cardEl.querySelector('.card-room');
+            if (roomInp) roomInp.style.color = '';
+        }
+    }
+    applyAccent(card, el);
+
+    // Menu actions — gradient slider
+    const slider = el.querySelector('.accent-slider');
+    if (slider) {
+        slider.addEventListener('click', e => {
+            e.stopPropagation();
+            const rect = slider.getBoundingClientRect();
+            const raw = ((e.clientX - rect.left) / rect.width) * 100;
+            // left 8% of slider = neutral (0), otherwise round to nearest integer
+            const pct = raw <= 8 ? 0 : Math.round(Math.max(0, Math.min(100, raw)));
+            card.accentValue = pct;
+            const knob = slider.querySelector('.accent-slider-knob');
+            if (knob) knob.style.left = pct + '%';
+            applyAccent(card, el); autoSave();
+        });
+    }
+    el.querySelector('[data-action="toggle-stars"]').addEventListener('click', e => { e.stopPropagation();
+        card.starsOn = !card.starsOn; if (!card.starsOn) card.stars = 0; renderCardStars(card);
+        const b = el.querySelector('[data-action="toggle-stars"]'); b.classList.toggle('on',card.starsOn); b.querySelector('.toggle-indicator').textContent=card.starsOn?'on':'off'; autoSave(); });
+    el.querySelector('[data-action="delete-card"]').addEventListener('click', e => { e.stopPropagation();
+        el.style.transition='opacity 180ms,transform 180ms'; el.style.opacity='0'; el.style.transform='scale(0.95)';
+        setTimeout(() => { el.remove(); const bd=activeBoard(); bd.columns.forEach(c=>{c.cardIds=c.cardIds.filter(id=>id!==card.id)}); delete bd.cards[card.id]; updateColCounts(); renderSidebar(); autoSave(); }, 180); });
+
+    // Drag — blocked when menu is open; full opacity via custom drag image
+    el.addEventListener('dragstart', e => {
+        if (el.querySelector('.burger-menu.open') || _draggingItem) { e.preventDefault(); return; }
+        el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+        const clone = el.cloneNode(true);
+        clone.style.opacity = '1'; clone.style.position = 'absolute'; clone.style.top = '-9999px'; clone.style.left = '-9999px';
+        clone.style.width = el.offsetWidth + 'px'; clone.classList.remove('dragging');
+        document.body.appendChild(clone);
+        e.dataTransfer.setDragImage(clone, e.offsetX, e.offsetY);
+        requestAnimationFrame(() => clone.remove());
+    });
+    el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
+
+    renderCardStars(card, el); renderCardItems(card, el);
+
+    el.querySelector('.add-note-btn').addEventListener('click', () => {
+        card.items.push({ type: 'note', id: nid(), text: '' });
+        renderCardItems(card); autoSave();
+        setTimeout(() => { const ln = el.querySelector('.card-item:last-child .ci-text'); if (ln) ln.focus(); }, 50);
+    });
+    el.querySelector('.add-item-btn').addEventListener('click', () => {
+        card.items.push({ type: 'listItem', id: nid(), text: '', checked: false, priority: 0, createdAt: nowISO() });
+        renderCardItems(card); renderSidebar(); autoSave();
+        setTimeout(() => { const ln = el.querySelector('.card-item:last-child .ci-text'); if (ln) ln.focus(); }, 50);
+    });
+
+    return el;
+}
+
+function dots3x3(pri) {
+    let html = '<div class="dot-grid-3x3">';
+    for (let i = 1; i <= 9; i++) {
+        html += `<span class="dg-dot${pri >= i ? ' on' : ''}"></span>`;
+    }
+    html += '</div>';
+    return html;
+}
+
+function renderCardStars(card, cardEl) {
+    const bar = (cardEl && cardEl.querySelector('#stars-'+card.id)) || document.getElementById('stars-'+card.id);
+    if (!bar) return;
+    bar.innerHTML = ''; if (!card.starsOn) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex'; bar.style.minHeight = '18px';
+    if (card.stars === 0) {
+        const hint = document.createElement('span');
+        hint.className = 'star-icon hint'; hint.textContent = '☆';
+        bar.appendChild(hint);
+    } else {
+        for (let i = 0; i < card.stars; i++) { const s = document.createElement('span'); s.className='star-icon filled'; s.textContent='★'; bar.appendChild(s); }
+    }
+    bar.onclick = e => {
+        const star = e.target.closest('.star-icon.filled');
+        if (star) card.stars = Math.max(card.stars-1, 0); else card.stars = Math.min(card.stars+1, 20);
+        renderCardStars(card); autoSave();
+    };
+}
+
+function renderCardItems(card, cardEl) {
+    const ct = (cardEl && cardEl.querySelector('#items-'+card.id)) || document.getElementById('items-'+card.id);
+    if (!ct) return;
+    ct.innerHTML = '';
+    if (!card.items) card.items = [];
+    card.items.forEach((item, idx) => {
+        const block = document.createElement('div');
+        block.className = 'card-item ci-' + item.type + (item.checked ? ' checked' : '');
+        block.dataset.itemIdx = idx;
+
+        if (item.type === 'listItem') {
+            block.innerHTML = `
+                ${itemGrip()}
+                <input type="checkbox" class="li-checkbox" ${item.checked ? 'checked' : ''}>
+                <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
+                <div class="li-priority" data-item="${item.id}">${dots3x3(item.priority || 0)}</div>
+                <button class="item-delete">×</button>`;
+            block.querySelector('.li-checkbox').addEventListener('change', e => {
+                item.checked = e.target.checked;
+                block.classList.toggle('checked', item.checked);
+                renderSidebar(); autoSave();
+            });
+            block.querySelector('.li-priority').addEventListener('click', () => {
+                item.priority = ((item.priority || 0) + 1) % 10;
+                const grids = block.querySelector('.dot-grid-3x3');
+                if (grids) grids.outerHTML = dots3x3(item.priority);
+                renderSidebar(); autoSave();
+            });
+        } else {
+            block.innerHTML = `
+                ${itemGrip()}
+                <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
+                <button class="item-delete">×</button>`;
+        }
+
+        block.querySelector('.ci-text').addEventListener('input', e => { item.text = e.target.innerText; autoSave(); });
+        block.querySelector('.item-delete').addEventListener('click', () => {
+            const wasChecked = item.checked;
+            card.items.splice(idx, 1);
+            block.style.transition = 'opacity 120ms'; block.style.opacity = '0';
+            setTimeout(() => { block.remove(); if (wasChecked) renderSidebar(); }, 120);
+            autoSave();
+        });
+
+        // Intra-card drag from grip handle
+        const grip = block.querySelector('.item-grip');
+        if (grip) {
+            grip.addEventListener('dragstart', e => {
+                e.stopPropagation();
+                _draggingItem = { card, idx, el: block };
+                block.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            grip.addEventListener('dragend', () => {
+                block.classList.remove('dragging');
+                clearItemPlaceholder();
+                _draggingItem = null;
+            });
+        }
+
+        ct.appendChild(block);
+    });
+
+    // Wire dragover/drop on the items container for intra-card reorder
+    ct.ondragover = e => {
+        if (!_draggingItem || _draggingItem.card !== card) return;
+        e.preventDefault();
+        const items = [...ct.querySelectorAll('.card-item:not(.dragging)')];
+        clearItemPlaceholder();
+        const mouseY = e.clientY; let inserted = false;
+        for (let i = 0; i < items.length; i++) {
+            const rect = items[i].getBoundingClientRect();
+            if (mouseY < rect.top + rect.height / 2) {
+                const ph = document.createElement('div');
+                ph.className = 'item-placeholder';
+                items[i].before(ph); inserted = true; break;
+            }
+        }
+        if (!inserted && items.length > 0) {
+            const ph = document.createElement('div');
+            ph.className = 'item-placeholder';
+            items[items.length - 1].after(ph);
+        } else if (!inserted && items.length === 0) {
+            const ph = document.createElement('div');
+            ph.className = 'item-placeholder';
+            ct.appendChild(ph);
+        }
+    };
+    ct.ondrop = e => {
+        if (!_draggingItem || _draggingItem.card !== card) return;
+        e.preventDefault();
+        const fromIdx = _draggingItem.idx;
+        const movedItem = card.items.splice(fromIdx, 1)[0];
+        const items = [...ct.querySelectorAll('.card-item:not(.dragging)')];
+        clearItemPlaceholder();
+        const mouseY = e.clientY; let inserted = false;
+        for (let i = 0; i < items.length; i++) {
+            const rect = items[i].getBoundingClientRect();
+            if (mouseY < rect.top + rect.height / 2) {
+                card.items.splice(i, 0, movedItem); inserted = true; break;
+            }
+        }
+        if (!inserted) card.items.push(movedItem);
+        renderCardItems(card); renderSidebar(); autoSave();
+    };
+}
+
+function clearItemPlaceholder() { document.querySelectorAll('.item-placeholder').forEach(p => p.remove()); }
+
+function updateColCounts() {
+    const board = activeBoard();
+    document.querySelectorAll('.col-count').forEach(el => { const cId=el.closest('.column')?.dataset.colId; const col=board.columns.find(c=>c.id===cId); if(col)el.textContent=col.cardIds.length; });
+}
+
+// ============================================================================
+// DRAG & DROP
+// ============================================================================
+function clearPlaceholder() { document.querySelectorAll('.drag-placeholder,.item-placeholder').forEach(p => p.remove()); }
+
+function handleDragOver(e, zone) {
+    const cardEl = document.querySelector('.card.dragging'); if (!cardEl) return;
+    const cards = [...zone.querySelectorAll('.card:not(.dragging)')];
+    clearPlaceholder();
+    const mouseY = e.clientY;
+    let inserted = false;
+    for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        if (mouseY < rect.top + rect.height/2) {
+            const ph = document.createElement('div');
+            ph.className = 'drag-placeholder';
+            cards[i].before(ph); inserted = true; break;
+        }
+    }
+    if (!inserted && cards.length > 0) {
+        const ph = document.createElement('div');
+        ph.className = 'drag-placeholder';
+        cards[cards.length-1].after(ph);
+    } else if (!inserted && cards.length === 0) {
+        const ph = document.createElement('div');
+        ph.className = 'drag-placeholder';
+        zone.appendChild(ph);
+    }
+}
+
+function handleDrop(e, zone, col) {
+    clearPlaceholder();
+    const cardEl = document.querySelector('.card.dragging'); if (!cardEl) return;
+    const cardId = cardEl.dataset.cardId;
+    const board = activeBoard();
+    board.columns.forEach(c => { c.cardIds = c.cardIds.filter(id => id !== cardId); });
+    const cards = [...zone.querySelectorAll('.card:not(.dragging)')];
+    const mouseY = e.clientY; let inserted = false;
+    for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        if (mouseY < rect.top + rect.height/2) {
+            col.cardIds.splice(i, 0, cardId); inserted = true; break;
+        }
+    }
+    if (!inserted) col.cardIds.push(cardId);
+    cardEl.classList.remove('dragging');
+    // Insert at correct DOM position matching cardIds order
+    const idx = col.cardIds.indexOf(cardId);
+    const nextId = col.cardIds[idx + 1];
+    if (nextId) {
+        const nextEl = zone.querySelector('.card[data-card-id="' + nextId + '"]');
+        if (nextEl) { zone.insertBefore(cardEl, nextEl); } else { zone.appendChild(cardEl); }
+    } else {
+        zone.appendChild(cardEl);
+    }
+    updateColCounts(); autoSave();
+}
+
+// ============================================================================
+// BOARD NAV
+// ============================================================================
+function updateBoardNav() {
+    const board = activeBoard();
+    const container = document.getElementById('kanban-board');
+    const nav = document.getElementById('board-nav');
+    const dots = document.getElementById('board-dots');
+    if (!nav || !container) return;
+    const overflows = container.scrollWidth > container.clientWidth + 4;
+    nav.classList.toggle('visible', overflows);
+    if (!overflows) return;
+    dots.innerHTML = board.columns.map((c, i) =>
+        `<button class="board-dot${i===appState.mobileColIdx?' active':''}" data-idx="${i}"></button>`
+    ).join('');
+    dots.querySelectorAll('.board-dot').forEach(d => {
+        d.addEventListener('click', () => { appState.mobileColIdx = parseInt(d.dataset.idx); scrollToCol(); });
+    });
+}
+function scrollToCol() {
+    const board = activeBoard();
+    if (appState.mobileColIdx >= board.columns.length) appState.mobileColIdx = 0;
+    const cols = document.querySelectorAll('.column');
+    if (cols[appState.mobileColIdx]) cols[appState.mobileColIdx].scrollIntoView({ behavior: 'smooth', inline: 'start' });
+    updateBoardNav();
+}
+document.getElementById('nav-prev').addEventListener('click', () => {
+    const board = activeBoard();
+    appState.mobileColIdx = (appState.mobileColIdx - 1 + board.columns.length) % board.columns.length;
+    scrollToCol();
+});
+document.getElementById('nav-next').addEventListener('click', () => {
+    const board = activeBoard();
+    appState.mobileColIdx = (appState.mobileColIdx + 1) % board.columns.length;
+    scrollToCol();
+});
+// Update nav dots on scroll
+document.getElementById('kanban-board').addEventListener('scroll', () => {
+    const cols = document.querySelectorAll('.column');
+    const boardEl = document.getElementById('kanban-board');
+    const scrollLeft = boardEl.scrollLeft;
+    let bestIdx = 0; let bestDist = Infinity;
+    cols.forEach((col, i) => {
+        const dist = Math.abs(col.offsetLeft - scrollLeft);
+        if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+    });
+    if (appState.mobileColIdx !== bestIdx) { appState.mobileColIdx = bestIdx; updateBoardNav(); }
+});
+// Editable board title
+const titleInput = document.getElementById('board-title-input');
+titleInput.addEventListener('input', () => {
+    const board = activeBoard();
+    if (board) { board.name = titleInput.innerText.trim() || board.name; renderTabs(); renderSidebar(); autoSave(); }
+});
+titleInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); titleInput.blur(); } });
+
+// ============================================================================
+// MENUS
+// ============================================================================
+function closeAllMenus() { document.querySelectorAll('.burger-menu.open').forEach(m=>m.classList.remove('open')); }
+function closeColMenus() { document.querySelectorAll('.col-menu.open').forEach(m=>m.classList.remove('open')); }
+function toggleColMenu(colId) { const m=document.getElementById('col-menu-'+colId); const was=m.classList.contains('open'); closeColMenus(); if(!was)m.classList.add('open'); }
+document.addEventListener('click', e => {
+    if (!e.target.closest('.card-burger') && !e.target.closest('.burger-menu')) closeAllMenus();
+    if (!e.target.closest('.col-options') && !e.target.closest('.col-menu')) closeColMenus();
+});
+
+function addCard(colId) {
+    const board = activeBoard();
+    const card = { id: cid(), room: '', name: '', stars: 0, accentValue: 0, starsOn: false, notes: [], listItems: [], createdAt: nowISO() };
+    board.cards[card.id] = card;
+    const col = colById(colId); if (col) col.cardIds.push(card.id);
+    const zone = document.getElementById('zone-'+colId);
+    if (zone) { const ce = renderCard(card); zone.appendChild(ce); setTimeout(()=>ce.querySelector('.card-name').focus(),50); }
+    updateColCounts(); autoSave();
+}
+
+// ============================================================================
+// SIDEBAR
+// ============================================================================
+function renderSidebar() {
+    renderBoardList(); renderGlobalTasks(); renderThemeChips();
+    const toggle = document.getElementById('toggle-global-col');
+    if (toggle) toggle.classList.toggle('pinned', appState.showGlobalColumn);
+}
+function renderBoardList() {
+    const list = document.getElementById('board-list');
+    const boards = Object.values(appState.boards);
+    list.innerHTML = boards.map(b => `<li class="board-list-item${b.id===appState.activeBoardId?' active':''}" data-board="${b.id}">${esc(b.name)}${boards.length>1?`<button class="board-delete" data-board="${b.id}">×</button>`:''}</li>`).join('');
+    list.querySelectorAll('.board-list-item').forEach(item => { item.addEventListener('click', e => { if(e.target.closest('.board-delete'))return; appState.activeBoardId=item.dataset.board; renderAll(); autoSave(); }); });
+    list.querySelectorAll('.board-delete').forEach(btn => { btn.addEventListener('click', e => { e.stopPropagation(); const bid=btn.dataset.board; if(Object.keys(appState.boards).length<=1)return; delete appState.boards[bid]; if(appState.activeBoardId===bid)appState.activeBoardId=Object.keys(appState.boards)[0]; renderAll(); autoSave(); }); });
+}
+function renderGlobalTasks(containerId) {
+    const isColumn = (containerId === 'global-col-list');
+    const listId = containerId || 'global-task-list';
+    const list = document.getElementById(listId);
+    const empty = isColumn ? document.getElementById('empty-global-col') : document.getElementById('empty-global');
+    if (!list) return;
+    const board = activeBoard();
+    const allItems = [];
+    Object.values(board.cards).forEach(card => {
+        (card.items || []).forEach(item => {
+            if (item.type === 'listItem' && !item.checked) allItems.push({ ...item, cardId: card.id, cardName: card.name, cardRoom: card.room });
+        });
+    });
+    if (allItems.length === 0) {
+        list.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+    }
+    if (empty) empty.style.display = 'none';
+    const sorted = sortItems(allItems);
+    list.innerHTML = sorted.map(item => `
+        <li class="global-task">
+            <div class="gt-info"><div class="gt-text">${esc(item.text || '(empty)')}</div><div class="gt-meta">${esc(item.cardName)} · ${esc(item.cardRoom)} — ${formatDate(item.createdAt)}</div></div>
+            <div class="gt-dots" data-card="${item.cardId}" data-item="${item.id}">${dots3x3(item.priority || 0)}</div>
+        </li>`).join('');
+    list.querySelectorAll('.gt-dots').forEach(dots => {
+        dots.addEventListener('click', e => {
+            e.stopPropagation();
+            const card = board.cards[dots.dataset.card]; if (!card) return;
+            const item = (card.items || []).find(li => li.id === dots.dataset.item); if (!item) return;
+            item.priority = ((item.priority || 0) + 1) % 10;
+            const grid = dots.querySelector('.dot-grid-3x3');
+            if (grid) grid.outerHTML = dots3x3(item.priority);
+            refreshCardDOM(dots.dataset.card);
+            if (isColumn) renderGlobalTasks(); // keep sidebar in sync
+            autoSave();
+        });
+    });
+}
+function renderThemeChips() {
+    document.querySelectorAll('.theme-chip').forEach(c => {
+        if (c.dataset.theme === 'random') {
+            c.classList.toggle('active', appState.theme === 'custom');
+        } else {
+            c.classList.toggle('active', c.dataset.theme === appState.theme);
+        }
+    });
+}
+function refreshCardDOM(cardId) { const card=activeBoard().cards[cardId]; if(card){renderCardStars(card);renderCardItems(card);} }
+
+// ============================================================================
+// SIDEBAR TOGGLE / THEME / EXPORT
+// ============================================================================
+document.getElementById('global-burger').addEventListener('click', ()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('sidebar-overlay').classList.add('open');renderSidebar();});
+document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
+document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
+
+function renderGlobalColumn() {
+    const board = activeBoard();
+    const gCol = document.createElement('div');
+    gCol.className = 'global-column';
+    gCol.id = 'global-column';
+    gCol.innerHTML = `
+        <h4>Global Tasks</h4>
+        <div class="task-sort">
+            <button class="sort-btn${appState.sortBy==='priority'?' active':''}" data-sort="priority">★ Priority</button>
+            <button class="sort-btn${appState.sortBy==='recent'?' active':''}" data-sort="recent">Recent</button>
+        </div>
+        <ul class="global-task-list" id="global-col-list"></ul>
+        <div class="empty-global" id="empty-global-col">No open tasks across patients</div>`;
+    // Wire sort buttons inside the column
+    gCol.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            gCol.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            appState.sortBy = btn.dataset.sort;
+            // Update sidebar sort too
+            document.querySelectorAll('#sidebar .sort-btn').forEach(b => { b.classList.toggle('active', b.dataset.sort === appState.sortBy); });
+            renderGlobalTasks('global-col-list');
+            renderGlobalTasks(); // sidebar
+            autoSave();
+        });
+    });
+    return gCol;
+}
+
+// Toggle global column
+(function wireGlobalColToggle() {
+    const toggle = document.getElementById('toggle-global-col');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            appState.showGlobalColumn = !appState.showGlobalColumn;
+            renderAll(); autoSave();
+        });
+    }
+})();
+
+document.querySelectorAll('.sort-btn').forEach(btn => { btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    appState.sortBy=btn.dataset.sort;
+    renderGlobalTasks();
+    // Also update global column if visible
+    if (appState.showGlobalColumn) renderGlobalTasks('global-col-list');
+    autoSave();
+}); });
+document.getElementById('add-board-sidebar').addEventListener('click',()=>{const n=prompt('Board name:');if(!n||!n.trim())return;const b=freshBoard(n.trim());appState.boards[b.id]=b;appState.activeBoardId=b.id;renderAll();autoSave();});
+
+document.querySelectorAll('.theme-chip').forEach(chip => { chip.addEventListener('click',()=>{
+    if (chip.dataset.theme === 'random') {
+        const palette = generateRandomPalette();
+        appState.customTheme = palette;
+        appState.theme = 'custom';
+        document.documentElement.setAttribute('data-theme', 'custom');
+        // Clear any previously set custom properties
+        const root = document.documentElement;
+        root.style.cssText = '';
+        applyCustomTheme(palette.vars);
+        renderThemeChips(); autoSave();
+    } else {
+        appState.theme = chip.dataset.theme;
+        document.documentElement.setAttribute('data-theme', chip.dataset.theme);
+        // Clear any custom inline vars so named theme CSS takes over
+        document.documentElement.style.cssText = '';
+        renderThemeChips(); autoSave();
+    }
+}); });
+
+document.getElementById('export-btn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(appState,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='case-board-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);});
+document.getElementById('import-btn').addEventListener('click',()=>document.getElementById('import-file').click());
+document.getElementById('import-file').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.boards&&data.activeBoardId){appState=data;document.documentElement.setAttribute('data-theme',appState.theme||'classic-dark');renderAll();saveState();}else{alert('Invalid board file.');}}catch(err){alert('Could not parse file: '+err.message);}};reader.readAsText(file);e.target.value='';});
+
+// ============================================================================
+// RANDOM PALETTE GENERATOR
+// ============================================================================
+function hsl(h, s, l) { return `hsl(${h},${s}%,${l}%)`; }
+
+function generateRandomPalette() {
+    const baseH = Math.floor(Math.random() * 360);
+    const off = (d) => (baseH + d + 360) % 360; // offset from base hue
+
+    // Dark background: low lightness, low saturation, slightly tinted by base hue
+    const bg = hsl(baseH, 8 + Math.random() * 14, 6 + Math.random() * 5);
+    const cardBg = hsl(baseH, 7 + Math.random() * 12, 8 + Math.random() * 5);
+
+    // Text: light, slightly warm/cool based on base
+    const text = hsl(off(0), 6 + Math.random() * 10, 82 + Math.random() * 8);
+    const textDim = hsl(off(0), 5 + Math.random() * 8, 55 + Math.random() * 12);
+    const textFaint = hsl(off(0), 4 + Math.random() * 7, 32 + Math.random() * 10);
+
+    const border = hsl(off(0), 4 + Math.random() * 8, 14 + Math.random() * 6);
+    const rule = hsl(off(0), 3 + Math.random() * 7, 24 + Math.random() * 8);
+
+    // Star: warm gold, independent of base
+    const star = hsl(44 + Math.random() * 10, 65 + Math.random() * 25, 48 + Math.random() * 10);
+    const starDim = hsl(44 + Math.random() * 8, 30 + Math.random() * 20, 18 + Math.random() * 6);
+
+    // Check: muted green/sage
+    const check = hsl(115 + Math.random() * 25, 25 + Math.random() * 25, 38 + Math.random() * 12);
+    const checkDim = hsl(115 + Math.random() * 20, 15 + Math.random() * 15, 16 + Math.random() * 6);
+
+    // Accents: split-complementary around base hue
+    const accentBurgundy = hsl(off(345 + Math.random() * 25), 40 + Math.random() * 30, 40 + Math.random() * 12);
+    const accentNavy = hsl(off(200 + Math.random() * 30), 30 + Math.random() * 30, 38 + Math.random() * 12);
+    const accentForest = hsl(off(120 + Math.random() * 30), 28 + Math.random() * 28, 35 + Math.random() * 12);
+    const accentOchre = hsl(off(30 + Math.random() * 25), 40 + Math.random() * 30, 42 + Math.random() * 12);
+
+    // Columns: subtle tinted backgrounds
+    const colReady = hsl(off(210 + Math.random() * 20), 8 + Math.random() * 8, 8 + Math.random() * 4);
+    const colActive = hsl(off(280 + Math.random() * 20), 8 + Math.random() * 8, 8 + Math.random() * 4);
+    const colBlocked = hsl(off(15 + Math.random() * 20), 10 + Math.random() * 10, 8 + Math.random() * 4);
+    const colDone = hsl(off(140 + Math.random() * 20), 8 + Math.random() * 8, 8 + Math.random() * 4);
+
+    const colReadyBorder = hsl(off(215), 12 + Math.random() * 10, 18 + Math.random() * 8);
+    const colActiveBorder = hsl(off(285), 14 + Math.random() * 12, 18 + Math.random() * 8);
+    const colBlockedBorder = hsl(off(20), 18 + Math.random() * 14, 18 + Math.random() * 8);
+    const colDoneBorder = hsl(off(145), 16 + Math.random() * 14, 18 + Math.random() * 8);
+
+    // Calm → Alert gradient endpoints
+    const accentCalm = hsl(off(130), 40 + Math.random() * 25, 38 + Math.random() * 12);
+    const accentAlert = hsl(off(0), 50 + Math.random() * 25, 42 + Math.random() * 12);
+
+    return {
+        id: 'random-' + Date.now(),
+        name: 'Random',
+        vars: { bg, 'card-bg': cardBg, text, 'text-dim': textDim, 'text-faint': textFaint,
+            border, rule, star, 'star-dim': starDim, check, 'check-dim': checkDim,
+            'accent-burgundy': accentBurgundy, 'accent-navy': accentNavy,
+            'accent-forest': accentForest, 'accent-ochre': accentOchre,
+            'col-ready': colReady, 'col-active': colActive,
+            'col-blocked': colBlocked, 'col-done': colDone,
+            'col-ready-border': colReadyBorder, 'col-active-border': colActiveBorder,
+            'col-blocked-border': colBlockedBorder, 'col-done-border': colDoneBorder,
+            'accent-calm': accentCalm, 'accent-alert': accentAlert }
+    };
+}
+
+function applyCustomTheme(vars) {
+    const root = document.documentElement;
+    Object.entries(vars).forEach(([k, v]) => root.style.setProperty('--' + k, v));
+}
+
+// ============================================================================
+// RENDER ALL
+// ============================================================================
+function renderAll() {
+    const sidebarOpen = document.getElementById('sidebar').classList.contains('open');
+    const board = activeBoard();
+    document.getElementById('board-title-input').innerText = board ? board.name : 'Case Board';
+    renderTabs(); renderBoard(); renderSidebar();
+    if (sidebarOpen) { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('open'); }
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
+async function init() {
+    await loadState();
+    if (!appState.theme) appState.theme = 'classic-dark';
+    document.documentElement.setAttribute('data-theme', appState.theme);
+    if (appState.theme === 'custom' && appState.customTheme) {
+        document.documentElement.style.cssText = '';
+        applyCustomTheme(appState.customTheme.vars);
+    }
+    renderAll();
+    window.addEventListener('beforeunload', () => saveState());
+}
+init();
+</script>
+</body>
+</html>
