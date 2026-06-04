@@ -1292,18 +1292,19 @@ function renderCard(card) {
         el.style.transition='opacity 180ms,transform 180ms'; el.style.opacity='0'; el.style.transform='scale(0.95)';
         setTimeout(() => { el.remove(); const bd=activeBoard(); bd.columns.forEach(c=>{c.cardIds=c.cardIds.filter(id=>id!==card.id)}); delete bd.cards[card.id]; updateColCounts(); renderSidebar(); autoSave(); }, 180); });
 
-    // Drag — blocked when menu is open; full opacity via custom drag image
+    // Drag — blocked when menu is open; full-opacity custom drag image
     el.addEventListener('dragstart', e => {
         if (el.querySelector('.burger-menu.open') || _draggingItem) { e.preventDefault(); return; }
         el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
         const clone = el.cloneNode(true);
         clone.style.position = 'fixed'; clone.style.top = '0'; clone.style.left = '0';
-        clone.style.width = el.offsetWidth + 'px'; clone.style.visibility = 'hidden';
-        clone.classList.remove('dragging');
+        clone.style.width = el.offsetWidth + 'px'; clone.style.opacity = '1';
+        clone.style.zIndex = '2147483647'; clone.classList.remove('dragging');
         document.body.appendChild(clone);
+        clone.offsetHeight; // force layout paint so setDragImage captures it
         const rect = el.getBoundingClientRect();
         e.dataTransfer.setDragImage(clone, e.clientX - rect.left, e.clientY - rect.top);
-        setTimeout(() => clone.remove(), 0);
+        setTimeout(() => clone.remove(), 60);
     });
     el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
