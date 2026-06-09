@@ -122,6 +122,16 @@ body {
     font-family: system-ui, sans-serif;
 }
 .col-add-card:hover { border-color: var(--text-dim); color: var(--text-dim); }
+.col-sort-stars {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: none; border: 1px solid transparent;
+    color: var(--text-faint); cursor: pointer; font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color 120ms, color 120ms, background 120ms;
+    font-family: system-ui, sans-serif;
+}
+.col-sort-stars:hover { border-color: var(--star); color: var(--star); background: rgba(255,255,255,0.02); }
+.col-sort-stars.active { border-color: var(--star); color: var(--star); background: rgba(255,255,255,0.03); }
 .col-options {
     width: 22px; height: 22px; border-radius: 4px;
     background: none; border: none; color: var(--text-faint);
@@ -139,6 +149,7 @@ body {
 }
 .col-menu.open { display: block; }
 .col-drop-zone { flex: 1; min-height: 60px; }
+.col-drop-zone:empty { min-height: 180px; }
 
 /* Add column button — sits at end of board */
 .add-col-btn {
@@ -181,6 +192,22 @@ body {
 .drag-placeholder { height: 4px; background: var(--text-dim); border-radius: 2px; margin: 2px 0; opacity: 0.5; transition: none; pointer-events: none; }
 /* card border + bg tint set via JS for accent gradient */
 
+/* Collapse toggle */
+.card-collapse {
+    width: 20px; height: 20px; border-radius: 4px;
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 10px; font-family: system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 120ms, color 120ms, transform 150ms; padding: 0;
+}
+.card-collapse:hover { background: rgba(255,255,255,0.04); color: var(--text-dim); }
+.card.collapsed .card-collapse { transform: rotate(-90deg); }
+.card.collapsed .stars-bar,
+.card.collapsed .card-rule,
+.card.collapsed .card-items,
+.card.collapsed .card-footer { display: none; }
+.card.collapsed .card-top-row { margin-bottom: 0; }
+
 .card-top-row {
     display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px;
 }
@@ -222,30 +249,38 @@ body {
 
 .card-rule { height: 1px; background: var(--rule); margin-bottom: 6px; }
 
-/* Note blocks (plain text, no checkbox/priority) */
-.note-blocks { display: flex; flex-direction: column; gap: 2px; }
-.note-block {
-    display: flex; align-items: flex-start; gap: 6px; padding: 1px 0;
+/* Unified card items (notes + list items, mixable & reorderable) */
+.card-items { display: flex; flex-direction: column; gap: 2px; }
+.card-item {
+    display: flex; align-items: flex-start; gap: 5px; padding: 2px 0;
     border-radius: 3px; transition: background 120ms;
 }
-.note-block:hover { background: rgba(255,255,255,0.015); }
-.note-text {
+.card-item:hover { background: rgba(255,255,255,0.015); }
+.card-item.checked .ci-text { text-decoration: line-through; opacity: 0.4; }
+.card-item.dragging { opacity: 0.35; }
+.item-placeholder { height: 3px; background: var(--text-dim); border-radius: 2px; margin: 1px 0 1px 15px; opacity: 0.5; transition: none; pointer-events: none; }
+
+/* Drag grip (2x3 dot grid) */
+.item-grip {
+    display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);
+    gap: 2px; width: 10px; height: 14px; flex-shrink: 0;
+    cursor: grab; opacity: 0; transition: opacity 120ms; margin-top: 4px;
+    padding: 2px 0;
+}
+.card-item:hover .item-grip { opacity: 0.35; }
+.item-grip:hover { opacity: 0.8 !important; }
+.item-grip:active { cursor: grabbing; }
+.grip-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-faint); pointer-events: none; }
+
+.ci-text {
     flex: 1; font-family: Georgia, Charter, serif;
     font-size: 13px; line-height: 1.55; color: var(--text);
     outline: none; min-height: 20px;
     word-break: break-word; white-space: pre-wrap;
 }
-.note-text:empty::before { content: 'note…'; color: var(--text-faint); font-style: italic; }
-
-/* List items (checkbox + priority + global pool) */
-.list-items { display: flex; flex-direction: column; gap: 3px; }
-.list-item {
-    display: flex; align-items: flex-start; gap: 6px; padding: 2px 0;
-    border-radius: 3px; transition: background 120ms;
-}
-.list-item:hover { background: rgba(255,255,255,0.015); }
-.list-item.checked .li-text { text-decoration: line-through; opacity: 0.4; }
-.list-item:first-child { margin-top: 4px; }
+.ci-text:empty::before { content: '…'; color: var(--text-faint); font-style: italic; }
+.ci-note .ci-text:empty::before { content: 'note…'; }
+.ci-listitem .ci-text:empty::before { content: 'list item…'; }
 
 .li-checkbox {
     appearance: none; -webkit-appearance: none;
@@ -260,14 +295,6 @@ body {
     content: '✓'; position: absolute; top: -2px; left: 2px;
     font-size: 10px; color: #fff; font-family: system-ui, sans-serif;
 }
-
-.li-text {
-    flex: 1; font-family: Georgia, Charter, serif;
-    font-size: 13px; line-height: 1.55; color: var(--text);
-    outline: none; min-height: 20px;
-    word-break: break-word; white-space: pre-wrap;
-}
-.li-text:empty::before { content: 'list item…'; color: var(--text-faint); font-style: italic; }
 
 /* 3x3 priority dot grid */
 .dot-grid-3x3 {
@@ -304,13 +331,13 @@ body {
     color: var(--text-faint); margin-left: auto; white-space: nowrap;
 }
 
-.note-delete {
+.item-delete {
     background: none; border: none; color: var(--text-faint);
     cursor: pointer; font-size: 11px; padding: 0 2px; margin-top: 2px;
     opacity: 0; transition: opacity 120ms; font-family: system-ui, sans-serif;
 }
-.note-block:hover .note-delete, .list-item:hover .note-delete { opacity: 0.5; }
-.note-delete:hover { opacity: 1 !important; color: #b86868; }
+.card-item:hover .item-delete { opacity: 0.5; }
+.item-delete:hover { opacity: 1 !important; color: #b86868; }
 
 /* —— Burger menu (per-card) —— */
 .burger-menu {
@@ -383,7 +410,12 @@ body {
     z-index: 31; overflow-y: auto; padding: 20px;
     transition: right 250ms ease;
     font-family: system-ui, -apple-system, sans-serif;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
 }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 .sidebar.open { right: 0; }
 .sidebar-close {
     position: absolute; top: 14px; right: 16px;
@@ -821,25 +853,23 @@ function demoData() {
 
     const c1 = cid(); b.columns[0].cardIds.push(c1);
     b.cards[c1] = { id: c1, room: '304', name: 'Margaret Chen', stars: 3, accentValue: 50, starsOn: true,
-        notes: ['Speaks Mandarin — interpreter preferred'],
-        listItems: [
-            { id: nid(), text: 'Confirm interpreter booked', checked: true, priority: 2, createdAt: '2026-06-02T09:15:00' },
-            { id: nid(), text: 'Family meeting Thursday', checked: false, priority: 1, createdAt: '2026-06-01T14:30:00' }
+        items: [
+            { type: 'note', id: nid(), text: 'Speaks Mandarin — interpreter preferred' },
+            { type: 'listItem', id: nid(), text: 'Confirm interpreter booked', checked: true, priority: 2, createdAt: '2026-06-02T09:15:00' },
+            { type: 'listItem', id: nid(), text: 'Family meeting Thursday', checked: false, priority: 1, createdAt: '2026-06-01T14:30:00' }
         ],
         createdAt: '2026-06-01T08:00:00' };
     const c2 = cid(); b.columns[1].cardIds.push(c2);
     b.cards[c2] = { id: c2, room: '112', name: 'James Okonkwo', stars: 5, accentValue: 25, starsOn: true,
-        notes: [],
-        listItems: [
-            { id: nid(), text: 'CT results — check portal Thursday', checked: true, priority: 5, createdAt: '2026-06-02T08:00:00' },
-            { id: nid(), text: 'Pain improving — possible discharge this week', checked: false, priority: 0, createdAt: '2026-06-01T16:00:00' }
+        items: [
+            { type: 'listItem', id: nid(), text: 'CT results — check portal Thursday', checked: true, priority: 5, createdAt: '2026-06-02T08:00:00' },
+            { type: 'listItem', id: nid(), text: 'Pain improving — possible discharge this week', checked: false, priority: 0, createdAt: '2026-06-01T16:00:00' }
         ],
         createdAt: '2026-06-01T10:00:00' };
     const c3 = cid(); b.columns[2].cardIds.push(c3);
     b.cards[c3] = { id: c3, room: '208', name: 'Sofia Reyes', stars: 0, accentValue: 0, starsOn: false,
-        notes: [],
-        listItems: [
-            { id: nid(), text: 'New admit — full psychosocial assessment', checked: false, priority: 2, createdAt: '2026-06-02T10:00:00' }
+        items: [
+            { type: 'listItem', id: nid(), text: 'New admit — full psychosocial assessment', checked: false, priority: 2, createdAt: '2026-06-02T10:00:00' }
         ],
         createdAt: '2026-06-02T10:00:00' };
     return b;
@@ -847,35 +877,46 @@ function demoData() {
 
 function migrateData(state) {
     // v0.x → v1.0: split old notes[] into notes (strings) + listItems (structured)
+    // v1.x → v2.0: merge notes[] + listItems[] → items[]
     Object.values(state.boards).forEach(board => {
         if (!board.cards) return;
         Object.values(board.cards).forEach(card => {
-            if (card._migrated) return;
-            card._migrated = true;
-            // Ensure listItems and notes arrays exist
-            if (!card.listItems) card.listItems = [];
-            if (!card.notes) card.notes = [];
-            // Migrate old structured notes → listItems
-            if (Array.isArray(card.notes) && card.notes.length > 0) {
-                // Check if notes are old structured format (have 'checked' or 'priority' properties)
-                const first = card.notes[0];
-                if (typeof first === 'object' && first !== null && ('checked' in first || 'priority' in first)) {
-                    const oldNotes = card.notes;
-                    const newNotes = [];
-                    oldNotes.forEach(n => {
-                        if (typeof n === 'object' && n !== null) {
-                            if (n.checked !== undefined || n.priority !== undefined) {
-                                card.listItems.push({ id: n.id || nid(), text: n.text || '', checked: !!n.checked, priority: n.priority || 0, createdAt: n.createdAt || nowISO() });
-                            } else {
-                                newNotes.push(typeof n.text === 'string' ? n.text : String(n));
+            if (card._migrated === 2) return;
+            // v0.x → v1.0: split old structured notes
+            if (!card._migrated || card._migrated < 1) {
+                if (!card.listItems) card.listItems = [];
+                if (!card.notes) card.notes = [];
+                if (Array.isArray(card.notes) && card.notes.length > 0) {
+                    const first = card.notes[0];
+                    if (typeof first === 'object' && first !== null && ('checked' in first || 'priority' in first)) {
+                        const oldNotes = card.notes;
+                        const newNotes = [];
+                        oldNotes.forEach(n => {
+                            if (typeof n === 'object' && n !== null) {
+                                if (n.checked !== undefined || n.priority !== undefined) {
+                                    card.listItems.push({ id: n.id || nid(), text: n.text || '', checked: !!n.checked, priority: n.priority || 0, createdAt: n.createdAt || nowISO() });
+                                } else {
+                                    newNotes.push(typeof n.text === 'string' ? n.text : String(n));
+                                }
+                            } else if (typeof n === 'string') {
+                                newNotes.push(n);
                             }
-                        } else if (typeof n === 'string') {
-                            newNotes.push(n);
-                        }
-                    });
-                    card.notes = newNotes;
+                        });
+                        card.notes = newNotes;
+                    }
                 }
             }
+            // v1.x → v2.0: merge notes + listItems → items
+            card.items = [];
+            (card.notes || []).forEach(n => {
+                const text = typeof n === 'string' ? n : (n.text || '');
+                card.items.push({ type: 'note', id: nid(), text });
+            });
+            (card.listItems || []).forEach(li => {
+                card.items.push({ type: 'listItem', id: li.id || nid(), text: li.text || '', checked: !!li.checked, priority: li.priority || 0, createdAt: li.createdAt || nowISO() });
+            });
+            delete card.notes;
+            delete card.listItems;
             // Migrate old string accent → numeric accentValue
             if (card.accent !== undefined && card.accentValue === undefined) {
                 const map = { '': 0, 'burgundy': 85, 'navy': 25, 'forest': 35, 'ochre': 50 };
@@ -887,6 +928,8 @@ function migrateData(state) {
             delete card.checklistOn;
             if (!card.createdAt) card.createdAt = nowISO();
             if (card.starsOn === undefined) card.starsOn = false;
+            if (card.collapsed === undefined) card.collapsed = false;
+            card._migrated = 2;
         });
     });
     return state;
@@ -956,9 +999,9 @@ function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => 
 function activeBoard() { return appState.boards[appState.activeBoardId]; }
 function colById(id) { const b = activeBoard(); return b ? b.columns.find(c => c.id === id) : null; }
 function esc(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function sortNotes(notes) {
-    if (appState.sortBy === 'recent') return [...notes].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
-    return [...notes].sort((a,b) => b.priority - a.priority);
+function sortItems(items) {
+    if (appState.sortBy === 'recent') return [...items].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+    return [...items].sort((a,b) => b.priority - a.priority);
 }
 function formatShortDate(iso) {
     if (!iso) return '';
@@ -1031,6 +1074,7 @@ function renderBoard() {
                 <div class="col-header">
                     <input class="col-name" value="${esc(col.name)}" data-col-id="${col.id}">
                     <span class="col-count">${col.cardIds.length}</span>
+                    <button class="col-sort-stars" data-col-id="${col.id}" title="Sort by stars">★</button>
                     <button class="col-add-card" data-col-id="${col.id}" title="Add card">+</button>
                     <button class="col-options" data-col-id="${col.id}">⋮</button>
                 </div>
@@ -1061,6 +1105,29 @@ function renderBoard() {
             hdr.style.background = `color-mix(in srgb, var(--accent-${col.headerColor}) 12%, var(--card-bg) 88%)`;
         }
 
+        const sortBtn = colEl.querySelector('.col-sort-stars');
+        if (col._sorted) sortBtn.classList.add('active');
+        sortBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (col._sorted) {
+                // Restore previous order
+                col.cardIds = col._preSortOrder || col.cardIds;
+                col._sorted = false; col._preSortOrder = null;
+                sortBtn.classList.remove('active');
+            } else {
+                // Save current order, then sort
+                col._preSortOrder = [...col.cardIds];
+                col._sorted = true;
+                sortBtn.classList.add('active');
+                const cards = col.cardIds.map(id => board.cards[id]).filter(Boolean);
+                cards.sort((a, b) => {
+                    if (b.stars !== a.stars) return b.stars - a.stars;
+                    return (b.createdAt || '').localeCompare(a.createdAt || '');
+                });
+                col.cardIds = cards.map(c => c.id);
+            }
+            renderAll(); autoSave();
+        });
         colEl.querySelector('.col-add-card').addEventListener('click', () => addCard(col.id));
         colEl.querySelector('.col-options').addEventListener('click', e => { e.stopPropagation(); toggleColMenu(col.id); });
 
@@ -1128,15 +1195,21 @@ function renderBoard() {
     updateBoardNav();
 }
 
+function itemGrip() { return '<div class="item-grip" draggable="true"><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span></div>'; }
+
+let _draggingItem = null; // { card, idx, el }
+
 function renderCard(card) {
     const el = document.createElement('div');
-    el.className = 'card';
+    el.className = 'card' + (card.collapsed ? ' collapsed' : '');
     el.dataset.cardId = card.id; el.draggable = true;
+    if (!card.items) card.items = [];
 
     el.innerHTML = `
         <div class="card-top-row">
             <input class="card-room" value="${esc(card.room)}" size="3" placeholder="Rm">
             <input class="card-name" value="${esc(card.name)}" size="12" placeholder="Name">
+            <button class="card-collapse">▼</button>
             <button class="card-burger">⋮</button>
             <div class="burger-menu" id="menu-${card.id}">
                 <div class="burger-section"><div class="burger-label">Priority</div>
@@ -1152,8 +1225,7 @@ function renderCard(card) {
         </div>
         <div class="stars-bar" id="stars-${card.id}"></div>
         <div class="card-rule"></div>
-        <div class="note-blocks" id="notes-${card.id}"></div>
-        <div class="list-items" id="listitems-${card.id}"></div>
+        <div class="card-items" id="items-${card.id}"></div>
         <div class="card-footer">
             <button class="add-note-btn" data-card="${card.id}">+ Add note</button>
             <button class="add-item-btn" data-card="${card.id}">+ Add list item</button>
@@ -1165,6 +1237,14 @@ function renderCard(card) {
     roomInp.addEventListener('input', () => { card.room = roomInp.value; autoSave(); });
     nameInp.addEventListener('input', () => { card.name = nameInp.value; autoSave(); });
     autoSize(roomInp, 34); autoSize(nameInp, 60);
+
+    // Collapse toggle
+    el.querySelector('.card-collapse').addEventListener('click', e => {
+        e.stopPropagation();
+        card.collapsed = !card.collapsed;
+        el.classList.toggle('collapsed', card.collapsed);
+        autoSave();
+    });
 
     // Burger
     const burgerBtn = el.querySelector('.card-burger'), menu = el.querySelector('.burger-menu');
@@ -1213,24 +1293,30 @@ function renderCard(card) {
         el.style.transition='opacity 180ms,transform 180ms'; el.style.opacity='0'; el.style.transform='scale(0.95)';
         setTimeout(() => { el.remove(); const bd=activeBoard(); bd.columns.forEach(c=>{c.cardIds=c.cardIds.filter(id=>id!==card.id)}); delete bd.cards[card.id]; updateColCounts(); renderSidebar(); autoSave(); }, 180); });
 
-    // Drag — blocked when menu is open
+    // Drag — blocked when menu is open; invisible drag ghost (cleaner)
     el.addEventListener('dragstart', e => {
-        if (el.querySelector('.burger-menu.open')) { e.preventDefault(); return; }
+        if (el.querySelector('.burger-menu.open') || _draggingItem) { e.preventDefault(); return; }
         el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+        const ghost = document.createElement('div');
+        ghost.style.width = '1px'; ghost.style.height = '1px';
+        ghost.style.position = 'fixed'; ghost.style.top = '-1px'; ghost.style.left = '-1px';
+        document.body.appendChild(ghost);
+        e.dataTransfer.setDragImage(ghost, 0, 0);
+        setTimeout(() => ghost.remove(), 0);
     });
     el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearPlaceholder(); });
 
-    renderCardStars(card, el); renderCardNotes(card, el); renderCardListItems(card, el);
+    renderCardStars(card, el); renderCardItems(card, el);
 
     el.querySelector('.add-note-btn').addEventListener('click', () => {
-        card.notes.push('');
-        renderCardNotes(card); autoSave(); // card already in DOM, getElementById works
-        setTimeout(() => { const ln = el.querySelector('.note-block:last-child .note-text'); if (ln) ln.focus(); }, 50);
+        card.items.push({ type: 'note', id: nid(), text: '' });
+        renderCardItems(card); autoSave();
+        setTimeout(() => { const ln = el.querySelector('.card-item:last-child .ci-text'); if (ln) ln.focus(); }, 50);
     });
     el.querySelector('.add-item-btn').addEventListener('click', () => {
-        card.listItems.push({ id: nid(), text: '', checked: false, priority: 0, createdAt: nowISO() });
-        renderCardListItems(card); renderSidebar(); autoSave();
-        setTimeout(() => { const ln = el.querySelector('.list-item:last-child .li-text'); if (ln) ln.focus(); }, 50);
+        card.items.push({ type: 'listItem', id: nid(), text: '', checked: false, priority: 0, createdAt: nowISO() });
+        renderCardItems(card); renderSidebar(); autoSave();
+        setTimeout(() => { const ln = el.querySelector('.card-item:last-child .ci-text'); if (ln) ln.focus(); }, 50);
     });
 
     return el;
@@ -1264,63 +1350,114 @@ function renderCardStars(card, cardEl) {
     };
 }
 
-function renderCardNotes(card, cardEl) {
-    const ct = (cardEl && cardEl.querySelector('#notes-'+card.id)) || document.getElementById('notes-'+card.id);
+function renderCardItems(card, cardEl) {
+    const ct = (cardEl && cardEl.querySelector('#items-'+card.id)) || document.getElementById('items-'+card.id);
     if (!ct) return;
     ct.innerHTML = '';
-    (card.notes || []).forEach((note, idx) => {
-        const text = typeof note === 'string' ? note : (note.text || '');
+    if (!card.items) card.items = [];
+    card.items.forEach((item, idx) => {
         const block = document.createElement('div');
-        block.className = 'note-block';
-        block.innerHTML = `
-            <div class="note-text" contenteditable="true">${esc(text)}</div>
-            <button class="note-delete">×</button>`;
-        block.querySelector('.note-text').addEventListener('input', e => { card.notes[idx] = e.target.innerText; autoSave(); });
-        block.querySelector('.note-delete').addEventListener('click', () => {
-            card.notes.splice(idx, 1);
-            block.style.transition='opacity 120ms'; block.style.opacity='0';
-            setTimeout(() => { block.remove(); }, 120);
-            autoSave();
-        });
-        ct.appendChild(block);
-    });
-}
+        block.className = 'card-item ci-' + item.type + (item.checked ? ' checked' : '');
+        block.dataset.itemIdx = idx;
 
-function renderCardListItems(card, cardEl) {
-    const ct = (cardEl && cardEl.querySelector('#listitems-'+card.id)) || document.getElementById('listitems-'+card.id);
-    if (!ct) return;
-    ct.innerHTML = '';
-    (card.listItems || []).forEach(item => {
-        const block = document.createElement('div');
-        block.className = 'list-item' + (item.checked ? ' checked' : '');
-        const pri = item.priority || 0;
-        block.innerHTML = `
-            <input type="checkbox" class="li-checkbox" ${item.checked ? 'checked' : ''}>
-            <div class="li-text" contenteditable="true">${esc(item.text)}</div>
-            <div class="li-priority" data-item="${item.id}">${dots3x3(pri)}</div>
-            <button class="note-delete">×</button>`;
-        block.querySelector('.li-checkbox').addEventListener('change', e => {
-            item.checked = e.target.checked;
-            block.classList.toggle('checked', item.checked);
-            renderSidebar(); autoSave();
-        });
-        block.querySelector('.li-priority').addEventListener('click', () => {
-            item.priority = ((item.priority || 0) + 1) % 10;
-            const grids = block.querySelector('.dot-grid-3x3');
-            if (grids) grids.outerHTML = dots3x3(item.priority);
-            renderSidebar(); autoSave();
-        });
-        block.querySelector('.li-text').addEventListener('input', e => { item.text = e.target.innerText; autoSave(); });
-        block.querySelector('.note-delete').addEventListener('click', () => {
+        if (item.type === 'listItem') {
+            block.innerHTML = `
+                <input type="checkbox" class="li-checkbox" ${item.checked ? 'checked' : ''}>
+                <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
+                <div class="li-priority" data-item="${item.id}">${dots3x3(item.priority || 0)}</div>
+                ${itemGrip()}
+                <button class="item-delete">×</button>`;
+            block.querySelector('.li-checkbox').addEventListener('change', e => {
+                item.checked = e.target.checked;
+                block.classList.toggle('checked', item.checked);
+                renderSidebar(); autoSave();
+            });
+            block.querySelector('.li-priority').addEventListener('click', () => {
+                item.priority = ((item.priority || 0) + 1) % 10;
+                const grids = block.querySelector('.dot-grid-3x3');
+                if (grids) grids.outerHTML = dots3x3(item.priority);
+                renderSidebar(); autoSave();
+            });
+        } else {
+            block.innerHTML = `
+                <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
+                ${itemGrip()}
+                <button class="item-delete">×</button>`;
+        }
+
+        block.querySelector('.ci-text').addEventListener('input', e => { item.text = e.target.innerText; autoSave(); });
+        block.querySelector('.item-delete').addEventListener('click', () => {
             const wasChecked = item.checked;
-            card.listItems = card.listItems.filter(li => li.id !== item.id);
+            card.items.splice(idx, 1);
             block.style.transition = 'opacity 120ms'; block.style.opacity = '0';
             setTimeout(() => { block.remove(); if (wasChecked) renderSidebar(); }, 120);
             autoSave();
         });
+
+        // Intra-card drag from grip handle
+        const grip = block.querySelector('.item-grip');
+        if (grip) {
+            grip.addEventListener('dragstart', e => {
+                e.stopPropagation();
+                _draggingItem = { card, idx, el: block };
+                block.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            grip.addEventListener('dragend', () => {
+                block.classList.remove('dragging');
+                clearItemPlaceholder();
+                _draggingItem = null;
+            });
+        }
+
         ct.appendChild(block);
     });
+
+    // Wire dragover/drop on the items container for intra-card reorder
+    ct.ondragover = e => {
+        if (!_draggingItem || _draggingItem.card !== card) return;
+        e.preventDefault();
+        const items = [...ct.querySelectorAll('.card-item:not(.dragging)')];
+        clearItemPlaceholder();
+        const mouseY = e.clientY; let inserted = false;
+        for (let i = 0; i < items.length; i++) {
+            const rect = items[i].getBoundingClientRect();
+            if (mouseY < rect.top + rect.height / 2) {
+                const ph = document.createElement('div');
+                ph.className = 'item-placeholder';
+                items[i].before(ph); inserted = true; break;
+            }
+        }
+        if (!inserted && items.length > 0) {
+            const ph = document.createElement('div');
+            ph.className = 'item-placeholder';
+            items[items.length - 1].after(ph);
+        } else if (!inserted && items.length === 0) {
+            const ph = document.createElement('div');
+            ph.className = 'item-placeholder';
+            ct.appendChild(ph);
+        }
+    };
+    ct.ondrop = e => {
+        if (!_draggingItem || _draggingItem.card !== card) return;
+        e.preventDefault();
+        const fromIdx = _draggingItem.idx;
+        const movedItem = card.items.splice(fromIdx, 1)[0];
+        const items = [...ct.querySelectorAll('.card-item:not(.dragging)')];
+        clearItemPlaceholder();
+        const mouseY = e.clientY; let inserted = false;
+        for (let i = 0; i < items.length; i++) {
+            const rect = items[i].getBoundingClientRect();
+            if (mouseY < rect.top + rect.height / 2) {
+                card.items.splice(i, 0, movedItem); inserted = true; break;
+            }
+        }
+        if (!inserted) card.items.push(movedItem);
+        renderCardItems(card); renderSidebar(); autoSave();
+    };
 }
+
+function clearItemPlaceholder() { document.querySelectorAll('.item-placeholder').forEach(p => p.remove()); }
 
 function updateColCounts() {
     const board = activeBoard();
@@ -1330,7 +1467,7 @@ function updateColCounts() {
 // ============================================================================
 // DRAG & DROP
 // ============================================================================
-function clearPlaceholder() { document.querySelectorAll('.drag-placeholder').forEach(p => p.remove()); }
+function clearPlaceholder() { document.querySelectorAll('.drag-placeholder,.item-placeholder').forEach(p => p.remove()); }
 
 function handleDragOver(e, zone) {
     const cardEl = document.querySelector('.card.dragging'); if (!cardEl) return;
@@ -1486,8 +1623,8 @@ function renderGlobalTasks(containerId) {
     const board = activeBoard();
     const allItems = [];
     Object.values(board.cards).forEach(card => {
-        (card.listItems || []).forEach(item => {
-            if (!item.checked) allItems.push({ ...item, cardId: card.id, cardName: card.name, cardRoom: card.room });
+        (card.items || []).forEach(item => {
+            if (item.type === 'listItem' && !item.checked) allItems.push({ ...item, cardId: card.id, cardName: card.name, cardRoom: card.room });
         });
     });
     if (allItems.length === 0) {
@@ -1496,7 +1633,7 @@ function renderGlobalTasks(containerId) {
         return;
     }
     if (empty) empty.style.display = 'none';
-    const sorted = sortNotes(allItems);
+    const sorted = sortItems(allItems);
     list.innerHTML = sorted.map(item => `
         <li class="global-task">
             <div class="gt-info"><div class="gt-text">${esc(item.text || '(empty)')}</div><div class="gt-meta">${esc(item.cardName)} · ${esc(item.cardRoom)} — ${formatDate(item.createdAt)}</div></div>
@@ -1506,7 +1643,7 @@ function renderGlobalTasks(containerId) {
         dots.addEventListener('click', e => {
             e.stopPropagation();
             const card = board.cards[dots.dataset.card]; if (!card) return;
-            const item = (card.listItems || []).find(li => li.id === dots.dataset.item); if (!item) return;
+            const item = (card.items || []).find(li => li.id === dots.dataset.item); if (!item) return;
             item.priority = ((item.priority || 0) + 1) % 10;
             const grid = dots.querySelector('.dot-grid-3x3');
             if (grid) grid.outerHTML = dots3x3(item.priority);
@@ -1525,7 +1662,7 @@ function renderThemeChips() {
         }
     });
 }
-function refreshCardDOM(cardId) { const card=activeBoard().cards[cardId]; if(card){renderCardStars(card);renderCardNotes(card);renderCardListItems(card);} }
+function refreshCardDOM(cardId) { const card=activeBoard().cards[cardId]; if(card){renderCardStars(card);renderCardItems(card);} }
 
 // ============================================================================
 // SIDEBAR TOGGLE / THEME / EXPORT
