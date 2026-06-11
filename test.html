@@ -963,36 +963,42 @@ async function loadState() {
     });
 }
 async function saveState(force) {
-    const db = await openDB();
-    if (!force) {
-        // Guard against stale overwrite from another tab (skip on forced saves)
-        const current = await new Promise(resolve => {
-            const tx = db.transaction('state', 'readonly');
-            const req = tx.objectStore('state').get('app');
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = () => resolve(null);
-        });
-        if (current && current._version && appState._version && current._version > appState._version) {
-            db.close();
-            appState = current;
-            document.documentElement.setAttribute('data-theme', appState.theme || 'classic-dark');
-            if (appState.theme === 'custom' && appState.customTheme) {
-                document.documentElement.style.cssText = '';
-                applyCustomTheme(appState.customTheme.vars);
+    if (_saving) return;
+    _saving = true;
+    try {
+        const db = await openDB();
+        if (!force) {
+            const current = await new Promise(resolve => {
+                const tx = db.transaction('state', 'readonly');
+                const req = tx.objectStore('state').get('app');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(null);
+            });
+            if (current && current._version && appState._version && current._version > appState._version) {
+                db.close();
+                appState = current;
+                document.documentElement.setAttribute('data-theme', appState.theme || 'classic-dark');
+                if (appState.theme === 'custom' && appState.customTheme) {
+                    document.documentElement.style.cssText = '';
+                    applyCustomTheme(appState.customTheme.vars);
+                }
+                renderAll();
+                _saving = false;
+                return;
             }
-            renderAll();
-            return;
         }
-    }
-    appState._version = (appState._version || 0) + 1;
-    return new Promise((resolve) => {
-        const tx = db.transaction('state', 'readwrite');
-        tx.objectStore('state').put(appState, 'app');
-        tx.oncomplete = () => { db.close(); resolve(); };
-    });
+        appState._version = (appState._version || 0) + 1;
+        return new Promise((resolve) => {
+            const tx = db.transaction('state', 'readwrite');
+            tx.objectStore('state').put(appState, 'app');
+            tx.oncomplete = () => { db.close(); _saving = false; resolve(); };
+            tx.onerror = () => { db.close(); _saving = false; resolve(); };
+            tx.onabort = () => { db.close(); _saving = false; resolve(); };
+        });
+    } catch (e) { _saving = false; }
 }
-let saveTimeout;
-function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => saveState(), 300); }
+let saveTimeout, _saving = false;
+function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => saveState(), 120); }
 function saveNow() { clearTimeout(saveTimeout); saveState(true); }
 
 // ============================================================================
@@ -1844,6 +1850,7 @@ async function init() {
     }
     renderAll();
     window.addEventListener('beforeunload', () => saveNow());
+    document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });
 }
 init();
 </script>
