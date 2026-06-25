@@ -277,6 +277,7 @@ body {
     font-size: 13px; line-height: 1.55; color: var(--text);
     outline: none; min-height: 20px;
     word-break: break-word; white-space: pre-wrap;
+    user-select: text; -webkit-user-select: text;
 }
 .ci-text:empty::before { content: '…'; color: var(--text-faint); font-style: italic; }
 .ci-note .ci-text:empty::before { content: 'note…'; }
@@ -465,6 +466,14 @@ body {
     margin-top: 4px; transition: border-color 120ms, color 120ms;
 }
 .add-board-btn:hover { color: var(--text-dim); border-color: var(--text-dim); }
+
+.collapse-all-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--text-dim); font-size: 11px; font-family: system-ui, sans-serif;
+    cursor: pointer; padding: 5px 10px; border-radius: 4px;
+    margin-top: 2px; transition: border-color 120ms, color 120ms;
+}
+.collapse-all-btn:hover { color: var(--text); border-color: var(--text-dim); }
 
 /* Global task list */
 .task-sort { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -776,6 +785,10 @@ body {
 <div class="sidebar" id="sidebar">
     <button class="sidebar-close" id="sidebar-close">✕</button>
 
+    <div class="sidebar-section">
+        <h3>Cards</h3>
+        <button class="collapse-all-btn" id="collapse-all-btn">▾ Collapse All</button>
+    </div>
     <div class="sidebar-section">
         <h3>Global Tasks</h3>
         <div class="task-sort">
@@ -1236,8 +1249,8 @@ function renderCard(card) {
 
     el.innerHTML = `
         <div class="card-top-row">
-            <input class="card-room" value="${esc(card.room)}" size="3" placeholder="Rm">
-            <input class="card-name" value="${esc(card.name)}" size="12" placeholder="Name">
+            <input class="card-room" value="${esc(card.room)}" size="3" placeholder="Rm" spellcheck="true">
+            <input class="card-name" value="${esc(card.name)}" size="12" placeholder="Name" spellcheck="true">
             <button class="card-collapse">▼</button>
             <button class="card-burger">⋮</button>
             <div class="burger-menu" id="menu-${card.id}">
@@ -1393,7 +1406,7 @@ function renderCardItems(card, cardEl) {
         if (item.type === 'listItem') {
             block.innerHTML = `
                 <input type="checkbox" class="li-checkbox" ${item.checked ? 'checked' : ''}>
-                <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
+                <div class="ci-text" contenteditable="true" spellcheck="true">${esc(item.text)}</div>
                 <div class="li-priority" data-item="${item.id}">${dots3x3(item.priority || 0)}</div>
                 ${itemGrip()}
                 <button class="item-delete">×</button>`;
@@ -1410,7 +1423,7 @@ function renderCardItems(card, cardEl) {
             });
         } else {
             block.innerHTML = `
-                <div class="ci-text" contenteditable="true">${esc(item.text)}</div>
+                <div class="ci-text" contenteditable="true" spellcheck="true">${esc(item.text)}</div>
                 ${itemGrip()}
                 <button class="item-delete">×</button>`;
         }
@@ -1701,6 +1714,22 @@ document.getElementById('global-burger').addEventListener('click', ()=>{document
 document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
 document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
+
+document.getElementById('collapse-all-btn').addEventListener('click', function() {
+    const board = activeBoard();
+    const cards = Object.values(board.cards);
+    const anyExpanded = cards.some(c => !c.collapsed);
+    cards.forEach(c => {
+        c.collapsed = anyExpanded;
+        const el = document.querySelector(`.card[data-id="${c.id}"]`);
+        if (el) {
+            el.classList.toggle('collapsed', c.collapsed);
+            if (!c.collapsed) renderCardItems(c, el);
+        }
+    });
+    this.textContent = anyExpanded ? '▸ Expand All' : '▾ Collapse All';
+    saveNow();
+});
 
 function renderGlobalColumn() {
     const board = activeBoard();
