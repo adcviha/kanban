@@ -954,8 +954,13 @@ async function loadState() {
         const tx = db.transaction('state', 'readonly');
         const req = tx.objectStore('state').get('app');
         req.onsuccess = () => {
-            if (req.result) { appState = req.result; migrateData(appState); if (!appState._version) appState._version = 1; }
-            else {
+            if (req.result) { appState = req.result; migrateData(appState); if (!appState._version) appState._version = 1;
+                // If localStorage has a newer version, prefer it (recovery from crash)
+                try {
+                    const backup = localStorage.getItem('case-board-backup');
+                    if (backup) { const lb = JSON.parse(backup); if (lb._version > appState._version) { appState = lb; migrateData(appState); } }
+                } catch(e) {}
+            } else {
                 // Try localStorage fallback before fresh demo data
                 try {
                     const backup = localStorage.getItem('case-board-backup');
