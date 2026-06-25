@@ -955,16 +955,30 @@ async function loadState() {
         const req = tx.objectStore('state').get('app');
         req.onsuccess = () => {
             if (req.result) { appState = req.result; migrateData(appState); if (!appState._version) appState._version = 1; }
-            else { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; appState._version = 1; }
+            else {
+                // Try localStorage fallback before fresh demo data
+                try {
+                    const backup = localStorage.getItem('case-board-backup');
+                    if (backup) { appState = JSON.parse(backup); migrateData(appState); }
+                    else { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; appState._version = 1; }
+                } catch(e) { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; appState._version = 1; }
+            }
             resolve();
         };
-        req.onerror = () => reject(req.error);
+        req.onerror = () => {
+            // IndexedDB read failed — try localStorage
+            try {
+                const backup = localStorage.getItem('case-board-backup');
+                if (backup) { appState = JSON.parse(backup); migrateData(appState); }
+                else { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; appState._version = 1; }
+            } catch(e) { appState.boards = { 'board-1': demoData() }; appState.activeBoardId = 'board-1'; appState._version = 1; }
+            resolve();
+        };
         tx.oncomplete = () => db.close();
     });
 }
 async function saveState(force) {
-    if (_saving) return;
-    _saving = true;
+    _savePending = true;
     try {
         const db = await openDB();
         if (!force) {
@@ -983,23 +997,25 @@ async function saveState(force) {
                     applyCustomTheme(appState.customTheme.vars);
                 }
                 renderAll();
-                _saving = false;
+                _savePending = false;
                 return;
             }
         }
         appState._version = (appState._version || 0) + 1;
+        // Mirror to localStorage as secondary backup
+        try { localStorage.setItem('case-board-backup', JSON.stringify(appState)); } catch(e) {}
         return new Promise((resolve) => {
             const tx = db.transaction('state', 'readwrite');
             tx.objectStore('state').put(appState, 'app');
-            tx.oncomplete = () => { db.close(); _saving = false; resolve(); };
-            tx.onerror = () => { db.close(); _saving = false; resolve(); };
-            tx.onabort = () => { db.close(); _saving = false; resolve(); };
+            tx.oncomplete = () => { db.close(); _savePending = false; if (_saveQueued) { _saveQueued = false; saveState(force); } resolve(); };
+            tx.onerror = () => { db.close(); _savePending = false; resolve(); };
+            tx.onabort = () => { db.close(); _savePending = false; resolve(); };
         });
-    } catch (e) { _saving = false; }
+    } catch (e) { _savePending = false; }
 }
-let saveTimeout, _saving = false;
+let saveTimeout, _savePending = false, _saveQueued = false;
 function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => saveState(), 120); }
-function saveNow() { clearTimeout(saveTimeout); saveState(true); }
+function saveNow() { clearTimeout(saveTimeout); if (_savePending) { _saveQueued = true; return; } _savePending = true; saveState(true); }
 
 // ============================================================================
 // HELPERS
@@ -1319,12 +1335,12 @@ function renderCard(card) {
 
     el.querySelector('.add-note-btn').addEventListener('click', () => {
         card.items.push({ type: 'note', id: nid(), text: '' });
-        renderCardItems(card); autoSave();
+        renderCardItems(card); saveNow();
         setTimeout(() => { const ln = el.querySelector('.card-item:last-child .ci-text'); if (ln) ln.focus(); }, 50);
     });
     el.querySelector('.add-item-btn').addEventListener('click', () => {
         card.items.push({ type: 'listItem', id: nid(), text: '', checked: false, priority: 0, createdAt: nowISO() });
-        renderCardItems(card); renderSidebar(); autoSave();
+        renderCardItems(card); renderSidebar(); saveNow();
         setTimeout(() => { const ln = el.querySelector('.card-item:last-child .ci-text'); if (ln) ln.focus(); }, 50);
     });
 
@@ -1379,13 +1395,13 @@ function renderCardItems(card, cardEl) {
             block.querySelector('.li-checkbox').addEventListener('change', e => {
                 item.checked = e.target.checked;
                 block.classList.toggle('checked', item.checked);
-                renderSidebar(); autoSave();
+                renderSidebar(); saveNow();
             });
             block.querySelector('.li-priority').addEventListener('click', () => {
                 item.priority = ((item.priority || 0) + 1) % 10;
                 const grids = block.querySelector('.dot-grid-3x3');
                 if (grids) grids.outerHTML = dots3x3(item.priority);
-                renderSidebar(); autoSave();
+                renderSidebar(); saveNow();
             });
         } else {
             block.innerHTML = `
@@ -1394,13 +1410,13 @@ function renderCardItems(card, cardEl) {
                 <button class="item-delete">×</button>`;
         }
 
-        block.querySelector('.ci-text').addEventListener('input', e => { item.text = e.target.innerText; autoSave(); });
+        block.querySelector('.ci-text').addEventListener('input', e => { item.text = e.target.innerText; saveNow(); });
         block.querySelector('.item-delete').addEventListener('click', () => {
             const wasChecked = item.checked;
             card.items.splice(idx, 1);
             block.style.transition = 'opacity 120ms'; block.style.opacity = '0';
             setTimeout(() => { block.remove(); if (wasChecked) renderSidebar(); }, 120);
-            autoSave();
+            saveNow();
         });
 
         // Intra-card drag from grip handle
@@ -1462,7 +1478,7 @@ function renderCardItems(card, cardEl) {
             }
         }
         if (!inserted) card.items.push(movedItem);
-        renderCardItems(card); renderSidebar(); autoSave();
+        renderCardItems(card); renderSidebar(); saveNow();
     };
 }
 
