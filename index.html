@@ -907,7 +907,7 @@ function migrateData(state) {
                 }
             }
             // v1.x → v2.0: merge notes + listItems → items
-            card.items = [];
+            if (!card.items) card.items = [];
             (card.notes || []).forEach(n => {
                 const text = typeof n === 'string' ? n : (n.text || '');
                 card.items.push({ type: 'note', id: nid(), text });
@@ -1621,7 +1621,7 @@ document.addEventListener('click', e => {
 
 function addCard(colId) {
     const board = activeBoard();
-    const card = { id: cid(), room: '', name: '', stars: 0, accentValue: 0, starsOn: false, notes: [], listItems: [], createdAt: nowISO() };
+    const card = { id: cid(), room: '', name: '', stars: 0, accentValue: 0, starsOn: false, items: [], _migrated: 2, createdAt: nowISO() };
     board.cards[card.id] = card;
     const col = colById(colId); if (col) col.cardIds.push(card.id);
     const zone = document.getElementById('zone-'+colId);
